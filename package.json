@@ -1,0 +1,16 @@
+{
+  "name": "quality-gate-repo",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.10.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.8.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

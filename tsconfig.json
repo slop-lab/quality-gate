@@ -1,0 +1,23 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "packages/core"
+    },
+    {
+      "path": "packages/test-utils"
+    },
+    {
+      "path": "packages/rules-git"
+    },
+    {
+      "path": "packages/rules-package-manager"
+    },
+    {
+      "path": "packages/rules-test"
+    },
+    {
+      "path": "packages/cli"
+    }
+  ]
+}

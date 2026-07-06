@@ -1,0 +1,22 @@
+{
+  "name": "quality-gate",
+  "version": "0.0.0",
+  "type": "module",
+  "bin": {
+    "quality-gate": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@quality-gate/core": "workspace:*",
+    "@quality-gate/rules-package-manager": "workspace:*",
+    "@quality-gate/rules-git": "workspace:*",
+    "@quality-gate/rules-test": "workspace:*"
+  }
+}
