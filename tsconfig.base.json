@@ -12,14 +12,14 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "paths": {
-      "@quality-gate/core": ["packages/core/src/index.ts"],
-      "@quality-gate/test-utils": ["packages/test-utils/src/index.ts"],
-      "@quality-gate/rules-git": ["packages/rules-git/src/index.ts"],
-      "@quality-gate/rules-files": ["packages/rules-files/src/index.ts"],
-      "@quality-gate/rules-package-manager": [
+      "@slop-lab/qg-core": ["packages/core/src/index.ts"],
+      "@slop-lab/qg-test-utils": ["packages/test-utils/src/index.ts"],
+      "@slop-lab/qg-rules-git": ["packages/rules-git/src/index.ts"],
+      "@slop-lab/qg-rules-files": ["packages/rules-files/src/index.ts"],
+      "@slop-lab/qg-rules-package-manager": [
         "packages/rules-package-manager/src/index.ts"
       ],
-      "@quality-gate/rules-test": ["packages/rules-test/src/index.ts"]
+      "@slop-lab/qg-rules-test": ["packages/rules-test/src/index.ts"]
     }
   }
 }

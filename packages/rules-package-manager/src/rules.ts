@@ -1,7 +1,7 @@
 import { cp, mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, join, relative, sep } from "node:path";
-import type { Diagnostic, Rule, RuleContext } from "@quality-gate/core";
+import type { Diagnostic, Rule, RuleContext } from "@slop-lab/qg-core";
 
 export interface PnpmLockfileIsCurrentOptions {
   pnpmCommand?: string;
@@ -10,7 +10,7 @@ export interface PnpmLockfileIsCurrentOptions {
 
 const defaultPnpmLockfileOptions: Required<PnpmLockfileIsCurrentOptions> = {
   pnpmCommand: "pnpm",
-  ignoredShadowDirectories: [".git", ".quality-gate", "dist", "node_modules"],
+  ignoredShadowDirectories: [".git", ".qg", "dist", "node_modules"],
 };
 
 export const noNpmLockWithPnpmRule: Rule = {
@@ -192,7 +192,7 @@ async function createShadowWorkspace(
   root: string,
   ignoredDirectories: string[],
 ): Promise<string> {
-  const shadowRoot = await mkdtemp(join(tmpdir(), "quality-gate-pnpm-"));
+  const shadowRoot = await mkdtemp(join(tmpdir(), "qg-pnpm-"));
   await cp(root, shadowRoot, {
     recursive: true,
     filter: (sourcePath) =>

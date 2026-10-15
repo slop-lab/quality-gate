@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { runQualityGate } from "@quality-gate/core";
-import { createFixture, runRule } from "@quality-gate/test-utils";
+import { runQualityGate } from "@slop-lab/qg-core";
+import { createFixture, runRule } from "@slop-lab/qg-test-utils";
 import { maxBytesRule, maxLineLengthRule, maxLinesRule } from "./limits.js";
 
 test("file limit rules report bytes, line length, and line count", async (t) => {

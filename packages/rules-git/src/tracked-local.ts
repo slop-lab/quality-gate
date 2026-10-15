@@ -1,4 +1,4 @@
-import { type Diagnostic, matchesAnyGlob, type Rule } from "@quality-gate/core";
+import { type Diagnostic, matchesAnyGlob, type Rule } from "@slop-lab/qg-core";
 
 export interface NoTrackedLocalFilesOptions {
   directories?: string[];

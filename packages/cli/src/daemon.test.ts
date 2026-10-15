@@ -7,7 +7,7 @@ import { setTimeout as delay } from "node:timers/promises";
 import { requestDaemon, startDaemon } from "./daemon.js";
 
 test("project daemon handles check, ping, and stop over its local socket", async (t) => {
-  const root = await mkdtemp(join(tmpdir(), "quality-gate-daemon-"));
+  const root = await mkdtemp(join(tmpdir(), "qg-daemon-"));
   const running = startDaemon(root, async (args) => ({
     code: 0,
     result: { mode: "changed", changes: [], diagnostics: [] },
@@ -28,8 +28,8 @@ test("project daemon handles check, ping, and stop over its local socket", async
 });
 
 test("project daemons use independent endpoints and support restart", async (t) => {
-  const first = await mkdtemp(join(tmpdir(), "quality-gate-daemon-"));
-  const second = await mkdtemp(join(tmpdir(), "quality-gate-daemon-"));
+  const first = await mkdtemp(join(tmpdir(), "qg-daemon-"));
+  const second = await mkdtemp(join(tmpdir(), "qg-daemon-"));
   const runs: Promise<void>[] = [];
   t.after(async () => {
     await Promise.all(

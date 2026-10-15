@@ -4,7 +4,7 @@ import {
   assertDiagnostic,
   createFixture,
   runRule,
-} from "@quality-gate/test-utils";
+} from "@slop-lab/qg-test-utils";
 import { collectAffectedDirectories, noLoneGitkeepRule } from "./gitkeep.js";
 
 test("collectAffectedDirectories includes old and new rename endpoints", () => {

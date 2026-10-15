@@ -4,20 +4,12 @@ import type {
   QualityGateConfig,
   QualityGateOverride,
   RuleConfig,
-} from "@quality-gate/core";
+} from "@slop-lab/qg-core";
 import { parse } from "yaml";
 
-const localConfigNames = [".qualitygate.yaml", ".qualitygate.yml"];
-const legacyRootConfigNames = [
-  "qualitygate.config.yaml",
-  "qualitygate.config.yml",
-];
-const ignoredDirectories = new Set([
-  ".git",
-  ".quality-gate",
-  "dist",
-  "node_modules",
-]);
+const localConfigNames = [".qg.yaml", ".qg.yml"];
+const alternateRootConfigNames = ["qg.config.yaml", "qg.config.yml"];
+const ignoredDirectories = new Set([".git", ".qg", "dist", "node_modules"]);
 
 export async function loadConfig(
   root: string,
@@ -82,7 +74,7 @@ export async function loadConfig(
 }
 
 async function findRootConfig(root: string): Promise<string | undefined> {
-  for (const name of [...localConfigNames, ...legacyRootConfigNames]) {
+  for (const name of [...localConfigNames, ...alternateRootConfigNames]) {
     const path = join(root, name);
     try {
       await readFile(path);

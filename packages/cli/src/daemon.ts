@@ -3,7 +3,7 @@ import { watch } from "node:fs";
 import { mkdir, readdir, rm } from "node:fs/promises";
 import { createConnection, createServer } from "node:net";
 import { join, resolve } from "node:path";
-import type { RunResult } from "@quality-gate/core";
+import type { RunResult } from "@slop-lab/qg-core";
 
 export interface DaemonResponse {
   code: number;
@@ -18,7 +18,7 @@ interface Request {
 }
 
 export function daemonDirectory(root: string): string {
-  return join(root, ".local", "cache", "quality-gate");
+  return join(root, ".local", "cache", "qg");
 }
 
 export function daemonSocket(root: string): string {
@@ -26,7 +26,7 @@ export function daemonSocket(root: string): string {
     const identity = createHash("sha256")
       .update(resolve(root).toLowerCase())
       .digest("hex");
-    return `\\\\.\\pipe\\quality-gate-${identity}`;
+    return `\\\\.\\pipe\\qg-${identity}`;
   }
   return join(daemonDirectory(root), "daemon.sock");
 }

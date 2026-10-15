@@ -1,4 +1,4 @@
-import type { Diagnostic, Rule, RuleContext } from "@quality-gate/core";
+import type { Diagnostic, Rule, RuleContext } from "@slop-lab/qg-core";
 
 export interface NoDirectoryFixtureCopyOptions {
   ignoredDirectories?: string[];

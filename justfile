@@ -2,7 +2,7 @@ set dotenv-load
 set windows-shell := ["powershell.exe", "-NoLogo", "-NoProfile", "-Command"]
 
 packages := "packages/core packages/test-utils packages/rules-git packages/rules-files packages/rules-package-manager packages/rules-test packages/cli"
-quality_gate := "packages/cli/dist/index.cjs"
+qg_cli := "packages/cli/dist/index.cjs"
 
 default:
   @just --list
@@ -16,7 +16,7 @@ bootstrap:
 
 build:
   pnpm exec tsc -b {{packages}}
-  pnpm --dir packages/cli run bundle
+  pnpm exec tsdown
 
 test: build
   pnpm exec node --test packages/*/dist/**/*.test.js
@@ -31,16 +31,16 @@ biome-check:
   pnpm exec biome check .
 
 qg-full: build
-  node {{quality_gate}} check --full
+  node {{qg_cli}} check --full
 
 qg-changed: build
-  node {{quality_gate}} check --changed
+  node {{qg_cli}} check --changed
 
 qg-rules: build
-  node {{quality_gate}} rules
+  node {{qg_cli}} rules
 
-quality-gate *args: build
-  node {{quality_gate}} {{args}}
+qg *args: build
+  node {{qg_cli}} {{args}}
 
 check: biome-check qg-full
 

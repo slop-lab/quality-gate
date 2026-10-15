@@ -128,7 +128,7 @@ Plugins may wrap existing tools, but they must declare:
 - whether the tool supports changed-path filtering;
 - whether the tool reads the whole project even for changed scans.
 
-A future `quality-gate explain` command should expose this so users understand
+A future `qg explain` command should expose this so users understand
 why a scan is slow or why a rule is unavailable. That command and structured
 external-tool metadata are not currently implemented.
 

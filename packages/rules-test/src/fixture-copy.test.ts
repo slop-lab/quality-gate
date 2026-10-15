@@ -4,7 +4,7 @@ import {
   assertDiagnostic,
   createFixture,
   runRule,
-} from "@quality-gate/test-utils";
+} from "@slop-lab/qg-test-utils";
 import { noDirectoryFixtureCopyRule } from "./fixture-copy.js";
 
 const directoryFixtureCopyCall = "createFixtureFrom" + "Directory";
@@ -12,7 +12,7 @@ const directoryFixtureCopyCall = "createFixtureFrom" + "Directory";
 test("reports tests that copy fixture directories", async (t) => {
   const fixture = await createFixture({
     "src/example.test.ts": `
-      import { ${directoryFixtureCopyCall} } from "@quality-gate/test-utils";
+      import { ${directoryFixtureCopyCall} } from "@slop-lab/qg-test-utils";
 
       test("uses a broad fixture", async () => {
         await ${directoryFixtureCopyCall}(new URL("../fixtures/app", import.meta.url));
@@ -38,7 +38,7 @@ test("reports tests that copy fixture directories", async (t) => {
 test("ignores focused inline fixtures", async (t) => {
   const fixture = await createFixture({
     "src/example.test.ts": `
-      import { createFixture } from "@quality-gate/test-utils";
+      import { createFixture } from "@slop-lab/qg-test-utils";
 
       test("uses a focused fixture", async () => {
         await createFixture({ "package.json": "{}" });

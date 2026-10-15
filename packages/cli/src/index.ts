@@ -7,17 +7,17 @@ import {
   type RunResult,
   runQualityGate,
   type ScanMode,
-} from "@quality-gate/core";
+} from "@slop-lab/qg-core";
 import {
   fileRules,
   validDocumentReferenceRule,
-} from "@quality-gate/rules-files";
+} from "@slop-lab/qg-rules-files";
 import {
   noLoneGitkeepRule,
   noTrackedLocalFilesRule,
-} from "@quality-gate/rules-git";
-import { packageManagerRules } from "@quality-gate/rules-package-manager";
-import { testRules } from "@quality-gate/rules-test";
+} from "@slop-lab/qg-rules-git";
+import { packageManagerRules } from "@slop-lab/qg-rules-package-manager";
+import { testRules } from "@slop-lab/qg-rules-test";
 import { loadConfig } from "./config.js";
 import { daemonDirectory, requestDaemon, startDaemon } from "./daemon.js";
 
@@ -120,13 +120,13 @@ async function runSpecialCommand(argv: string[]): Promise<number | undefined> {
     );
     console.log(
       response
-        ? `quality-gate daemon ${action === "stop" ? "stopped" : "running"}`
-        : "quality-gate daemon is not running",
+        ? `qg daemon ${action === "stop" ? "stopped" : "running"}`
+        : "qg daemon is not running",
     );
     return response ? 0 : 1;
   }
   if (argv[1] !== "clear" || argv[2] !== "--rule" || !argv[3]) {
-    throw new Error("Usage: quality-gate cache clear --rule <rule-id>");
+    throw new Error("Usage: qg cache clear --rule <rule-id>");
   }
   await new JsonFileRuleCacheStore(joinCache(root)).clearRule(argv[3]);
   console.log(`Cleared cache for ${argv[3]}.`);
@@ -251,13 +251,13 @@ function printStylish(diagnostics: Diagnostic[]): void {
 }
 
 function printHelp(): void {
-  console.log(`quality-gate
+  console.log(`qg
 
 Usage:
-  quality-gate check [--changed|--full] [--base <ref>] [--format stylish|json]
-  quality-gate rules [--format stylish|json]
-  quality-gate daemon <start|status|stop>
-  quality-gate cache clear --rule <rule-id>
+  qg check [--changed|--full] [--base <ref>] [--format stylish|json]
+  qg rules [--format stylish|json]
+  qg daemon <start|status|stop>
+  qg cache clear --rule <rule-id>
 
 Options:
   --changed       Scan Git affected paths.
@@ -267,7 +267,7 @@ Options:
   --staged        Scan staged changes (default).
   --working-tree  Scan unstaged working tree changes.
   --root <path>   Workspace root. Defaults to cwd.
-  --config <path> Root config path. Defaults to .qualitygate.yaml or .yml.
+  --config <path> Root config path. Defaults to .qg.yaml or .yml.
 `);
 }
 

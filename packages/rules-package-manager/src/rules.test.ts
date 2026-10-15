@@ -2,12 +2,12 @@ import assert from "node:assert/strict";
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { test } from "node:test";
-import type { ProcessProvider } from "@quality-gate/core";
+import type { ProcessProvider } from "@slop-lab/qg-core";
 import {
   assertDiagnostic,
   createFixture,
   runRule,
-} from "@quality-gate/test-utils";
+} from "@slop-lab/qg-test-utils";
 import { noNpmLockWithPnpmRule, pnpmLockfileIsCurrentRule } from "./rules.js";
 
 test("reports package-lock.json when pnpm workspace is present", async (t) => {

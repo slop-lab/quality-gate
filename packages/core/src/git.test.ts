@@ -54,7 +54,7 @@ test("buildDiffArgs supports staged, working tree, and ref scans", () => {
 });
 
 test("GitIndexFileSystemProvider reads staged content instead of working tree content", async (t) => {
-  const root = await mkdtemp(join(tmpdir(), "quality-gate-git-index-"));
+  const root = await mkdtemp(join(tmpdir(), "qg-git-index-"));
   t.after(() => rm(root, { recursive: true, force: true }));
   await execFileAsync("git", ["init", "-q"], { cwd: root });
   await writeFile(join(root, "doc.md"), "staged/value\n");

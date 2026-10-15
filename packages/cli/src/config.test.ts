@@ -3,7 +3,7 @@ import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
-import { type Rule, resolveRuleConfig } from "@quality-gate/core";
+import { type Rule, resolveRuleConfig } from "@slop-lab/qg-core";
 import { loadConfig } from "./config.js";
 
 const rule: Rule<{ limit: number }> = {
@@ -23,14 +23,14 @@ const rule: Rule<{ limit: number }> = {
   },
 };
 
-test("nested .qualitygate.yaml files inherit and override by directory", async (t) => {
-  const root = await mkdtemp(join(tmpdir(), "quality-gate-config-"));
+test("nested .qg.yaml files inherit and override by directory", async (t) => {
+  const root = await mkdtemp(join(tmpdir(), "qg-config-"));
   t.after(() => rm(root, { recursive: true, force: true }));
-  await write(root, ".qualitygate.yaml", config(100));
-  await write(root, "packages/.qualitygate.yaml", config(50));
+  await write(root, ".qg.yaml", config(100));
+  await write(root, "packages/.qg.yaml", config(50));
   await write(
     root,
-    "packages/app/.qualitygate.yaml",
+    "packages/app/.qg.yaml",
     `rules:\n  test/limit: off\noverrides:\n  - files: ["generated/**"]\n    rules:\n      test/limit:\n        severity: warning\n        options: { limit: 10 }\n`,
   );
 
@@ -54,10 +54,10 @@ test("nested .qualitygate.yaml files inherit and override by directory", async (
   assert.equal(generated.options.limit, 10);
 });
 
-test("legacy root filename remains supported", async (t) => {
-  const root = await mkdtemp(join(tmpdir(), "quality-gate-config-"));
+test("alternate root config filename is supported", async (t) => {
+  const root = await mkdtemp(join(tmpdir(), "qg-config-"));
   t.after(() => rm(root, { recursive: true, force: true }));
-  await write(root, "qualitygate.config.yaml", config(42));
+  await write(root, "qg.config.yaml", config(42));
   const loaded = await loadConfig(root);
   assert.equal(resolveRuleConfig(loaded, rule, "a.ts").options.limit, 42);
 });

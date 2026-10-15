@@ -13,7 +13,7 @@ import {
   type RunResult,
   runQualityGate,
   type ScanMode,
-} from "@quality-gate/core";
+} from "@slop-lab/qg-core";
 
 export interface TestFixture {
   root: string;
@@ -139,7 +139,7 @@ export async function createFixtureFromDirectory(
 }
 
 async function mkFixtureRoot(): Promise<string> {
-  const root = join(tmpdir(), `quality-gate-${randomUUID()}`);
+  const root = join(tmpdir(), `qg-${randomUUID()}`);
   await mkdir(root, { recursive: true });
   return root;
 }

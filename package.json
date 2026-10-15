@@ -1,5 +1,5 @@
 {
-  "name": "quality-gate-repo",
+  "name": "@slop-lab/qg-repo",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.10.0",
@@ -8,6 +8,7 @@
   ],
   "devDependencies": {
     "@types/node": "^24.0.0",
+    "tsdown": "0.23.1",
     "typescript": "^5.8.0"
   },
   "engines": {

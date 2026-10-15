@@ -2,7 +2,7 @@
 
 This document describes the current runner and the intended architecture.
 The implemented entrypoints are the CLI, a single-project daemon, and the
-`@quality-gate/core` library API. General workspace servers, dynamic plugin
+`@slop-lab/qg-core` library API. General workspace servers, dynamic plugin
 loading, package graphs, and additional output formats remain design goals.
 See [CLI](cli.md) for the supported commands and options.
 
@@ -81,7 +81,7 @@ Deleted paths remain important because they can affect directory-level rules. Fo
 The current `daemon` command runs one project per process and supports check,
 ping, and stop requests. On Windows it uses a named pipe whose name contains
 a hash of the resolved, case-normalized project path. Other platforms use
-`.local/cache/quality-gate/daemon.sock`. Windows pipe names are independent of
+`.local/cache/qg/daemon.sock`. Windows pipe names are independent of
 project path length and do not create a socket file in the cache directory.
 Requests are newline-delimited JSON; each connection carries one request and
 one JSON response. The server closes the connection after responding, so
@@ -158,7 +158,7 @@ socket file is only present on platforms using Unix-domain sockets):
 ```text
 .local/
   cache/
-    quality-gate/
+    qg/
       daemon.sock
       rules/
         <sanitized-rule-id>.json
@@ -167,7 +167,7 @@ socket file is only present on platforms using Unix-domain sockets):
 Global cache entries are allowed only for immutable package artifacts, such as downloaded plugin metadata or compiled plugin bundles. Rule diagnostics, parsed project state, and external tool output must be workspace-scoped.
 
 For example, `docs/valid-reference` is stored in `docs__valid-reference.json`.
-Emergency recovery uses `quality-gate cache clear --rule <rule-id>`.
+Emergency recovery uses `qg cache clear --rule <rule-id>`.
 
 Watch mode may update caches incrementally, but correctness must not depend on file watching. A scan after missed filesystem events must still become correct by validating hashes and metadata.
 

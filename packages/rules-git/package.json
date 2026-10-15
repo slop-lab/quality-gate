@@ -1,19 +1,40 @@
 {
-  "name": "@quality-gate/rules-git",
+  "name": "@slop-lab/qg-rules-git",
   "version": "0.0.0",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    }
-  },
   "dependencies": {
-    "@quality-gate/core": "workspace:*"
+    "@slop-lab/qg-core": "workspace:*"
   },
   "devDependencies": {
-    "@quality-gate/test-utils": "workspace:*"
+    "@slop-lab/qg-test-utils": "workspace:*"
+  },
+  "files": [
+    "dist/*.mjs",
+    "dist/*.mjs.map",
+    "dist/*.d.mts",
+    "dist/*.d.mts.map"
+  ],
+  "scripts": {
+    "build": "tsc -b && tsdown --config ../../tsdown.config.ts --filter @slop-lab/qg-rules-git",
+    "prepack": "pnpm run build"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/slop-lab/quality-gate.git",
+    "directory": "packages/rules-git"
+  },
+  "description": "Git hygiene rules for QG",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
   }
 }

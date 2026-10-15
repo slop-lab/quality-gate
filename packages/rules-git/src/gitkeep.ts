@@ -4,7 +4,7 @@ import type {
   DirectoryEntry,
   Rule,
   RuleContext,
-} from "@quality-gate/core";
+} from "@slop-lab/qg-core";
 
 export interface NoLoneGitkeepOptions {
   gitkeepName?: string;

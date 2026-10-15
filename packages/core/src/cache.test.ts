@@ -6,7 +6,7 @@ import { test } from "node:test";
 import { cacheKey, JsonFileRuleCacheStore } from "./cache.js";
 
 test("rule cache persists values and isolates rule namespaces", async (t) => {
-  const root = await mkdtemp(join(tmpdir(), "quality-gate-cache-"));
+  const root = await mkdtemp(join(tmpdir(), "qg-cache-"));
   t.after(() => rm(root, { recursive: true, force: true }));
   const first = new JsonFileRuleCacheStore(root);
   await first.forRule("docs/valid-reference").set("path", { parsed: true });

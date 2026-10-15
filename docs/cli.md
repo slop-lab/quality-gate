@@ -1,7 +1,7 @@
 # CLI
 
 Quality Gate uses the same runner for standalone checks and the optional
-project daemon. Examples below use `quality-gate`; in a project with a local
+project daemon. Examples below use `qg`; in a project with a local
 installation, prefix it with `pnpm exec`.
 
 ## Commands
@@ -11,12 +11,12 @@ installation, prefix it with `pnpm exec`.
 Run a scan and report diagnostics.
 
 ```sh
-quality-gate check
-quality-gate check --staged
-quality-gate check --changed --base origin/main
-quality-gate check --full
-quality-gate check --working-tree
-quality-gate check --format json
+qg check
+qg check --staged
+qg check --changed --base origin/main
+qg check --full
+qg check --working-tree
+qg check --format json
 ```
 
 The default scan mode is `changed`, unless the root config sets
@@ -52,15 +52,15 @@ One optional daemon can run per project. `check` uses its local socket when
 available and falls back to an in-process run when no daemon can be reached.
 
 ```sh
-quality-gate daemon start
-quality-gate daemon status
-quality-gate daemon stop
+qg daemon start
+qg daemon status
+qg daemon stop
 ```
 
 `start` runs in the foreground. Use another terminal for checks, or a process
 supervisor to keep it running. Windows uses a named pipe derived from the
 absolute project path; other platforms use a Unix-domain socket at
-`.local/cache/quality-gate/daemon.sock`. Named pipes are released automatically
+`.local/cache/qg/daemon.sock`. Named pipes are released automatically
 when the daemon stops. Persistent caches use the same project-local directory
 on every platform.
 Restart running daemons after updating the CLI so clients and the daemon use
@@ -68,7 +68,7 @@ the same protocol version.
 
 The daemon watches workspace directories as change hints and reads the Git
 index again on each staged check. Rule-owned caches survive restarts under
-`.local/cache/quality-gate/rules/`. Standalone checks use no persistent rule
+`.local/cache/qg/rules/`. Standalone checks use no persistent rule
 cache. Add `.local/` to the project's `.gitignore`.
 
 ### `rules`
@@ -76,8 +76,8 @@ cache. Add `.local/` to the project's `.gitignore`.
 List built-in rule metadata.
 
 ```sh
-quality-gate rules
-quality-gate rules --format json
+qg rules
+qg rules --format json
 ```
 
 The CLI bundles its rule set; loading additional plugins through CLI flags or
@@ -88,8 +88,8 @@ configuration is not currently supported.
 Clear one rule's persistent cache for the selected project.
 
 ```sh
-quality-gate cache clear --rule docs/valid-reference
-quality-gate cache clear --rule docs/valid-reference --root /path/to/project
+qg cache clear --rule docs/valid-reference
+qg cache clear --rule docs/valid-reference --root /path/to/project
 ```
 
 Each rule owns its cache keys and refresh policy. Core provides isolated
@@ -103,12 +103,12 @@ file, and reports the exact occurrence. Suppress one occurrence by placing the
 marker immediately after it:
 
 ```md
-not/a/file <!-- quality-gate-suppress docs/valid-reference -->
+not/a/file <!-- qg-suppress docs/valid-reference -->
 ```
 
 The marker does not suppress other occurrences on the same line. Because the
 pattern also matches slash-separated prose, enable the rule in nested
-`.qualitygate.yaml` files for document sets that use this reference convention.
+`.qg.yaml` files for document sets that use this reference convention.
 
 ## Exit Codes
 
@@ -120,13 +120,13 @@ Warnings and informational diagnostics do not cause check failure.
 
 ## Config
 
-The CLI automatically loads `.qualitygate.yaml` or `.qualitygate.yml`. A file
+The CLI automatically loads `.qg.yaml` or `.qg.yml`. A file
 at the workspace root supplies repository defaults. A file in any nested
 directory applies to that directory and all descendants, like `.gitignore`.
 Nested rules inherit and override parent options; paths in nested `overrides`
 are relative to the directory containing that config. Later, deeper matching
-configs win. The old root-only `qualitygate.config.yaml` and `.yml` names remain
-supported for compatibility.
+configs win. The root-only alternatives `qg.config.yaml` and `qg.config.yml`
+are also supported.
 
 Configuration is YAML. Supported root fields are `scan`, `rules`, and
 `overrides`. `scan` is only allowed in the root config and supports
@@ -134,7 +134,7 @@ Configuration is YAML. Supported root fields are `scan`, `rules`, and
 files and a `defineConfig` export are not currently supported.
 
 ```yaml
-# .qualitygate.yaml (repository root)
+# .qg.yaml (repository root)
 scan:
   defaultMode: changed
   base: origin/main
@@ -148,7 +148,7 @@ rules:
 ```
 
 ```yaml
-# packages/.qualitygate.yaml
+# packages/.qg.yaml
 rules:
   files/max-line-length:
     severity: warning

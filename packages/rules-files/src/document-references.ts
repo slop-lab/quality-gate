@@ -3,7 +3,7 @@ import {
   type Diagnostic,
   type FileSystemProvider,
   type Rule,
-} from "@quality-gate/core";
+} from "@slop-lab/qg-core";
 
 export interface ValidDocumentReferenceOptions {
   extensions?: string[];
@@ -18,7 +18,7 @@ interface ReferenceOccurrence {
 
 const defaults: Required<ValidDocumentReferenceOptions> = {
   extensions: [".md", ".mdx", ".txt", ".adoc", ".rst"],
-  suppression: "quality-gate-suppress docs/valid-reference",
+  suppression: "qg-suppress docs/valid-reference",
 };
 const referencePattern = /\b\w+(?:\/\w+)+\b/g;
 const parserVersion = "1";

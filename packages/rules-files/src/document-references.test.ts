@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { createFixture, runRule } from "@quality-gate/test-utils";
+import { createFixture, runRule } from "@slop-lab/qg-test-utils";
 import { validDocumentReferenceRule } from "./document-references.js";
 
 test("reports each missing slash-delimited reference occurrence", async (t) => {
@@ -21,7 +21,7 @@ test("reports each missing slash-delimited reference occurrence", async (t) => {
 test("suppression applies only to the immediately preceding occurrence", async (t) => {
   const fixture = await createFixture({
     "docs/check.md":
-      "first/missing second/missing <!-- quality-gate-suppress docs/valid-reference -->\n",
+      "first/missing second/missing <!-- qg-suppress docs/valid-reference -->\n",
   });
   t.after(() => fixture.cleanup());
   const result = await runRule({ fixture, rule: validDocumentReferenceRule });

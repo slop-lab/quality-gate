@@ -4,7 +4,7 @@ import {
   type Rule,
   type RuleContext,
   type RuleMetadata,
-} from "@quality-gate/core";
+} from "@slop-lab/qg-core";
 
 export interface FileLimitOptions {
   limit: number;
@@ -18,7 +18,7 @@ const ignoredPaths = [
   "**/yarn.lock",
   "**/*.tsbuildinfo",
 ];
-const ignoredDirectories = [".git", ".quality-gate", "node_modules", "dist"];
+const ignoredDirectories = [".git", ".qg", "node_modules", "dist"];
 
 export const maxBytesRule: Rule<FileLimitOptions> = {
   metadata: metadata(
