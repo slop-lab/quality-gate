@@ -5,7 +5,10 @@ import {
   runQualityGate,
   type ScanMode,
 } from "@quality-gate/core";
-import { fileRules } from "@quality-gate/rules-files";
+import {
+  fileRules,
+  validDocumentReferenceRule,
+} from "@quality-gate/rules-files";
 import {
   noLoneGitkeepRule,
   noTrackedLocalFilesRule,
@@ -30,6 +33,7 @@ const builtInRules = [
   noLoneGitkeepRule,
   noTrackedLocalFilesRule,
   ...fileRules,
+  validDocumentReferenceRule,
   ...packageManagerRules,
   ...testRules,
 ];
