@@ -105,12 +105,91 @@ file, and reports the exact occurrence. Suppress one occurrence by placing the
 marker immediately after it:
 
 ```md
-not/a/file <!-- qg-suppress docs/valid-reference -->
+not/a/file <!-- qg-suppress docs/valid-reference: illustrative missing path -->
 ```
 
-The marker does not suppress other occurrences on the same line. Because the
+The marker suppresses only the preceding word. Because the
 pattern also matches slash-separated prose, enable the rule in nested
 `.qg.yaml` files for document sets that use this reference convention.
+
+## Markdown characters
+
+`markdown/allowed-characters` is enabled by the recommended rule set. It
+checks `.md`, `.markdown`, and `.mdx` files (case-insensitive), including code
+blocks, links, and comments. The default allows printable ASCII U+0020 through
+U+007E plus tab, CR, and LF. This includes English letters, digits, straight
+quotes (`'` and `"`), and ASCII Markdown punctuation. Curly quotes, Unicode
+dashes, non-breaking spaces, zero-width characters, emoji, and non-ASCII
+letters require an explicit exception. Diagnostics identify each character
+with its Unicode code point and one-based line and UTF-16 column.
+
+Add languages or characters in the project's `.qg.yaml`:
+
+```yaml
+rules:
+  markdown/allowed-characters:
+    severity: error
+    options:
+      allowedLanguages: [ko, ja]
+      allowedCharacters: ["\u2192"] # An arrow; literal characters also work.
+      ignoredPaths: ["vendor/**"]
+  qg/require-suppression-reason: error
+```
+
+`allowedLanguages` accepts language tags such as `ko`, `ja`, `fr`, or
+`zh-TW` and permits letters, marks, and numbers in their writing systems.
+Korean permits Hangul; Japanese permits Hiragana, Katakana, and Han.
+These are writing-system allowances, not dictionary checks. Punctuation and
+invisible formatting characters remain restricted. English tags retain the
+ASCII baseline. `allowedScripts` accepts Unicode script names such as `Greek`
+or `Cyrillic` for explicit writing-system control. `allowedCharacters` adds
+the code points in each string, including explicitly requested punctuation.
+Unicode escapes work in YAML double-quoted strings.
+
+`extensions` can override the checked file extensions. `ignoredPaths` accepts
+repository-relative globs; nested configs and path overrides work as for other
+rules. `.git`, `.local`, `.qg`, `node_modules`, and `dist` are excluded from
+document discovery.
+
+## Suppressions
+
+The runner applies HTML-comment directives to diagnostics with a file path and
+line number. Name the rule (or comma-separated rule IDs), then add a reason
+after `:`. `qg/require-suppression-reason` checks Markdown by default and
+requires non-empty reasons for every suppression except the closing end
+marker. Configure its `extensions` or `ignoredPaths` to change its file scope.
+Its diagnostics cannot themselves be suppressed by comments; project config
+can change or disable the rule.
+
+The default scope is the immediately preceding whitespace-delimited word,
+including attached quotes or punctuation. A marker can touch the word or be
+separated by ASCII spaces or tabs, and must stay on the same line. It covers
+all invalid characters in that word, not other words or other rules:
+
+```md
+“quoted” <!-- qg-suppress markdown/allowed-characters: preserve source spelling -->
+```
+
+Use these forms for a larger, explicit scope:
+
+```md
+“two” “words” <!-- qg-suppress-line markdown/allowed-characters: verbatim quotation -->
+<!-- qg-suppress-next-line markdown/allowed-characters: original language -->
+한글
+<!-- qg-suppress-start markdown/allowed-characters: verbatim excerpt -->
+日本語
+“quotation”
+<!-- qg-suppress-end -->
+```
+
+`qg-suppress-line` covers the comment's starting line. `qg-suppress-next-line`
+covers the line after the comment ends. Paired start/end directives cover
+content between the two comments and support nesting. An end marker without
+rule IDs closes the most recent open group; specifying rule IDs closes the
+latest open range for each listed rule. Unmatched starts or ends do not
+suppress anything. Comments are recognized in source text, including code
+examples. In staged mode, both text and suppression comments come from the
+Git index.
 
 ## Exit Codes
 

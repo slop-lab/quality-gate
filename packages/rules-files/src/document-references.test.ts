@@ -48,3 +48,16 @@ test("changed mode checks only changed document paths", async (t) => {
     ["docs/a.md"],
   );
 });
+
+test("shared suppression supports reasons and next-line scope for document references", async (t) => {
+  const fixture = await createFixture({
+    "docs/check.md":
+      "<!-- qg-suppress-next-line docs/valid-reference: example path -->\nfirst/missing\nsecond/missing\n",
+  });
+  t.after(() => fixture.cleanup());
+  const result = await runRule({ fixture, rule: validDocumentReferenceRule });
+  assert.deepEqual(
+    result.diagnostics.map((item) => item.line),
+    [3],
+  );
+});

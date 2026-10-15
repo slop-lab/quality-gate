@@ -1,6 +1,8 @@
 import type { Rule } from "@slop-lab/qg-core";
 import {
+  allowedMarkdownCharactersRule,
   fileRules,
+  requireSuppressionReasonRule,
   validDocumentReferenceRule,
 } from "@slop-lab/qg-rules-files";
 import {
@@ -16,6 +18,8 @@ export const recommendedRules: Rule[] = [
   noTrackedLocalFilesRule,
   ...fileRules,
   validDocumentReferenceRule,
+  allowedMarkdownCharactersRule,
+  requireSuppressionReasonRule,
   ...packageManagerRules,
   ...testRules,
 ];

@@ -79,6 +79,7 @@ export interface Diagnostic {
   suggestedFix?: SuggestedFix;
   docsUrl?: string;
   metadata?: Record<string, unknown>;
+  suppressible?: boolean;
 }
 
 export interface SuggestedFix {

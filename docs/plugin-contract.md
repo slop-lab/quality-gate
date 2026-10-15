@@ -49,6 +49,12 @@ currently expose an `optionsSchema` field.
 
 Rule IDs are part of the public contract and should not be renamed casually.
 
+The runner applies `qg-suppress` HTML-comment directives to located diagnostics
+after rule execution, using the same filesystem snapshot as the check.
+Diagnostics can set `suppressible: false` for policy errors that must not be
+hidden by inline comments, such as missing suppression reasons. Project rule
+configuration still applies. Columns are one-based UTF-16 positions.
+
 ## Useful Inputs
 
 The current `RuleContext` provides normalized changes, filesystem and process

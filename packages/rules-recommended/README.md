@@ -3,7 +3,8 @@
 `@slop-lab/qg-rules-recommended` exports `recommendedRules`, the default rule
 set used by the `qg` CLI. It composes the Git, file, package manager, and test
 rule packages as runtime dependencies. Rule implementations and default
-severities are unchanged.
+severities come from the individual rule packages. Markdown character checks
+and suppression-reason checks are enabled by default.
 
 Use it with the independent runner:
 

@@ -3,6 +3,7 @@ import { resolveRuleConfig } from "./config.js";
 import { NodeFileSystemProvider } from "./fs.js";
 import { GitChangedProvider, GitIndexFileSystemProvider } from "./git.js";
 import { NodeProcessProvider } from "./process.js";
+import { DocumentSuppressions } from "./suppression.js";
 import type { Diagnostic, RunOptions, RunResult, ScanMode } from "./types.js";
 
 export async function runQualityGate(options: RunOptions): Promise<RunResult> {
@@ -27,6 +28,7 @@ export async function runQualityGate(options: RunOptions): Promise<RunResult> {
       : [];
 
   const diagnostics: Diagnostic[] = [];
+  const suppressions = new Map<string, DocumentSuppressions>();
 
   for (const rule of options.rules) {
     if (!rule.metadata.supports.includes(mode)) {
@@ -54,6 +56,20 @@ export async function runQualityGate(options: RunOptions): Promise<RunResult> {
         ? resolveRuleConfig(options.config, rule, diagnostic.path)
         : resolved;
       if (pathConfig.enabled) {
+        if (
+          diagnostic.path &&
+          diagnostic.line !== undefined &&
+          diagnostic.suppressible !== false
+        ) {
+          let document = suppressions.get(diagnostic.path);
+          if (!document && (await fs.isFile(diagnostic.path))) {
+            document = new DocumentSuppressions(
+              await fs.readFile(diagnostic.path),
+            );
+            suppressions.set(diagnostic.path, document);
+          }
+          if (document?.isSuppressed(diagnostic)) continue;
+        }
         diagnostics.push({ ...diagnostic, severity: pathConfig.severity });
       }
     }

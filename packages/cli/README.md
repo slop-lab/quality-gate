@@ -41,5 +41,11 @@ The daemon runs in the foreground and uses named pipes on Windows or Unix-domain
 sockets on other platforms. Add `.local/` to the project's `.gitignore` for
 runtime data under `.local/cache/qg/`.
 
+Recommended checks include `markdown/allowed-characters` (ASCII by default)
+and `qg/require-suppression-reason`. Add `allowedLanguages` or
+`allowedCharacters` through rule options for multilingual documents. Inline
+suppression comments require a reason and support word, line, next-line,
+and paired start/end scopes.
+
 See the [CLI reference](https://github.com/slop-lab/quality-gate/blob/main/docs/cli.md)
 for all commands and configuration options.
