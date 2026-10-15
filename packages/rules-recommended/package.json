@@ -1,0 +1,44 @@
+{
+  "name": "@slop-lab/qg-rules-recommended",
+  "version": "0.0.0",
+  "description": "Default recommended rule set for QG",
+  "type": "module",
+  "files": [
+    "dist/*.mjs",
+    "dist/*.mjs.map",
+    "dist/*.d.mts",
+    "dist/*.d.mts.map"
+  ],
+  "scripts": {
+    "build": "tsc -b && tsdown --config ../../tsdown.config.ts --filter @slop-lab/qg-rules-recommended",
+    "prepack": "pnpm run build"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/slop-lab/quality-gate.git",
+    "directory": "packages/rules-recommended"
+  },
+  "dependencies": {
+    "@slop-lab/qg-core": "workspace:*",
+    "@slop-lab/qg-rules-files": "workspace:*",
+    "@slop-lab/qg-rules-git": "workspace:*",
+    "@slop-lab/qg-rules-package-manager": "workspace:*",
+    "@slop-lab/qg-rules-test": "workspace:*"
+  },
+  "devDependencies": {
+    "@slop-lab/qg-test-utils": "workspace:*"
+  },
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  }
+}

@@ -14,21 +14,18 @@ export default defineConfig(
       const pkg = JSON.parse(
         readFileSync(join(cwd, "package.json"), "utf8"),
       ) as { name: string };
-      const cli = pkg.name === "@slop-lab/qg";
       return {
         name: pkg.name,
         cwd,
         entry: ["src/index.ts"],
-        format: cli ? "cjs" : "esm",
+        format: "esm",
         platform: "node",
         target: "node22",
         dts: true,
         // tsc also emits the test files into dist for node --test.
         clean: false,
         exports: { legacy: true, bin: false },
-        deps: cli
-          ? { alwaysBundle: [/^@slop-lab\/qg-/, "yaml"], onlyBundle: false }
-          : { neverBundle: /^@slop-lab\/qg-/ },
+        deps: { neverBundle: true },
       } satisfies UserConfig;
     }),
 );

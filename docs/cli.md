@@ -80,7 +80,9 @@ qg rules
 qg rules --format json
 ```
 
-The CLI bundles its rule set; loading additional plugins through CLI flags or
+The CLI loads its default set from the runtime dependency
+`@slop-lab/qg-rules-recommended`. Core and the rule packages are installed as
+separate dependencies. Loading additional plugins through CLI flags or
 configuration is not currently supported.
 
 ### `cache`

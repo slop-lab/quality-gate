@@ -19,22 +19,13 @@ importers:
         version: 5.9.3
 
   packages/cli:
-    devDependencies:
+    dependencies:
       '@slop-lab/qg-core':
         specifier: workspace:*
         version: link:../core
-      '@slop-lab/qg-rules-files':
+      '@slop-lab/qg-rules-recommended':
         specifier: workspace:*
-        version: link:../rules-files
-      '@slop-lab/qg-rules-git':
-        specifier: workspace:*
-        version: link:../rules-git
-      '@slop-lab/qg-rules-package-manager':
-        specifier: workspace:*
-        version: link:../rules-package-manager
-      '@slop-lab/qg-rules-test':
-        specifier: workspace:*
-        version: link:../rules-test
+        version: link:../rules-recommended
       yaml:
         specifier: ^2.9.1
         version: 2.9.1
@@ -66,6 +57,28 @@ importers:
       '@slop-lab/qg-core':
         specifier: workspace:*
         version: link:../core
+    devDependencies:
+      '@slop-lab/qg-test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
+
+  packages/rules-recommended:
+    dependencies:
+      '@slop-lab/qg-core':
+        specifier: workspace:*
+        version: link:../core
+      '@slop-lab/qg-rules-files':
+        specifier: workspace:*
+        version: link:../rules-files
+      '@slop-lab/qg-rules-git':
+        specifier: workspace:*
+        version: link:../rules-git
+      '@slop-lab/qg-rules-package-manager':
+        specifier: workspace:*
+        version: link:../rules-package-manager
+      '@slop-lab/qg-rules-test':
+        specifier: workspace:*
+        version: link:../rules-test
     devDependencies:
       '@slop-lab/qg-test-utils':
         specifier: workspace:*

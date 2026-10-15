@@ -19,7 +19,10 @@
       "@slop-lab/qg-rules-package-manager": [
         "packages/rules-package-manager/src/index.ts"
       ],
-      "@slop-lab/qg-rules-test": ["packages/rules-test/src/index.ts"]
+      "@slop-lab/qg-rules-test": ["packages/rules-test/src/index.ts"],
+      "@slop-lab/qg-rules-recommended": [
+        "packages/rules-recommended/src/index.ts"
+      ]
     }
   }
 }

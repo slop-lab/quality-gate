@@ -197,8 +197,15 @@ and MCP responses are planned consumers of the same result model.
 
 The current core runner computes scan inputs, resolves rule configuration,
 executes enabled rules sequentially, and collects diagnostics. The CLI loads
-YAML configuration, supplies built-in rules, formats output, and determines
+YAML configuration, loads `recommendedRules` from
+`@slop-lab/qg-rules-recommended`, formats output, and determines
 the exit status.
+
+`@slop-lab/qg-core` is independent of the CLI and all rule packages. The CLI
+declares core, the recommended rule set, and YAML parsing as runtime
+dependencies. The recommended set composes the individual rule packages;
+package imports are kept external by the build and installed by the package
+manager. All packages use ESM so the CLI can import core and rules on Node.js 22.
 
 The target runner and entrypoints are responsible for:
 

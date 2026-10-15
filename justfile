@@ -1,8 +1,7 @@
 set dotenv-load
 set windows-shell := ["powershell.exe", "-NoLogo", "-NoProfile", "-Command"]
 
-packages := "packages/core packages/test-utils packages/rules-git packages/rules-files packages/rules-package-manager packages/rules-test packages/cli"
-qg_cli := "packages/cli/dist/index.cjs"
+qg_cli := "packages/cli/dist/index.mjs"
 
 default:
   @just --list
@@ -15,7 +14,7 @@ bootstrap:
   just build
 
 build:
-  pnpm exec tsc -b {{packages}}
+  pnpm exec tsc -b
   pnpm exec tsdown
 
 test: build

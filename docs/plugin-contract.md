@@ -4,7 +4,8 @@ Plugins provide rules and optional input providers. A plugin should be portable 
 
 This document combines the current rule interface with future plugin design
 requirements. Today, library callers pass `Rule` objects and injectable
-providers to `runQualityGate`; the CLI uses a fixed bundled rule set.
+providers to `runQualityGate`; the CLI loads its default set from the separate
+`@slop-lab/qg-rules-recommended` package. Core does not depend on rule packages.
 Dynamic plugin loading, lifecycle hooks, rich input discovery, and automatic
 fix application are not implemented.
 
@@ -146,4 +147,3 @@ Rules must not delete files or modify directories directly. For example,
 only returns the suggestion; a future fix implementation must require an
 explicit request and rule opt-in before applying edits. The CLI has no `--fix`
 option today.
-

@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "composite": true
+  },
+  "references": [
+    { "path": "../core" },
+    { "path": "../rules-git" },
+    { "path": "../rules-files" },
+    { "path": "../rules-package-manager" },
+    { "path": "../rules-test" },
+    { "path": "../test-utils" }
+  ],
+  "include": ["src/**/*.ts"]
+}

@@ -1,0 +1,26 @@
+# QG Recommended Rules
+
+`@slop-lab/qg-rules-recommended` exports `recommendedRules`, the default rule
+set used by the `qg` CLI. It composes the Git, file, package manager, and test
+rule packages as runtime dependencies. Rule implementations and default
+severities are unchanged.
+
+Use it with the independent runner:
+
+```ts
+import { runQualityGate } from "@slop-lab/qg-core";
+import { recommendedRules } from "@slop-lab/qg-rules-recommended";
+
+const result = await runQualityGate({
+  root: process.cwd(),
+  mode: "full",
+  rules: recommendedRules,
+  config: {
+    rules: { "docs/valid-reference": "off" },
+  },
+});
+```
+
+Core does not load any rules automatically. Library callers can use this set,
+individual rule packages, or their own `Rule` objects. CLI users configure
+severity and options through `.qg.yaml` or `.qg.yml`.

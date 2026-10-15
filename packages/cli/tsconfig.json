@@ -10,16 +10,7 @@
       "path": "../core"
     },
     {
-      "path": "../rules-git"
-    },
-    {
-      "path": "../rules-files"
-    },
-    {
-      "path": "../rules-package-manager"
-    },
-    {
-      "path": "../rules-test"
+      "path": "../rules-recommended"
     }
   ],
   "include": ["src/**/*.ts"]

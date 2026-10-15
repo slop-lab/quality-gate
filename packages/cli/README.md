@@ -3,6 +3,10 @@
 `@slop-lab/qg` provides the `qg` CLI for repository quality checks.
 Requires Node.js 22 or later.
 
+The CLI uses `@slop-lab/qg-core` and `@slop-lab/qg-rules-recommended` as runtime
+dependencies. Your package manager installs these and the individual rule
+packages automatically.
+
 ```sh
 pnpm add -D @slop-lab/qg
 pnpm exec qg rules

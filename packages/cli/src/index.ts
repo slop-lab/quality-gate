@@ -8,16 +8,7 @@ import {
   runQualityGate,
   type ScanMode,
 } from "@slop-lab/qg-core";
-import {
-  fileRules,
-  validDocumentReferenceRule,
-} from "@slop-lab/qg-rules-files";
-import {
-  noLoneGitkeepRule,
-  noTrackedLocalFilesRule,
-} from "@slop-lab/qg-rules-git";
-import { packageManagerRules } from "@slop-lab/qg-rules-package-manager";
-import { testRules } from "@slop-lab/qg-rules-test";
+import { recommendedRules } from "@slop-lab/qg-rules-recommended";
 import { loadConfig } from "./config.js";
 import { daemonDirectory, requestDaemon, startDaemon } from "./daemon.js";
 
@@ -32,15 +23,6 @@ interface CliOptions {
   root: string;
   config?: string;
 }
-
-const builtInRules = [
-  noLoneGitkeepRule,
-  noTrackedLocalFilesRule,
-  ...fileRules,
-  validDocumentReferenceRule,
-  ...packageManagerRules,
-  ...testRules,
-];
 
 async function main(argv: string[]): Promise<number> {
   const special = await runSpecialCommand(argv);
@@ -75,7 +57,7 @@ async function executeCheck(
     head: options.head,
     staged: options.staged,
     workingTree: options.workingTree,
-    rules: builtInRules,
+    rules: recommendedRules,
     config: await loadConfig(options.root, options.config),
     cacheStore,
   });
@@ -224,7 +206,7 @@ function requireValue(flag: string, args: string[]): string {
 }
 
 function printRules(format: "stylish" | "json"): void {
-  const rules = builtInRules.map((rule) => rule.metadata);
+  const rules = recommendedRules.map((rule) => rule.metadata);
   if (format === "json") {
     console.log(JSON.stringify(rules, null, 2));
     return;

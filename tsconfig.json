@@ -20,6 +20,9 @@
       "path": "packages/rules-test"
     },
     {
+      "path": "packages/rules-recommended"
+    },
+    {
       "path": "packages/cli"
     }
   ]
