@@ -25,7 +25,8 @@ quality-gate check --format json
 quality-gate check --format sarif --output quality-gate.sarif
 ```
 
-Default mode should be `--changed` for local interactive runs and configurable for CI. If `CI=true`, the default may still be changed mode when a base ref is available, but full mode should be easy to request explicitly.
+The default is `--staged`: changed paths and file contents both come from the
+Git index. Use `--full` for CI or an explicit repository-wide audit.
 
 Important options:
 
@@ -33,7 +34,7 @@ Important options:
 - `--full`: scan the full configured repository scope.
 - `--base <ref>`: compare against a base ref.
 - `--head <ref>`: compare against a head ref.
-- `--staged`: inspect staged changes.
+- `--staged`: inspect staged changes and index contents (default).
 - `--working-tree`: include unstaged working tree changes.
 - `--paths <glob...>`: restrict scan to paths.
 - `--rules <id...>`: run only selected rules.
@@ -44,6 +45,21 @@ Important options:
 - `--config <path>`: use a specific config file.
 - `--no-cache`: bypass persistent cache.
 - `--explain`: print config and rule activation details.
+
+### `daemon`
+
+One optional daemon can run per project. `check` uses its local socket when it
+is available and safely falls back to an in-process run otherwise.
+
+```sh
+quality-gate daemon start
+quality-gate daemon status
+quality-gate daemon stop
+```
+
+It watches workspace directories as invalidation hints and revalidates the Git
+index on every staged request. Rule-owned caches survive restarts under
+`.local/cache/quality-gate/rules/`.
 
 ### `server`
 
@@ -123,12 +139,27 @@ quality-gate explain --rule gitkeep/no-lone-gitkeep
 Inspect or clear persistent cache.
 
 ```sh
-quality-gate cache status
-quality-gate cache clear
-quality-gate cache clear --workspace .
-quality-gate cache clear --workspace quality-gate --plugin @quality-gate/rules-typescript
-quality-gate cache clear --path packages/api/src/index.ts
+quality-gate cache clear --rule docs/valid-reference
 ```
+
+Cache clearing is an emergency recovery operation. During normal operation,
+each rule owns its cache keys and refresh policy while core provides isolated
+namespaces, content hashing, and atomic persistence.
+
+### Document references
+
+`docs/valid-reference` finds occurrences matching
+`/\w+(?:\/\w+)+/`, checks that the matched repository-relative path is a
+file, and reports the exact occurrence. Suppress one occurrence by placing the
+marker immediately after it:
+
+```md
+not/a/file <!-- quality-gate-suppress docs/valid-reference -->
+```
+
+The marker does not suppress other occurrences on the same line. Because the
+pattern also matches slash-separated prose, enable the rule in nested
+`.qualitygate.yaml` files for document sets that use this reference convention.
 
 ## Exit Codes
 

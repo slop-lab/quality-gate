@@ -3,6 +3,8 @@ scan:
 
 rules:
   git/no-tracked-local-files: error
+  # Enable this in a nested docs directory after existing references are reviewed.
+  docs/valid-reference: off
   files/max-bytes:
     severity: error
     options:

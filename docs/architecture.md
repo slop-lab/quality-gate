@@ -100,7 +100,10 @@ The server should expose operations equivalent to:
 
 ## Cache Model
 
-Caching is owned by the runner, not by individual rules. Plugins may request cacheable inputs but should not manage global mutable cache by themselves.
+Cached values and their refresh policy are owned by each rule. Core provides
+rule-isolated namespaces, content-addressed key helpers, and atomic persistent
+storage. This lets a document rule cache parsed references and dependency
+graphs without coupling their invalidation semantics to the runner.
 
 Cache layers:
 
@@ -124,27 +127,19 @@ Cache invalidation should be explicit. The runner decides when a cache entry is 
 Persistent cache layout should separate workspaces:
 
 ```text
-.quality-gate/
+.local/
   cache/
-    workspaces/
-      <workspace-id>/
-        git/
-        fs/
-        project-graph/
-        plugins/
-          <plugin-id>/
+    quality-gate/
+      daemon.sock
+      rules/
+        <rule-id>.json
 ```
 
 Global cache entries are allowed only for immutable package artifacts, such as downloaded plugin metadata or compiled plugin bundles. Rule diagnostics, parsed project state, and external tool output must be workspace-scoped.
 
-The server should support cache invalidation by:
+Emergency cache recovery supports invalidation by rule:
 
-- workspace;
-- plugin;
 - rule;
-- path;
-- config hash;
-- all caches.
 
 Watch mode may update caches incrementally, but correctness must not depend on file watching. A scan after missed filesystem events must still become correct by validating hashes and metadata.
 
