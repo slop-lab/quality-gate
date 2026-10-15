@@ -1,6 +1,17 @@
 import assert from "node:assert/strict";
+import { execFile } from "node:child_process";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { test } from "node:test";
-import { buildDiffArgs, parseNameStatus } from "./git.js";
+import { promisify } from "node:util";
+import {
+  buildDiffArgs,
+  GitIndexFileSystemProvider,
+  parseNameStatus,
+} from "./git.js";
+
+const execFileAsync = promisify(execFile);
 
 test("parseNameStatus parses regular entries", () => {
   assert.deepEqual(
@@ -40,4 +51,20 @@ test("buildDiffArgs supports staged, working tree, and ref scans", () => {
     buildDiffArgs({ root: ".", base: "origin/main", head: "HEAD" }),
     ["diff", "--name-status", "--find-renames", "origin/main...HEAD"],
   );
+});
+
+test("GitIndexFileSystemProvider reads staged content instead of working tree content", async (t) => {
+  const root = await mkdtemp(join(tmpdir(), "quality-gate-git-index-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  await execFileAsync("git", ["init", "-q"], { cwd: root });
+  await writeFile(join(root, "doc.md"), "staged/value\n");
+  await execFileAsync("git", ["add", "doc.md"], { cwd: root });
+  await writeFile(join(root, "doc.md"), "unstaged/value\n");
+
+  const fs = new GitIndexFileSystemProvider(root);
+  assert.equal(await fs.readFile("doc.md"), "staged/value\n");
+  assert.equal(await fs.isFile("doc.md"), true);
+  assert.deepEqual(await fs.readDirectory("."), [
+    { name: "doc.md", path: "doc.md", type: "file" },
+  ]);
 });

@@ -1,12 +1,16 @@
 import { resolveRuleConfig } from "./config.js";
 import { NodeFileSystemProvider } from "./fs.js";
-import { GitChangedProvider } from "./git.js";
+import { GitChangedProvider, GitIndexFileSystemProvider } from "./git.js";
 import { NodeProcessProvider } from "./process.js";
 import type { Diagnostic, RunOptions, RunResult, ScanMode } from "./types.js";
 
 export async function runQualityGate(options: RunOptions): Promise<RunResult> {
   const mode = resolveMode(options);
-  const fs = options.fs ?? new NodeFileSystemProvider(options.root);
+  const fs =
+    options.fs ??
+    (options.staged
+      ? new GitIndexFileSystemProvider(options.root)
+      : new NodeFileSystemProvider(options.root));
   const process = options.process ?? new NodeProcessProvider();
   const changedProvider = options.changedProvider ?? new GitChangedProvider();
   const changes =

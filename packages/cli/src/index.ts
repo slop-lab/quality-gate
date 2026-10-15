@@ -78,15 +78,18 @@ function parseArgs(argv: string[]): CliOptions {
     command,
     format: "stylish",
     root: cwd(),
+    staged: true,
   };
 
   for (let arg = args.shift(); arg !== undefined; arg = args.shift()) {
     switch (arg) {
       case "--changed":
         options.mode = "changed";
+        options.staged = false;
         break;
       case "--full":
         options.mode = "full";
+        options.staged = false;
         break;
       case "--base":
         options.base = requireValue(arg, args);
@@ -99,6 +102,7 @@ function parseArgs(argv: string[]): CliOptions {
         break;
       case "--working-tree":
         options.workingTree = true;
+        options.staged = false;
         break;
       case "--format": {
         const format = requireValue(arg, args);
