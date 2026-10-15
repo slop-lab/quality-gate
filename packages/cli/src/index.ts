@@ -195,7 +195,7 @@ Options:
   --staged        Scan staged changes.
   --working-tree  Scan unstaged working tree changes.
   --root <path>   Workspace root. Defaults to cwd.
-  --config <path> Config path. Defaults to qualitygate.config.yaml or .yml.
+  --config <path> Root config path. Defaults to .qualitygate.yaml or .yml.
 `);
 }
 

@@ -139,27 +139,35 @@ quality-gate cache clear --path packages/api/src/index.ts
 
 ## Config
 
-The CLI automatically loads `qualitygate.config.yaml` or
-`qualitygate.config.yml` from the workspace root. YAML rules accept a severity
-string or an object with `severity` and `options`. Later matching overrides win.
+The CLI automatically loads `.qualitygate.yaml` or `.qualitygate.yml`. A file
+at the workspace root supplies repository defaults. A file in any nested
+directory applies to that directory and all descendants, like `.gitignore`.
+Nested rules inherit and override parent options; paths in nested `overrides`
+are relative to the directory containing that config. Later, deeper matching
+configs win. The old root-only `qualitygate.config.yaml` and `.yml` names remain
+supported for compatibility.
 
 ```yaml
+# .qualitygate.yaml (repository root)
 rules:
   files/max-bytes:
     severity: error
     options:
       limit: 1000000
-      ignoredPaths: ["**/package-lock.json", "generated/**"]
+      ignoredPaths: ["**/package-lock.json"]
+```
+
+```yaml
+# packages/.qualitygate.yaml
+rules:
+  files/max-line-length:
+    severity: warning
+    options: { limit: 120 }
 
 overrides:
-  - files: ["vendor/**"]
+  - files: ["*/generated/**"]
     rules:
       files/max-bytes: off
-  - files: ["docs/**"]
-    rules:
-      files/max-line-length:
-        severity: warning
-        options: { limit: 120 }
 ```
 
 Initial TypeScript config shape:

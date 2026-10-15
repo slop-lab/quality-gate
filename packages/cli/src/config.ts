@@ -1,5 +1,5 @@
-import { readFile } from "node:fs/promises";
-import { isAbsolute, join } from "node:path";
+import { readdir, readFile } from "node:fs/promises";
+import { dirname, isAbsolute, join, relative } from "node:path";
 import type {
   QualityGateConfig,
   QualityGateOverride,
@@ -7,33 +7,141 @@ import type {
 } from "@quality-gate/core";
 import { parse } from "yaml";
 
-const configNames = ["qualitygate.config.yaml", "qualitygate.config.yml"];
+const localConfigNames = [".qualitygate.yaml", ".qualitygate.yml"];
+const legacyRootConfigNames = [
+  "qualitygate.config.yaml",
+  "qualitygate.config.yml",
+];
+const ignoredDirectories = new Set([
+  ".git",
+  ".quality-gate",
+  "dist",
+  "node_modules",
+]);
 
 export async function loadConfig(
   root: string,
   requestedPath?: string,
 ): Promise<QualityGateConfig | undefined> {
-  const candidates = requestedPath ? [requestedPath] : configNames;
-  for (const candidate of candidates) {
-    const path = isAbsolute(candidate) ? candidate : join(root, candidate);
-    try {
-      const document = parse(await readFile(path, "utf8")) as unknown;
-      return normalizeConfig(document, candidate);
-    } catch (error) {
-      if (
-        !requestedPath &&
-        error instanceof Error &&
-        "code" in error &&
-        error.code === "ENOENT"
-      ) {
-        continue;
-      }
+  const rootConfigPath = requestedPath
+    ? isAbsolute(requestedPath)
+      ? requestedPath
+      : join(root, requestedPath)
+    : await findRootConfig(root);
+  const configPaths = await findLocalConfigs(root);
+  const nestedPaths = configPaths
+    .filter(
+      (path) =>
+        path !== rootConfigPath &&
+        normalizePath(relative(root, dirname(path))) !== "",
+    )
+    .sort(
+      (left, right) =>
+        pathDepth(root, left) - pathDepth(root, right) ||
+        left.localeCompare(right),
+    );
+
+  let result = rootConfigPath
+    ? await readConfig(
+        rootConfigPath,
+        relative(root, rootConfigPath) || rootConfigPath,
+      )
+    : undefined;
+
+  for (const path of nestedPaths) {
+    const directory = normalizePath(relative(root, dirname(path)));
+    const nested = await readConfig(path, relative(root, path));
+    if (nested.scan) {
       throw new Error(
-        `Failed to load ${candidate}: ${error instanceof Error ? error.message : String(error)}`,
+        `${relative(root, path)}: scan is only allowed in the root config`,
       );
+    }
+    result ??= {};
+    result.overrides ??= [];
+    if (nested.rules) {
+      result.overrides.push({
+        files: [`${directory}/**`],
+        rules: nested.rules,
+      });
+    }
+    result.overrides.push(
+      ...(nested.overrides ?? []).map((override) => ({
+        ...override,
+        files: override.files.map((pattern) => prefixGlob(directory, pattern)),
+        ...(override.excludedFiles
+          ? {
+              excludedFiles: override.excludedFiles.map((pattern) =>
+                prefixGlob(directory, pattern),
+              ),
+            }
+          : {}),
+      })),
+    );
+  }
+  return result;
+}
+
+async function findRootConfig(root: string): Promise<string | undefined> {
+  for (const name of [...localConfigNames, ...legacyRootConfigNames]) {
+    const path = join(root, name);
+    try {
+      await readFile(path);
+      return path;
+    } catch (error) {
+      if (!isMissing(error)) throw error;
     }
   }
   return undefined;
+}
+
+async function findLocalConfigs(root: string): Promise<string[]> {
+  const found: string[] = [];
+  const pending = [root];
+  while (pending.length > 0) {
+    const directory = pending.shift();
+    if (!directory) continue;
+    for (const entry of await readdir(directory, { withFileTypes: true })) {
+      if (entry.isDirectory() && !ignoredDirectories.has(entry.name)) {
+        pending.push(join(directory, entry.name));
+      } else if (entry.isFile() && localConfigNames.includes(entry.name)) {
+        found.push(join(directory, entry.name));
+      }
+    }
+  }
+  return found;
+}
+
+async function readConfig(
+  path: string,
+  label: string,
+): Promise<QualityGateConfig> {
+  try {
+    return normalizeConfig(
+      parse(await readFile(path, "utf8")) as unknown,
+      label,
+    );
+  } catch (error) {
+    throw new Error(
+      `Failed to load ${label}: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+}
+
+function prefixGlob(directory: string, pattern: string): string {
+  const normalized = pattern.replace(/^\.\//, "").replace(/^\//, "");
+  return normalized === "**" ? `${directory}/**` : `${directory}/${normalized}`;
+}
+
+function pathDepth(root: string, path: string): number {
+  return normalizePath(relative(root, path)).split("/").length;
+}
+
+function normalizePath(path: string): string {
+  return path.replaceAll("\\", "/");
+}
+
+function isMissing(error: unknown): boolean {
+  return error instanceof Error && "code" in error && error.code === "ENOENT";
 }
 
 function normalizeConfig(value: unknown, path: string): QualityGateConfig {

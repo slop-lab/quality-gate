@@ -1,0 +1,7 @@
+# Paths in a nested config are relative to the directory containing the config.
+overrides:
+  - files:
+      - "**/test/fixtures/**"
+    rules:
+      files/max-line-length: off
+      files/max-lines: off
