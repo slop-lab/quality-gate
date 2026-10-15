@@ -58,8 +58,13 @@ quality-gate daemon stop
 ```
 
 `start` runs in the foreground. Use another terminal for checks, or a process
-supervisor to keep it running. The current implementation uses a filesystem
-Unix-domain socket and requires a platform that supports it.
+supervisor to keep it running. Windows uses a named pipe derived from the
+absolute project path; other platforms use a Unix-domain socket at
+`.local/cache/quality-gate/daemon.sock`. Named pipes are released automatically
+when the daemon stops. Persistent caches use the same project-local directory
+on every platform.
+Restart running daemons after updating the CLI so clients and the daemon use
+the same protocol version.
 
 The daemon watches workspace directories as change hints and reads the Git
 index again on each staged check. Rule-owned caches survive restarts under

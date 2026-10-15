@@ -78,8 +78,14 @@ Deleted paths remain important because they can affect directory-level rules. Fo
 
 ## Workspace Server (Planned)
 
-The current `daemon` command runs one project per process, serves checks over
-`.local/cache/quality-gate/daemon.sock`, and supports ping and stop requests.
+The current `daemon` command runs one project per process and supports check,
+ping, and stop requests. On Windows it uses a named pipe whose name contains
+a hash of the resolved, case-normalized project path. Other platforms use
+`.local/cache/quality-gate/daemon.sock`. Windows pipe names are independent of
+project path length and do not create a socket file in the cache directory.
+Requests are newline-delimited JSON; each connection carries one request and
+one JSON response. The server closes the connection after responding, so
+request framing does not depend on half-closing a named pipe.
 It does not implement workspace registration or the identity protocol below.
 
 The server owns one or more persistent workspaces. A workspace is identified by:
@@ -146,7 +152,8 @@ relevant content, options, and dependencies before reusing cached values.
 The CLI supplies persistent storage through the daemon; standalone checks use
 a no-op cache store.
 
-Persistent cache layout should separate workspaces:
+Persistent cache layout separates workspaces under each project root (the
+socket file is only present on platforms using Unix-domain sockets):
 
 ```text
 .local/
