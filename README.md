@@ -23,29 +23,35 @@ The first rule package will cover Git-oriented hygiene checks, starting with:
 
 ## Documents
 
-- [Installation](docs/installation.md)
 - [Architecture](docs/architecture.md)
 - [Plugin Contract](docs/plugin-contract.md)
 - [CLI](docs/cli.md)
 
-## Install on another machine
+## Use in another project
 
-Quality Gate is not published to a package registry yet. Install the CLI from
-a checkout using the versions pinned in `mise.toml`:
+Install Quality Gate as a project-local development dependency:
 
 ```sh
-git clone <quality-gate-repository-url>
-cd quality-gate
-mise trust
-mise install
-mise exec -- just install-cli
-quality-gate rules
+pnpm add -D quality-gate
+pnpm exec quality-gate check
 ```
 
-The launcher is installed to `~/.local/bin` (or `$XDG_BIN_HOME`). Keep the checkout in place and
-run `mise exec -- just install-cli` again after moving it. See
-[Installation](docs/installation.md) for project setup, Git hooks, daemon use,
-updates, and removal.
+For package scripts, call the local binary directly:
+
+```json
+{
+  "scripts": {
+    "quality": "quality-gate check",
+    "quality:full": "quality-gate check --full"
+  },
+  "devDependencies": {
+    "quality-gate": "<version>"
+  }
+}
+```
+
+The published CLI artifact is bundled, so consumers do not need to install the
+repository's internal workspace packages separately.
 
 ## Development
 

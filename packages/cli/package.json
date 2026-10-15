@@ -2,23 +2,36 @@
   "name": "quality-gate",
   "version": "0.0.0",
   "type": "module",
-  "bin": {
-    "quality-gate": "./dist/index.js"
+  "files": [
+    "dist/index.cjs",
+    "dist/index.d.ts"
+  ],
+  "engines": {
+    "node": ">=22.0.0"
   },
-  "main": "./dist/index.js",
+  "bin": {
+    "quality-gate": "./dist/index.cjs"
+  },
+  "main": "./dist/index.cjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "default": "./dist/index.cjs"
     }
   },
-  "dependencies": {
+  "scripts": {
+    "bundle": "esbuild src/index.ts --bundle --platform=node --format=cjs --outfile=dist/index.cjs",
+    "build": "tsc -b && pnpm run bundle",
+    "prepack": "pnpm run build"
+  },
+  "devDependencies": {
     "@quality-gate/core": "workspace:*",
     "@quality-gate/rules-files": "workspace:*",
     "@quality-gate/rules-git": "workspace:*",
     "@quality-gate/rules-package-manager": "workspace:*",
     "@quality-gate/rules-test": "workspace:*",
+    "esbuild": "^0.28.2",
     "yaml": "^2.9.1"
   }
 }

@@ -9,20 +9,13 @@ default:
 install:
   pnpm install
 
-# Reproducible setup for a fresh clone.
 bootstrap:
   pnpm install --frozen-lockfile
-  pnpm exec tsc -b {{packages}}
-
-# Install the CLI from this checkout. Re-run after moving the checkout.
-install-cli: bootstrap
-  bash scripts/install-cli.sh
-
-uninstall-cli:
-  bash scripts/install-cli.sh --uninstall
+  just build
 
 build:
   pnpm exec tsc -b {{packages}}
+  pnpm --dir packages/cli run bundle
 
 test: build
   pnpm exec node --test packages/*/dist/**/*.test.js
