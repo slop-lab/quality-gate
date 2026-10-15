@@ -28,7 +28,7 @@
     "@slop-lab/qg-core": "workspace:*",
     "@slop-lab/qg-rules-files": "workspace:*",
     "@slop-lab/qg-rules-git": "workspace:*",
-    "@slop-lab/qg-rules-package-manager": "workspace:*",
+    "@slop-lab/qg-rules-js": "workspace:*",
     "@slop-lab/qg-rules-test": "workspace:*"
   },
   "devDependencies": {

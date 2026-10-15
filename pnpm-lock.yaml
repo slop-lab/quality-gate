@@ -52,7 +52,7 @@ importers:
         specifier: workspace:*
         version: link:../test-utils
 
-  packages/rules-package-manager:
+  packages/rules-js:
     dependencies:
       '@slop-lab/qg-core':
         specifier: workspace:*
@@ -73,9 +73,9 @@ importers:
       '@slop-lab/qg-rules-git':
         specifier: workspace:*
         version: link:../rules-git
-      '@slop-lab/qg-rules-package-manager':
+      '@slop-lab/qg-rules-js':
         specifier: workspace:*
-        version: link:../rules-package-manager
+        version: link:../rules-js
       '@slop-lab/qg-rules-test':
         specifier: workspace:*
         version: link:../rules-test

@@ -9,7 +9,7 @@
     { "path": "../core" },
     { "path": "../rules-git" },
     { "path": "../rules-files" },
-    { "path": "../rules-package-manager" },
+    { "path": "../rules-js" },
     { "path": "../rules-test" },
     { "path": "../test-utils" }
   ],

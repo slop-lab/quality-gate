@@ -112,6 +112,37 @@ The marker suppresses only the preceding word. Because the
 pattern also matches slash-separated prose, enable the rule in nested
 `.qg.yaml` files for document sets that use this reference convention.
 
+## JavaScript type checking
+
+`js/require-ts-check`, provided by `@slop-lab/qg-rules-js`, is enabled in the
+recommended rule set. JavaScript files must have an effective `// @ts-check`
+directive before executable code. It checks `.js`, `.jsx`, `.mjs`, and `.cjs`
+files in full or changed scans, using index contents for staged checks.
+
+```js
+#!/usr/bin/env node
+// @ts-check
+console.log("Checked JavaScript");
+```
+
+Leading whitespace and copyright comments are allowed. A string containing
+the directive, a block comment, or a comment after code does not count.
+The last leading `@ts-check` or `@ts-nocheck` directive wins. The rule requires
+the explicit file directive even when a project's TypeScript config sets
+`checkJs: true`.
+
+```yaml
+rules:
+  js/require-ts-check:
+    severity: error
+    options:
+      ignoredPaths: ["vendor/**", "**/*.min.js"]
+```
+
+`extensions` and `ignoredDirectories` can override the defaults. `.git`,
+`.local`, `.qg`, `node_modules`, and `dist` are ignored by default. Nested
+configuration and path overrides can disable the rule for specific files.
+
 ## Markdown characters
 
 `markdown/allowed-characters` is enabled by the recommended rule set. It

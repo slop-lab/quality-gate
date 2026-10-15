@@ -1,5 +1,5 @@
 {
-  "name": "@slop-lab/qg-rules-package-manager",
+  "name": "@slop-lab/qg-rules-js",
   "version": "0.0.0",
   "type": "module",
   "dependencies": {
@@ -15,7 +15,7 @@
     "dist/*.d.mts.map"
   ],
   "scripts": {
-    "build": "tsc -b && tsdown --config ../../tsdown.config.ts --filter @slop-lab/qg-rules-package-manager",
+    "build": "tsc -b && tsdown --config ../../tsdown.config.ts --filter @slop-lab/qg-rules-js",
     "prepack": "pnpm run build"
   },
   "publishConfig": {
@@ -24,9 +24,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/slop-lab/quality-gate.git",
-    "directory": "packages/rules-package-manager"
+    "directory": "packages/rules-js"
   },
-  "description": "Package manager consistency rules for QG",
+  "description": "JavaScript type-checking and package manager consistency rules for QG",
   "engines": {
     "node": ">=22.0.0"
   },

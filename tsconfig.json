@@ -14,7 +14,7 @@
       "path": "packages/rules-files"
     },
     {
-      "path": "packages/rules-package-manager"
+      "path": "packages/rules-js"
     },
     {
       "path": "packages/rules-test"
