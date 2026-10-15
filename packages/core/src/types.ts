@@ -121,6 +121,19 @@ export interface RuleContext<TOptions = unknown> {
   options: TOptions;
   severity: DiagnosticSeverity;
   resolveConfig(path: string): ResolvedRuleConfig<TOptions>;
+  cache: RuleCache;
+}
+
+export interface RuleCache {
+  get<T>(key: string): Promise<T | undefined>;
+  set<T>(key: string, value: T): Promise<void>;
+  delete(key: string): Promise<void>;
+  clear(): Promise<void>;
+}
+
+export interface RuleCacheStore {
+  forRule(ruleId: string): RuleCache;
+  clearRule(ruleId: string): Promise<void>;
 }
 
 export interface ResolvedRuleConfig<TOptions = unknown> {
@@ -167,6 +180,7 @@ export interface RunOptions {
   changedProvider?: ChangedProvider;
   fs?: FileSystemProvider;
   process?: ProcessProvider;
+  cacheStore?: RuleCacheStore;
 }
 
 export interface RunResult {

@@ -1,3 +1,4 @@
+import { NoopRuleCacheStore } from "./cache.js";
 import { resolveRuleConfig } from "./config.js";
 import { NodeFileSystemProvider } from "./fs.js";
 import { GitChangedProvider, GitIndexFileSystemProvider } from "./git.js";
@@ -13,6 +14,7 @@ export async function runQualityGate(options: RunOptions): Promise<RunResult> {
       : new NodeFileSystemProvider(options.root));
   const process = options.process ?? new NodeProcessProvider();
   const changedProvider = options.changedProvider ?? new GitChangedProvider();
+  const cacheStore = options.cacheStore ?? new NoopRuleCacheStore();
   const changes =
     mode === "changed"
       ? await changedProvider.getChanged({
@@ -45,6 +47,7 @@ export async function runQualityGate(options: RunOptions): Promise<RunResult> {
       options: resolved.options,
       severity: resolved.severity,
       resolveConfig: (path) => resolveRuleConfig(options.config, rule, path),
+      cache: cacheStore.forRule(rule.metadata.id),
     });
     for (const diagnostic of ruleDiagnostics) {
       const pathConfig = diagnostic.path

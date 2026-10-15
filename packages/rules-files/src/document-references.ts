@@ -1,8 +1,19 @@
-import type { Diagnostic, Rule } from "@quality-gate/core";
+import {
+  cacheKey,
+  type Diagnostic,
+  type FileSystemProvider,
+  type Rule,
+} from "@quality-gate/core";
 
 export interface ValidDocumentReferenceOptions {
   extensions?: string[];
   suppression?: string;
+}
+
+interface ReferenceOccurrence {
+  reference: string;
+  line: number;
+  column: number;
 }
 
 const defaults: Required<ValidDocumentReferenceOptions> = {
@@ -10,6 +21,7 @@ const defaults: Required<ValidDocumentReferenceOptions> = {
   suppression: "quality-gate-suppress docs/valid-reference",
 };
 const referencePattern = /\b\w+(?:\/\w+)+\b/g;
+const parserVersion = "1";
 
 export const validDocumentReferenceRule: Rule<ValidDocumentReferenceOptions> = {
   metadata: {
@@ -45,28 +57,18 @@ export const validDocumentReferenceRule: Rule<ValidDocumentReferenceOptions> = {
         !(await context.fs.isFile(path))
       )
         continue;
-      const content = await context.fs.readFile(path);
-      for (const match of content.matchAll(referencePattern)) {
-        const reference = match[0];
-        const offset = match.index ?? 0;
-        const preceding = content.slice(0, offset);
-        if (preceding.lastIndexOf("<!--") > preceding.lastIndexOf("-->"))
-          continue;
-        const lineEnd = content.indexOf("\n", offset);
-        const tail = content.slice(
-          offset + reference.length,
-          lineEnd < 0 ? content.length : lineEnd,
+      const bytes = await context.fs.readFileBytes(path);
+      const key = cacheKey(parserVersion, path, options.suppression, bytes);
+      let occurrences = await context.cache.get<ReferenceOccurrence[]>(key);
+      if (!occurrences) {
+        occurrences = parseOccurrences(
+          new TextDecoder().decode(bytes),
+          options.suppression,
         );
-        const escapedSuppression = options.suppression.replace(
-          /[.*+?^${}()|[\]\\]/g,
-          "\\$&",
-        );
-        if (new RegExp(`^\\s*<!--\\s*${escapedSuppression}\\s*-->`).test(tail))
-          continue;
+        await context.cache.set(key, occurrences);
+      }
+      for (const { reference, line, column } of occurrences) {
         if (await context.fs.isFile(reference)) continue;
-        const before = content.slice(0, offset);
-        const line = before.split(/\r?\n/).length;
-        const column = offset - Math.max(before.lastIndexOf("\n"), -1);
         diagnostics.push({
           ruleId: validDocumentReferenceRule.metadata.id,
           severity: resolved.severity,
@@ -84,9 +86,34 @@ export const validDocumentReferenceRule: Rule<ValidDocumentReferenceOptions> = {
   },
 };
 
-async function collectFiles(
-  fs: import("@quality-gate/core").FileSystemProvider,
-): Promise<string[]> {
+function parseOccurrences(
+  content: string,
+  suppression: string,
+): ReferenceOccurrence[] {
+  const occurrences: ReferenceOccurrence[] = [];
+  const escaped = suppression.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const suppressionPattern = new RegExp(`^\\s*<!--\\s*${escaped}\\s*-->`);
+  for (const match of content.matchAll(referencePattern)) {
+    const reference = match[0];
+    const offset = match.index ?? 0;
+    const preceding = content.slice(0, offset);
+    if (preceding.lastIndexOf("<!--") > preceding.lastIndexOf("-->")) continue;
+    const lineEnd = content.indexOf("\n", offset);
+    const tail = content.slice(
+      offset + reference.length,
+      lineEnd < 0 ? content.length : lineEnd,
+    );
+    if (suppressionPattern.test(tail)) continue;
+    occurrences.push({
+      reference,
+      line: preceding.split(/\r?\n/).length,
+      column: offset - Math.max(preceding.lastIndexOf("\n"), -1),
+    });
+  }
+  return occurrences;
+}
+
+async function collectFiles(fs: FileSystemProvider): Promise<string[]> {
   const files: string[] = [];
   const pending = ["."];
   while (pending.length) {
