@@ -23,23 +23,43 @@ The first rule package will cover Git-oriented hygiene checks, starting with:
 
 ## Documents
 
+- [Installation](docs/installation.md)
 - [Architecture](docs/architecture.md)
 - [Plugin Contract](docs/plugin-contract.md)
 - [CLI](docs/cli.md)
+
+## Install on another machine
+
+Quality Gate is not published to a package registry yet. Install the CLI from
+a checkout using the versions pinned in `mise.toml`:
+
+```sh
+git clone <quality-gate-repository-url>
+cd quality-gate
+mise trust
+mise install
+mise exec -- just install-cli
+quality-gate rules
+```
+
+The launcher is installed to `~/.local/bin` (or `$XDG_BIN_HOME`). Keep the checkout in place and
+run `mise exec -- just install-cli` again after moving it. See
+[Installation](docs/installation.md) for project setup, Git hooks, daemon use,
+updates, and removal.
 
 ## Development
 
 Install dependencies and run the TypeScript build:
 
 ```sh
-npm install
-just build
+mise install
+mise exec -- just bootstrap
 ```
 
 Run tests after building:
 
 ```sh
-npm test
+mise exec -- just test
 ```
 
 The initial runtime includes:

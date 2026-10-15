@@ -9,20 +9,32 @@ default:
 install:
   pnpm install
 
+# Reproducible setup for a fresh clone.
+bootstrap:
+  pnpm install --frozen-lockfile
+  pnpm exec tsc -b {{packages}}
+
+# Install the CLI from this checkout. Re-run after moving the checkout.
+install-cli: bootstrap
+  bash scripts/install-cli.sh
+
+uninstall-cli:
+  bash scripts/install-cli.sh --uninstall
+
 build:
-  tsc -b {{packages}}
+  pnpm exec tsc -b {{packages}}
 
 test: build
-  node --test packages/*/dist/**/*.test.js
+  pnpm exec node --test packages/*/dist/**/*.test.js
 
 lint:
-  biome lint .
+  pnpm exec biome lint .
 
 format:
-  biome format --write .
+  pnpm exec biome format --write .
 
 biome-check:
-  biome check .
+  pnpm exec biome check .
 
 qg-full: build
   node {{quality_gate}} check --full
