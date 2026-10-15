@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { test } from "node:test";
 import { type Rule, resolveRuleConfig } from "@quality-gate/core";
 import { loadConfig } from "./config.js";
@@ -74,8 +74,4 @@ async function write(
   const fullPath = join(root, path);
   await mkdir(dirname(fullPath), { recursive: true });
   await writeFile(fullPath, content);
-}
-
-function dirname(path: string): string {
-  return path.includes("/") ? path.slice(0, path.lastIndexOf("/")) : ".";
 }

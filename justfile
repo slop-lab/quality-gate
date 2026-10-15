@@ -1,7 +1,8 @@
 set dotenv-load
+set windows-shell := ["powershell.exe", "-NoLogo", "-NoProfile", "-Command"]
 
 packages := "packages/core packages/test-utils packages/rules-git packages/rules-files packages/rules-package-manager packages/rules-test packages/cli"
-quality_gate := "packages/cli/dist/index.js"
+quality_gate := "packages/cli/dist/index.cjs"
 
 default:
   @just --list

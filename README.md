@@ -13,13 +13,20 @@ The project is intended for AI-assisted implementation workflows where fast, det
 - Keep rules deterministic, explainable, and scoped to declared inputs.
 - Support monorepos with package-aware configuration and cache isolation.
 
-## Initial Scope
+## Current Runtime
 
-The first implementation will be TypeScript. The repository may later contain other implementations, such as Go, but the core behavior should be documented as a language-neutral contract.
+The implementation is TypeScript. The runtime includes:
 
-The first rule package will cover Git-oriented hygiene checks, starting with:
+- `@quality-gate/core`: runner, Git change parsing, injectable input providers, and rule cache storage.
+- `@quality-gate/rules-git`: Git hygiene checks, including `gitkeep/no-lone-gitkeep`.
+- `@quality-gate/rules-files`: file limits and document reference checks.
+- `@quality-gate/rules-package-manager`: package manager consistency checks.
+- `@quality-gate/rules-test`: test fixture checks.
+- `quality-gate`: CLI for `check`, `rules`, `daemon`, and `cache clear --rule`.
 
-- `gitkeep/no-lone-gitkeep`: report an error when a directory contains no files except `.gitkeep`.
+The CLI defaults to staged changes and index contents. Use `check --full` for
+a repository-wide working tree scan. See [CLI](docs/cli.md) for configuration
+and supported options; the architecture document also describes future work.
 
 ## Documents
 
@@ -29,7 +36,8 @@ The first rule package will cover Git-oriented hygiene checks, starting with:
 
 ## Use in another project
 
-Install Quality Gate as a project-local development dependency:
+The CLI package is designed to be installed as a project-local development
+dependency. Once a version is available in your registry:
 
 ```sh
 pnpm add -D quality-gate
@@ -50,8 +58,26 @@ For package scripts, call the local binary directly:
 }
 ```
 
-The published CLI artifact is bundled, so consumers do not need to install the
+The CLI package artifact is bundled, so consumers do not need to install the
 repository's internal workspace packages separately.
+
+To use an unpublished checkout, build and pack it, then install the generated
+tarball in the target project:
+
+```sh
+mise install
+mise exec -- just bootstrap
+mise exec -- pnpm --dir packages/cli pack
+```
+
+```sh
+# From the target project; use the tarball path printed by pnpm pack.
+pnpm add -D /path/to/quality-gate/packages/cli/quality-gate-0.0.0.tgz
+pnpm exec quality-gate rules
+```
+
+Requires Node.js 22 or later. Create `.qualitygate.yaml` in the target project
+to configure rules, and add `.local/` to its `.gitignore` if using the daemon.
 
 ## Development
 
@@ -68,8 +94,4 @@ Run tests after building:
 mise exec -- just test
 ```
 
-The initial runtime includes:
-
-- `@quality-gate/core`: runner, Git change parsing, injectable changed provider, filesystem adapter.
-- `@quality-gate/rules-git`: Git hygiene rules, starting with `gitkeep/no-lone-gitkeep`.
-- `quality-gate`: minimal CLI for `check` and `rules`.
+Run the checkout's bundled CLI with `mise exec -- just quality-gate rules`.

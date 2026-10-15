@@ -6,7 +6,10 @@ import { test } from "node:test";
 import { setTimeout as delay } from "node:timers/promises";
 import { requestDaemon, startDaemon } from "./daemon.js";
 
-test("project daemon handles check, ping, and stop over its local socket", async (t) => {
+test("project daemon handles check, ping, and stop over its local socket", {
+  skip:
+    process.platform === "win32" && "The daemon requires Unix-domain sockets",
+}, async (t) => {
   const root = await mkdtemp(join(tmpdir(), "quality-gate-daemon-"));
   t.after(() => rm(root, { recursive: true, force: true }));
   const running = startDaemon(root, async (args) => ({

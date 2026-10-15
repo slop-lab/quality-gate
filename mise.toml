@@ -1,5 +1,5 @@
 [tools]
-biome = "latest"
-just = "latest"
-node = "latest"
-pnpm = "latest"
+biome = "2.5.15"
+just = "1.47.0"
+node = "26.11.1"
+pnpm = "11.10.0"

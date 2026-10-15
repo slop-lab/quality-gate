@@ -2,6 +2,12 @@
 
 Plugins provide rules and optional input providers. A plugin should be portable across CLI and server usage.
 
+This document combines the current rule interface with future plugin design
+requirements. Today, library callers pass `Rule` objects and injectable
+providers to `runQualityGate`; the CLI uses a fixed bundled rule set.
+Dynamic plugin loading, lifecycle hooks, rich input discovery, and automatic
+fix application are not implemented.
+
 ## Principles
 
 Plugins must be:
@@ -33,15 +39,23 @@ Each rule declares:
 - `supports`: `changed`, `full`, or both
 - `scope`: `file`, `directory`, `package`, or `repo`
 - `requires`: requested inputs
-- `optionsSchema`
+- `defaultOptions` (optional)
 - `fixable`: `none | suggestion | edit`
-- `docsUrl`
+- `docsUrl` (optional)
+
+Runtime option schemas are a future extension; `RuleMetadata` does not
+currently expose an `optionsSchema` field.
 
 Rule IDs are part of the public contract and should not be renamed casually.
 
 ## Useful Inputs
 
-The runner may provide these inputs to plugins:
+The current `RuleContext` provides normalized changes, filesystem and process
+providers, scan mode, resolved options and severity, path-specific config
+resolution, and a rule-owned cache. Filesystem reads use the index during
+staged CLI checks and the working tree otherwise.
+
+The target input model may additionally provide:
 
 - normalized Git changes;
 - current file content;
@@ -57,7 +71,9 @@ The runner may provide these inputs to plugins:
 - user-selected scan mode;
 - CI metadata when explicitly enabled.
 
-Inputs are lazy. A rule asks for data through the context API, and the runner decides whether to serve it from cache or compute it.
+Filesystem reads are requested through the context API. Rules currently decide
+what to cache and when to refresh it; richer runner-managed input caching is
+future work.
 
 ## Changed Scan Rules
 
@@ -96,7 +112,10 @@ Requirements:
 - no reliance on current working directory after initialization;
 - no mutation of shared objects from the runner.
 
-If a plugin starts an external service, such as a language server, it must declare lifecycle hooks and cache keys so the runner can restart it when config or dependency state changes.
+Future support for plugins that start external services, such as language
+servers, will require lifecycle hooks and cache keys so the runner can restart
+them when config or dependency state changes. The current rule interface has
+no lifecycle hooks.
 
 ## External Tools
 
@@ -109,7 +128,9 @@ Plugins may wrap existing tools, but they must declare:
 - whether the tool supports changed-path filtering;
 - whether the tool reads the whole project even for changed scans.
 
-The runner should expose this in `quality-gate explain` so users understand why a scan is slow or why a rule is unavailable.
+A future `quality-gate explain` command should expose this so users understand
+why a scan is slow or why a rule is unavailable. That command and structured
+external-tool metadata are not currently implemented.
 
 ## Fixes
 
@@ -120,5 +141,9 @@ Fix levels:
 - `suggestion`: human-readable remediation only.
 - `edit`: file edits that the runner can apply.
 
-Rules must not delete files or modify directories directly. For example, `gitkeep/no-lone-gitkeep` may suggest deleting `.gitkeep`, but the runner applies the deletion only when `--fix` is requested and the rule is enabled for fixes.
+Rules must not delete files or modify directories directly. For example,
+`gitkeep/no-lone-gitkeep` can suggest deleting `.gitkeep`. The current runner
+only returns the suggestion; a future fix implementation must require an
+explicit request and rule opt-in before applying edits. The CLI has no `--fix`
+option today.
 

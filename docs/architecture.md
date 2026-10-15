@@ -1,6 +1,12 @@
 # Architecture
 
-Quality Gate has one execution model with multiple entrypoints:
+This document describes the current runner and the intended architecture.
+The implemented entrypoints are the CLI, a single-project daemon, and the
+`@quality-gate/core` library API. General workspace servers, dynamic plugin
+loading, package graphs, and additional output formats remain design goals.
+See [CLI](cli.md) for the supported commands and options.
+
+The target architecture has one execution model with multiple entrypoints:
 
 - CLI for local and CI usage.
 - Workspace server for editor, agent, or MCP-style usage.
@@ -14,11 +20,15 @@ The runner should treat changed scans and full scans as different scopes over th
 
 A changed scan evaluates only the files, directories, or packages affected by a Git change set.
 
-Default behavior:
+Current CLI behavior:
 
-- Compare `HEAD` against the merge base of the configured base ref.
-- Include working tree changes when requested.
-- Preserve Git status information such as added, modified, deleted, renamed, type-changed, and mode-changed.
+- By default, inspect staged changes and read rule filesystem inputs from the Git index.
+- With `--changed --base <ref>`, compare the head ref (default `HEAD`) against the merge base of the base ref and read working tree contents.
+- With `--working-tree`, inspect unstaged tracked changes against the index.
+- Normalize added, modified, deleted, renamed, copied, type-changed, and unmerged statuses. The status type also reserves mode-changed and unknown values.
+
+Without an explicit or configured base, a ref comparison uses `HEAD...HEAD`.
+Configuration files are loaded from the working tree even during staged scans.
 
 Changed scans are the default for interactive workflows because they are fast and match the actual implementation surface.
 
@@ -38,7 +48,10 @@ Rules must declare whether they support `changed`, `full`, or both. A rule that 
 
 ## Scope Model
 
-The runner builds a `ScanContext` before invoking rules. The context exposes stable inputs instead of letting plugins shell out freely.
+The runner builds a `RuleContext` before invoking each rule. It exposes changes,
+filesystem and process providers, resolved options, path-specific configuration,
+and a rule cache. Scope is rule metadata; rules currently traverse their own
+inputs. Central package discovery and scope scheduling are future work.
 
 Core scopes:
 
@@ -63,7 +76,11 @@ Fields:
 
 Deleted paths remain important because they can affect directory-level rules. For example, removing the last real file from a directory can make a `.gitkeep` rule fail.
 
-## Workspace Server
+## Workspace Server (Planned)
+
+The current `daemon` command runs one project per process, serves checks over
+`.local/cache/quality-gate/daemon.sock`, and supports ping and stop requests.
+It does not implement workspace registration or the identity protocol below.
 
 The server owns one or more persistent workspaces. A workspace is identified by:
 
@@ -105,14 +122,15 @@ rule-isolated namespaces, content-addressed key helpers, and atomic persistent
 storage. This lets a document rule cache parsed references and dependency
 graphs without coupling their invalidation semantics to the runner.
 
-Cache layers:
+Potential future cache layers:
 
 - Git cache: merge base, status, file object IDs, rename information.
 - Filesystem cache: file metadata, content hashes, directory listings.
 - Project graph cache: package roots, workspace manifests, tsconfig/go module metadata.
 - Plugin cache: parsed ASTs, dependency graphs, language server results, or tool output.
 
-Cache keys must include:
+Rules must include inputs that affect their cached values in their keys.
+Depending on the rule and future server capabilities, these may include:
 
 - workspace ID;
 - scan mode;
@@ -122,7 +140,11 @@ Cache keys must include:
 - relevant file content hashes or Git object IDs;
 - relevant environment fingerprints when a plugin depends on external tools.
 
-Cache invalidation should be explicit. The runner decides when a cache entry is stale based on file system changes, Git changes, config changes, plugin changes, and dependency changes.
+Cache invalidation is rule-owned. The runner supplies a cache namespace but
+does not decide whether individual values are stale. Rules must validate
+relevant content, options, and dependencies before reusing cached values.
+The CLI supplies persistent storage through the daemon; standalone checks use
+a no-op cache store.
 
 Persistent cache layout should separate workspaces:
 
@@ -132,14 +154,13 @@ Persistent cache layout should separate workspaces:
     quality-gate/
       daemon.sock
       rules/
-        <rule-id>.json
+        <sanitized-rule-id>.json
 ```
 
 Global cache entries are allowed only for immutable package artifacts, such as downloaded plugin metadata or compiled plugin bundles. Rule diagnostics, parsed project state, and external tool output must be workspace-scoped.
 
-Emergency cache recovery supports invalidation by rule:
-
-- rule;
+For example, `docs/valid-reference` is stored in `docs__valid-reference.json`.
+Emergency recovery uses `quality-gate cache clear --rule <rule-id>`.
 
 Watch mode may update caches incrementally, but correctness must not depend on file watching. A scan after missed filesystem events must still become correct by validating hashes and metadata.
 
@@ -162,11 +183,17 @@ Diagnostic fields:
 - `docsUrl`
 - `metadata`
 
-The same result model should support terminal output, JSON, SARIF, GitHub annotations, and MCP responses.
+The current CLI supports terminal output and JSON. SARIF, GitHub annotations,
+and MCP responses are planned consumers of the same result model.
 
 ## Rule Execution
 
-The runner is responsible for:
+The current core runner computes scan inputs, resolves rule configuration,
+executes enabled rules sequentially, and collects diagnostics. The CLI loads
+YAML configuration, supplies built-in rules, formats output, and determines
+the exit status.
+
+The target runner and entrypoints are responsible for:
 
 - loading config;
 - resolving plugins;
@@ -185,9 +212,14 @@ Rules are responsible for:
 - returning diagnostics;
 - avoiding hidden global side effects.
 
-Rules should not directly mutate files. Fixes are represented as suggestions or structured edits, and the runner applies them only when explicitly requested.
+Rules should not directly mutate files. Fixes can be represented as suggestions
+or structured edits. Applying edits is planned; the current runner does not
+apply fixes.
 
-## Monorepo Behavior
+## Monorepo Behavior (Planned)
+
+Current configuration supports nested YAML files and path-based overrides.
+Central package graph discovery and package-based overrides are not implemented.
 
 The runner should understand package boundaries but must not require one package manager.
 
