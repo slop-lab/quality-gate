@@ -2,6 +2,9 @@
 import { cwd, exit } from "node:process";
 import {
   type Diagnostic,
+  JsonFileRuleCacheStore,
+  type RuleCacheStore,
+  type RunResult,
   runQualityGate,
   type ScanMode,
 } from "@quality-gate/core";
@@ -16,6 +19,7 @@ import {
 import { packageManagerRules } from "@quality-gate/rules-package-manager";
 import { testRules } from "@quality-gate/rules-test";
 import { loadConfig } from "./config.js";
+import { daemonDirectory, requestDaemon, startDaemon } from "./daemon.js";
 
 interface CliOptions {
   command: "check" | "rules" | "help";
@@ -39,6 +43,8 @@ const builtInRules = [
 ];
 
 async function main(argv: string[]): Promise<number> {
+  const special = await runSpecialCommand(argv);
+  if (special !== undefined) return special;
   const options = parseArgs(argv);
 
   if (options.command === "help") {
@@ -51,7 +57,18 @@ async function main(argv: string[]): Promise<number> {
     return 0;
   }
 
-  const result = await runQualityGate({
+  const remote = await requestDaemon(options.root, "check", argv);
+  if (remote?.error) throw new Error(remote.error);
+  const result = remote?.result ?? (await executeCheck(options));
+  printResult(result, options.format);
+  return remote?.code ?? exitCodeFor(result);
+}
+
+async function executeCheck(
+  options: CliOptions,
+  cacheStore?: RuleCacheStore,
+): Promise<RunResult> {
+  return runQualityGate({
     root: options.root,
     mode: options.mode,
     base: options.base,
@@ -60,19 +77,64 @@ async function main(argv: string[]): Promise<number> {
     workingTree: options.workingTree,
     rules: builtInRules,
     config: await loadConfig(options.root, options.config),
+    cacheStore,
   });
+}
 
-  if (options.format === "json") {
+function printResult(result: RunResult, format: CliOptions["format"]): void {
+  if (format === "json") {
     console.log(JSON.stringify(result, null, 2));
   } else {
     printStylish(result.diagnostics);
   }
+}
 
+function exitCodeFor(result: RunResult): number {
   return result.diagnostics.some(
     (diagnostic) => diagnostic.severity === "error",
   )
     ? 1
     : 0;
+}
+
+async function runSpecialCommand(argv: string[]): Promise<number | undefined> {
+  const command = argv[0];
+  if (command !== "daemon" && command !== "cache") return undefined;
+  const rootIndex = argv.indexOf("--root");
+  const root =
+    rootIndex >= 0 && argv[rootIndex + 1] ? argv[rootIndex + 1] : cwd();
+  if (command === "daemon") {
+    const action = argv[1] ?? "status";
+    if (action === "start") {
+      const store = new JsonFileRuleCacheStore(joinCache(root));
+      await startDaemon(root, async (args) => {
+        const options = parseArgs(args);
+        const result = await executeCheck(options, store);
+        return { code: exitCodeFor(result), result };
+      });
+      return 0;
+    }
+    const response = await requestDaemon(
+      root,
+      action === "stop" ? "stop" : "ping",
+    );
+    console.log(
+      response
+        ? `quality-gate daemon ${action === "stop" ? "stopped" : "running"}`
+        : "quality-gate daemon is not running",
+    );
+    return response ? 0 : 1;
+  }
+  if (argv[1] !== "clear" || argv[2] !== "--rule" || !argv[3]) {
+    throw new Error("Usage: quality-gate cache clear --rule <rule-id>");
+  }
+  await new JsonFileRuleCacheStore(joinCache(root)).clearRule(argv[3]);
+  console.log(`Cleared cache for ${argv[3]}.`);
+  return 0;
+}
+
+function joinCache(root: string): string {
+  return `${daemonDirectory(root)}/rules`;
 }
 
 function parseArgs(argv: string[]): CliOptions {
@@ -194,13 +256,15 @@ function printHelp(): void {
 Usage:
   quality-gate check [--changed|--full] [--base <ref>] [--format stylish|json]
   quality-gate rules [--format stylish|json]
+  quality-gate daemon <start|status|stop>
+  quality-gate cache clear --rule <rule-id>
 
 Options:
   --changed       Scan Git affected paths.
   --full          Scan the full workspace.
   --base <ref>    Base ref for changed scans.
   --head <ref>    Head ref for changed scans.
-  --staged        Scan staged changes.
+  --staged        Scan staged changes (default).
   --working-tree  Scan unstaged working tree changes.
   --root <path>   Workspace root. Defaults to cwd.
   --config <path> Root config path. Defaults to .qualitygate.yaml or .yml.
