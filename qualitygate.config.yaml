@@ -1,0 +1,39 @@
+scan:
+  defaultMode: changed
+
+rules:
+  git/no-tracked-local-files: error
+  files/max-bytes:
+    severity: error
+    options:
+      limit: 1000000
+      ignoredPaths:
+        - "**/package-lock.json"
+        - "**/pnpm-lock.yaml"
+        - "**/yarn.lock"
+        - "**/*.tsbuildinfo"
+  files/max-line-length:
+    severity: error
+    options:
+      limit: 500
+      ignoredPaths:
+        - "**/package-lock.json"
+        - "**/pnpm-lock.yaml"
+        - "**/yarn.lock"
+        - "**/*.tsbuildinfo"
+  files/max-lines:
+    severity: error
+    options:
+      limit: 5000
+      ignoredPaths:
+        - "**/package-lock.json"
+        - "**/pnpm-lock.yaml"
+        - "**/yarn.lock"
+        - "**/*.tsbuildinfo"
+
+overrides:
+  - files:
+      - "packages/**/test/fixtures/**"
+    rules:
+      files/max-line-length: off
+      files/max-lines: off

@@ -1,6 +1,6 @@
 set dotenv-load
 
-packages := "packages/core packages/test-utils packages/rules-git packages/rules-package-manager packages/rules-test packages/cli"
+packages := "packages/core packages/test-utils packages/rules-git packages/rules-files packages/rules-package-manager packages/rules-test packages/cli"
 quality_gate := "packages/cli/dist/index.js"
 
 default:

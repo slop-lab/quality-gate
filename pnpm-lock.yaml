@@ -20,6 +20,9 @@ importers:
       '@quality-gate/core':
         specifier: workspace:*
         version: link:../core
+      '@quality-gate/rules-files':
+        specifier: workspace:*
+        version: link:../rules-files
       '@quality-gate/rules-git':
         specifier: workspace:*
         version: link:../rules-git
@@ -29,8 +32,21 @@ importers:
       '@quality-gate/rules-test':
         specifier: workspace:*
         version: link:../rules-test
+      yaml:
+        specifier: ^2.9.1
+        version: 2.9.1
 
   packages/core: {}
+
+  packages/rules-files:
+    dependencies:
+      '@quality-gate/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      '@quality-gate/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
 
   packages/rules-git:
     dependencies:
@@ -81,6 +97,11 @@ packages:
   undici-types@7.18.2:
     resolution: {integrity: sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w==}
 
+  yaml@2.9.1:
+    resolution: {integrity: sha512-3NxN8+78OdzbT7C/WjGsyfPAtJaN3FNDsWxv7Y7mcDsT/oOmgW8BpyQQFFBnvZE3j9Y2Sdz1ULFLezL7Eb2yFw==}
+    engines: {node: '>= 14.6'}
+    hasBin: true
+
 snapshots:
 
   '@types/node@24.13.2':
@@ -90,3 +111,5 @@ snapshots:
   typescript@5.9.3: {}
 
   undici-types@7.18.2: {}
+
+  yaml@2.9.1: {}

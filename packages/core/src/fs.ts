@@ -49,6 +49,10 @@ export class NodeFileSystemProvider implements FileSystemProvider {
     return readFile(this.resolve(path), "utf8");
   }
 
+  async readFileBytes(path: string): Promise<Uint8Array> {
+    return readFile(this.resolve(path));
+  }
+
   private resolve(path: string): string {
     return join(this.root, path);
   }

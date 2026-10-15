@@ -13,6 +13,9 @@
       "path": "../rules-git"
     },
     {
+      "path": "../rules-files"
+    },
+    {
       "path": "../rules-package-manager"
     },
     {

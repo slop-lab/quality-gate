@@ -5,9 +5,14 @@ import {
   runQualityGate,
   type ScanMode,
 } from "@quality-gate/core";
-import { noLoneGitkeepRule } from "@quality-gate/rules-git";
+import { fileRules } from "@quality-gate/rules-files";
+import {
+  noLoneGitkeepRule,
+  noTrackedLocalFilesRule,
+} from "@quality-gate/rules-git";
 import { packageManagerRules } from "@quality-gate/rules-package-manager";
 import { testRules } from "@quality-gate/rules-test";
+import { loadConfig } from "./config.js";
 
 interface CliOptions {
   command: "check" | "rules" | "help";
@@ -18,9 +23,16 @@ interface CliOptions {
   workingTree?: boolean;
   format: "stylish" | "json";
   root: string;
+  config?: string;
 }
 
-const builtInRules = [noLoneGitkeepRule, ...packageManagerRules, ...testRules];
+const builtInRules = [
+  noLoneGitkeepRule,
+  noTrackedLocalFilesRule,
+  ...fileRules,
+  ...packageManagerRules,
+  ...testRules,
+];
 
 async function main(argv: string[]): Promise<number> {
   const options = parseArgs(argv);
@@ -43,6 +55,7 @@ async function main(argv: string[]): Promise<number> {
     staged: options.staged,
     workingTree: options.workingTree,
     rules: builtInRules,
+    config: await loadConfig(options.root, options.config),
   });
 
   if (options.format === "json") {
@@ -97,6 +110,9 @@ function parseArgs(argv: string[]): CliOptions {
       }
       case "--root":
         options.root = requireValue(arg, args);
+        break;
+      case "--config":
+        options.config = requireValue(arg, args);
         break;
       case "-h":
       case "--help":
@@ -179,6 +195,7 @@ Options:
   --staged        Scan staged changes.
   --working-tree  Scan unstaged working tree changes.
   --root <path>   Workspace root. Defaults to cwd.
+  --config <path> Config path. Defaults to qualitygate.config.yaml or .yml.
 `);
 }
 

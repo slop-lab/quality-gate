@@ -37,6 +37,7 @@ export interface FileSystemProvider {
   isDirectory(path: string): Promise<boolean>;
   readDirectory(path: string): Promise<DirectoryEntry[]>;
   readFile(path: string): Promise<string>;
+  readFileBytes(path: string): Promise<Uint8Array>;
 }
 
 export interface ProcessProvider {
@@ -119,6 +120,13 @@ export interface RuleContext<TOptions = unknown> {
   process: ProcessProvider;
   options: TOptions;
   severity: DiagnosticSeverity;
+  resolveConfig(path: string): ResolvedRuleConfig<TOptions>;
+}
+
+export interface ResolvedRuleConfig<TOptions = unknown> {
+  enabled: boolean;
+  severity: DiagnosticSeverity;
+  options: TOptions;
 }
 
 export interface Rule<TOptions = unknown> {
@@ -138,6 +146,13 @@ export interface QualityGateConfig {
     base?: string;
   };
   rules?: Record<string, RuleConfig>;
+  overrides?: QualityGateOverride[];
+}
+
+export interface QualityGateOverride {
+  files: string[];
+  excludedFiles?: string[];
+  rules: Record<string, RuleConfig>;
 }
 
 export interface RunOptions {

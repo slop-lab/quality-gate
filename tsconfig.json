@@ -11,6 +11,9 @@
       "path": "packages/rules-git"
     },
     {
+      "path": "packages/rules-files"
+    },
+    {
       "path": "packages/rules-package-manager"
     },
     {

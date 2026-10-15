@@ -23,6 +23,9 @@ const emptyFs: FileSystemProvider = {
   async readFile() {
     return "";
   },
+  async readFileBytes() {
+    return new Uint8Array();
+  },
 };
 
 test("runQualityGate injects changed provider into changed scans", async () => {

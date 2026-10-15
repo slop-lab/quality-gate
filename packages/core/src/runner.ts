@@ -1,15 +1,8 @@
+import { resolveRuleConfig } from "./config.js";
 import { NodeFileSystemProvider } from "./fs.js";
 import { GitChangedProvider } from "./git.js";
 import { NodeProcessProvider } from "./process.js";
-import type {
-  Diagnostic,
-  DiagnosticSeverity,
-  QualityGateConfig,
-  Rule,
-  RunOptions,
-  RunResult,
-  ScanMode,
-} from "./types.js";
+import type { Diagnostic, RunOptions, RunResult, ScanMode } from "./types.js";
 
 export async function runQualityGate(options: RunOptions): Promise<RunResult> {
   const mode = resolveMode(options);
@@ -35,21 +28,28 @@ export async function runQualityGate(options: RunOptions): Promise<RunResult> {
     }
 
     const resolved = resolveRuleConfig(options.config, rule);
-    if (resolved.severity === "off") {
+    if (!resolved.enabled) {
       continue;
     }
 
-    diagnostics.push(
-      ...(await rule.check({
-        root: options.root,
-        mode,
-        changes,
-        fs,
-        process,
-        options: resolved.ruleOptions,
-        severity: resolved.severity,
-      })),
-    );
+    const ruleDiagnostics = await rule.check({
+      root: options.root,
+      mode,
+      changes,
+      fs,
+      process,
+      options: resolved.options,
+      severity: resolved.severity,
+      resolveConfig: (path) => resolveRuleConfig(options.config, rule, path),
+    });
+    for (const diagnostic of ruleDiagnostics) {
+      const pathConfig = diagnostic.path
+        ? resolveRuleConfig(options.config, rule, diagnostic.path)
+        : resolved;
+      if (pathConfig.enabled) {
+        diagnostics.push({ ...diagnostic, severity: pathConfig.severity });
+      }
+    }
   }
 
   return {
@@ -61,38 +61,4 @@ export async function runQualityGate(options: RunOptions): Promise<RunResult> {
 
 function resolveMode(options: RunOptions): ScanMode {
   return options.mode ?? options.config?.scan?.defaultMode ?? "changed";
-}
-
-function resolveRuleConfig(
-  config: QualityGateConfig | undefined,
-  rule: Rule,
-): { severity: DiagnosticSeverity | "off"; ruleOptions: unknown } {
-  const raw = config?.rules?.[rule.metadata.id];
-  const defaultOptions = rule.metadata.defaultOptions ?? {};
-
-  if (!raw) {
-    return {
-      severity: rule.metadata.defaultSeverity,
-      ruleOptions: defaultOptions,
-    };
-  }
-
-  if (Array.isArray(raw)) {
-    return {
-      severity: raw[0],
-      ruleOptions: {
-        ...(isObject(defaultOptions) ? defaultOptions : {}),
-        ...(isObject(raw[1]) ? raw[1] : {}),
-      },
-    };
-  }
-
-  return {
-    severity: raw,
-    ruleOptions: defaultOptions,
-  };
-}
-
-function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

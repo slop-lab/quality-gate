@@ -15,8 +15,10 @@
   },
   "dependencies": {
     "@quality-gate/core": "workspace:*",
-    "@quality-gate/rules-package-manager": "workspace:*",
+    "@quality-gate/rules-files": "workspace:*",
     "@quality-gate/rules-git": "workspace:*",
-    "@quality-gate/rules-test": "workspace:*"
+    "@quality-gate/rules-package-manager": "workspace:*",
+    "@quality-gate/rules-test": "workspace:*",
+    "yaml": "^2.9.1"
   }
 }

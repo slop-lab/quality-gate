@@ -15,6 +15,7 @@
       "@quality-gate/core": ["packages/core/src/index.ts"],
       "@quality-gate/test-utils": ["packages/test-utils/src/index.ts"],
       "@quality-gate/rules-git": ["packages/rules-git/src/index.ts"],
+      "@quality-gate/rules-files": ["packages/rules-files/src/index.ts"],
       "@quality-gate/rules-package-manager": [
         "packages/rules-package-manager/src/index.ts"
       ],
