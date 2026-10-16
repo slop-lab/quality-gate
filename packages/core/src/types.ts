@@ -73,6 +73,7 @@ export interface Diagnostic {
   severity: DiagnosticSeverity;
   message: string;
   path?: string;
+  pathKind?: "file" | "directory";
   line?: number;
   column?: number;
   endLine?: number;
@@ -179,7 +180,10 @@ export interface RuleContext<TOptions = unknown> {
   process: ProcessProvider;
   options: TOptions;
   severity: DiagnosticSeverity;
-  resolveConfig(path: string): ResolvedRuleConfig<TOptions>;
+  resolveConfig(
+    path: string,
+    kind?: "file" | "directory",
+  ): ResolvedRuleConfig<TOptions>;
   cache: RuleCache;
   discovery: FileDiscovery;
   artifacts: GeneratedArtifacts;
@@ -225,8 +229,11 @@ export interface QualityGateConfig {
 }
 
 export interface QualityGateOverride {
-  files: string[];
+  files?: string[];
   excludedFiles?: string[];
+  /** A project-relative base directory; files/excludedFiles become relative to it. */
+  directory?: string;
+  scope?: "self" | "subtree";
   rules: Record<string, RuleConfig>;
 }
 

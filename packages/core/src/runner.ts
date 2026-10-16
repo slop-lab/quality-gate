@@ -71,15 +71,21 @@ export async function runQualityGate(options: RunOptions): Promise<RunResult> {
       process,
       options: resolved.options,
       severity: resolved.severity,
-      resolveConfig: (path) =>
-        resolveRuleConfig(options.config, rule, path, artifacts),
+      resolveConfig: (path, kind) =>
+        resolveRuleConfig(options.config, rule, path, artifacts, kind),
       cache: cacheStore.forRule(rule.metadata.id),
       discovery,
       artifacts,
     });
     for (const diagnostic of ruleDiagnostics) {
       const pathConfig = diagnostic.path
-        ? resolveRuleConfig(options.config, rule, diagnostic.path, artifacts)
+        ? resolveRuleConfig(
+            options.config,
+            rule,
+            diagnostic.path,
+            artifacts,
+            diagnostic.pathKind,
+          )
         : resolved;
       if (pathConfig.enabled) {
         if (

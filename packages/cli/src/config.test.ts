@@ -88,6 +88,61 @@ test("root artifact settings are loaded and nested declarations fail clearly", a
   );
 });
 
+test("nested self overrides bind to their own directory and keep file filters relative to explicit directories", async (t) => {
+  const root = await mkdtemp(join(tmpdir(), "qg-config-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  await write(root, ".qg.yaml", config(100));
+  await write(
+    root,
+    "packages/app/.qg.yaml",
+    "overrides:\n  - scope: self\n    rules:\n      test/limit: [warning, {limit: 10}]\n  - directory: src\n    scope: self\n    files: ['*.ts']\n    excludedFiles: ['skip.ts']\n    rules:\n      test/limit: [error, {limit: 5}]\n",
+  );
+  const loaded = await loadConfig(root);
+  assert.equal(
+    resolveRuleConfig(loaded, rule, "packages/app/file.ts").options.limit,
+    10,
+  );
+  assert.equal(
+    resolveRuleConfig(loaded, rule, "packages/app", undefined, "directory")
+      .options.limit,
+    10,
+  );
+  assert.equal(
+    resolveRuleConfig(loaded, rule, "packages/app/src/file.ts").options.limit,
+    5,
+  );
+  assert.equal(
+    resolveRuleConfig(loaded, rule, "packages/app/src/skip.ts").options.limit,
+    100,
+  );
+  assert.equal(
+    resolveRuleConfig(loaded, rule, "packages/app/src/child/file.ts").options
+      .limit,
+    100,
+  );
+  assert.equal(
+    resolveRuleConfig(loaded, rule, "packages/sibling/file.ts").options.limit,
+    100,
+  );
+});
+
+test("override scope and directory selectors reject invalid values", async (t) => {
+  const root = await mkdtemp(join(tmpdir(), "qg-config-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  for (const selector of [
+    "directory: ../outside",
+    "directory: C:/outside",
+    "scope: invalid",
+  ]) {
+    await write(
+      root,
+      ".qg.yaml",
+      `overrides:\n  - ${selector}\n    rules: {test/limit: error}\n`,
+    );
+    await assert.rejects(loadConfig(root), /project-relative|self or subtree/);
+  }
+});
+
 function config(limit: number): string {
   return `rules:\n  test/limit:\n    severity: error\n    options: { limit: ${limit} }\n`;
 }

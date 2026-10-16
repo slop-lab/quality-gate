@@ -1,7 +1,9 @@
+import { posix } from "node:path";
 import type {
   DiagnosticSeverity,
   GeneratedArtifacts,
   QualityGateConfig,
+  QualityGateOverride,
   ResolvedRuleConfig,
   Rule,
   RuleConfig,
@@ -12,6 +14,7 @@ export function resolveRuleConfig<TOptions>(
   rule: Rule<TOptions>,
   path?: string,
   artifacts?: GeneratedArtifacts,
+  kind: "file" | "directory" = "file",
 ): ResolvedRuleConfig<TOptions> {
   let resolved = mergeRuleConfig(
     rule.metadata.defaultEnabled === false
@@ -23,10 +26,7 @@ export function resolveRuleConfig<TOptions>(
 
   if (path) {
     for (const override of config?.overrides ?? []) {
-      if (
-        matchesAnyGlob(path, override.files) &&
-        !matchesAnyGlob(path, override.excludedFiles ?? [])
-      ) {
+      if (matchesOverride(path, override, kind)) {
         resolved = mergeRuleConfig(
           resolved.enabled ? resolved.severity : "off",
           resolved.options,
@@ -45,6 +45,49 @@ export function resolveRuleConfig<TOptions>(
   )
     return { ...resolved, enabled: false };
   return resolved;
+}
+
+function matchesOverride(
+  path: string,
+  override: QualityGateOverride,
+  kind: "file" | "directory",
+): boolean {
+  let candidate = path;
+  if (override.directory !== undefined || override.scope !== undefined) {
+    const directory = override.directory ?? ".";
+    if (
+      typeof directory !== "string" ||
+      posix.isAbsolute(directory) ||
+      /[\\:\0]/.test(directory) ||
+      directory.split("/").includes("..")
+    )
+      throw new Error(
+        "Override directory must be a project-relative path using '/'.",
+      );
+    if (
+      override.scope !== undefined &&
+      !["self", "subtree"].includes(override.scope)
+    )
+      throw new Error("Override scope must be self or subtree.");
+    const relative = posix.relative(directory || ".", path);
+    if (relative === ".." || relative.startsWith("../")) return false;
+    if (relative === "" && kind === "file") return false;
+    if (
+      override.scope === "self" &&
+      (kind === "directory"
+        ? relative !== ""
+        : relative === "" || posix.dirname(relative) !== ".")
+    )
+      return false;
+    candidate = relative || ".";
+  }
+  const matches = (patterns: string[]) =>
+    matchesAnyGlob(candidate, patterns) ||
+    (kind === "directory" &&
+      matchesAnyGlob(candidate === "." ? "" : `${candidate}/`, patterns));
+  return (
+    matches(override.files ?? ["**"]) && !matches(override.excludedFiles ?? [])
+  );
 }
 
 function mergeRuleConfig<TOptions>(

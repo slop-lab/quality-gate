@@ -85,9 +85,7 @@ export const requiredCompanionsRule: Rule<RequiredCompanionsOptions> = {
   async check(context) {
     const diagnostics: Diagnostic[] = [];
     for (const directory of await candidateDirectories(context)) {
-      const options = context.resolveConfig(
-        directory === "." ? "." : `${directory}/`,
-      ).options;
+      const options = context.resolveConfig(directory, "directory").options;
       if (
         !matchesAnyGlob(directory, options.directories ?? ["**"]) ||
         !(await context.fs.isDirectory(directory))

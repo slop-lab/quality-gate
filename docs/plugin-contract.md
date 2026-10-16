@@ -59,6 +59,11 @@ after rule execution, using the same filesystem snapshot as the check.
 Diagnostics can set `suppressible: false` for policy errors that must not be
 hidden by inline comments, such as missing suppression reasons. Project rule
 configuration still applies. Columns are one-based UTF-16 positions.
+Diagnostics whose `path` refers to a directory set `pathKind: "directory"`;
+the default is `file`. Aggregate directory rules resolve options with
+`context.resolveConfig(path, "directory")`. These distinguish self-only
+directory overrides from settings for a file at the same relative path.
+See [directory limits and configuration scopes](directory-limits.md).
 
 ## Useful Inputs
 

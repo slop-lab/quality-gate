@@ -22,3 +22,8 @@ rules:
     options:
       warningLimit: 500
       limit: 1000
+  files/max-files-per-directory:
+    severity: error
+    options:
+      warningLimit: 50
+      limit: 100

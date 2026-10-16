@@ -70,6 +70,9 @@ The following built-in content checks skip generated files:
 - test fixture-copy checks;
 - opt-in Biome, Prettier, and ESLint integrations.
 
+The directory file-count rule also excludes generated entries from its count;
+its `includeGenerated` option counts them when explicitly enabled.
+
 External adapters skip generated input before resolving or launching tools.
 Artifact classification does not remove files from the filesystem, changes,
 or nearby-file discovery. References to generated targets remain valid, and

@@ -2,6 +2,7 @@ import type { Rule } from "@slop-lab/qg-core";
 import {
   allowedMarkdownCharactersRule,
   fileRules,
+  maxFilesPerDirectoryRule,
   repositoryFileRules,
   requiredCompanionsRule,
   requireSuppressionReasonRule,
@@ -19,6 +20,7 @@ export const recommendedRules: Rule[] = [
   noLoneGitkeepRule,
   noTrackedLocalFilesRule,
   ...fileRules,
+  maxFilesPerDirectoryRule,
   ...repositoryFileRules,
   requiredCompanionsRule,
   validDocumentReferenceRule,

@@ -63,8 +63,20 @@ export async function loadConfig(
     result.overrides.push(
       ...(nested.overrides ?? []).map((override) => ({
         ...override,
-        files: override.files.map((pattern) => prefixGlob(directory, pattern)),
-        ...(override.excludedFiles
+        ...(override.directory !== undefined || override.scope !== undefined
+          ? {
+              directory: normalizePath(
+                join(directory, override.directory ?? "."),
+              ),
+            }
+          : {
+              files: (override.files ?? ["**"]).map((pattern) =>
+                prefixGlob(directory, pattern),
+              ),
+            }),
+        ...(override.excludedFiles &&
+        override.directory === undefined &&
+        override.scope === undefined
           ? {
               excludedFiles: override.excludedFiles.map((pattern) =>
                 prefixGlob(directory, pattern),
@@ -200,8 +212,38 @@ function normalizeConfig(value: unknown, path: string): QualityGateConfig {
 
 function normalizeOverride(value: unknown, index: number): QualityGateOverride {
   const object = requireObject(value, `overrides[${index}]`);
+  if (
+    object.files === undefined &&
+    object.directory === undefined &&
+    object.scope === undefined
+  )
+    throw new Error(`overrides[${index}] requires files, directory, or scope`);
+  if (
+    object.directory !== undefined &&
+    (typeof object.directory !== "string" ||
+      object.directory.startsWith("/") ||
+      /[\\:\0]/.test(object.directory) ||
+      object.directory.split("/").includes(".."))
+  )
+    throw new Error(
+      `overrides[${index}].directory must be a project-relative path using '/'`,
+    );
+  if (
+    object.scope !== undefined &&
+    object.scope !== "self" &&
+    object.scope !== "subtree"
+  )
+    throw new Error(`overrides[${index}].scope must be self or subtree`);
   return {
-    files: requireStrings(object.files, `overrides[${index}].files`),
+    ...(object.files === undefined
+      ? {}
+      : { files: requireStrings(object.files, `overrides[${index}].files`) }),
+    ...(object.directory === undefined
+      ? {}
+      : { directory: object.directory as string }),
+    ...(object.scope === undefined
+      ? {}
+      : { scope: object.scope as "self" | "subtree" }),
     ...(object.excludedFiles === undefined
       ? {}
       : {

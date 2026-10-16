@@ -37,6 +37,7 @@ and supported options; the architecture document also describes future work.
 - [External tools](docs/external-tools.md)
 - [Required files and nearby-file detection](docs/file-policies.md)
 - [File length and generated artifacts](docs/generated-artifacts.md)
+- [Directory file limits and self-only configuration](docs/directory-limits.md)
 
 ## Use in another project
 

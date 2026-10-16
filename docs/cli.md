@@ -122,6 +122,10 @@ use `exclude` for source exceptions, or enable `includeGenerated` for one rule.
 See [generated artifacts](generated-artifacts.md) for defaults and extension
 registration.
 
+`files/max-files-per-directory` counts direct files per directory, warning above
+50 and erroring above 100. Generated files are excluded by default. See
+[directory limits](directory-limits.md) for options and self-only settings.
+
 ## Required repository and companion files
 
 `repo/require-readme` and `repo/require-gitattributes` are enabled by default.
@@ -253,11 +257,18 @@ Warnings and informational diagnostics do not cause check failure.
 
 The CLI automatically loads `.qg.yaml` or `.qg.yml`. A file
 at the workspace root supplies repository defaults. A file in any nested
-directory applies to that directory and all descendants, like `.gitignore`.
+directory normally applies to that directory and all descendants, like `.gitignore`.
 Nested rules inherit and override parent options; paths in nested `overrides`
 are relative to the directory containing that config. Later, deeper matching
 configs win. The root-only alternatives `qg.config.yaml` and `qg.config.yml`
 are also supported.
+For settings that should apply only to a directory and its direct files,
+use an override with `directory` and `scope: self`. A nested override may use
+`scope: self` alone to select the directory containing that config. With a
+directory selector or scope, optional `files`/`excludedFiles` filters are
+relative to the selected directory; omitted `files` defaults to `**`.
+See [directory limits](directory-limits.md) for examples. This controls which
+settings inherit; ordinary rules elsewhere retain their existing defaults.
 
 Configuration is YAML. Supported root fields are `scan`, `artifacts`, `rules`,
 and `overrides`. `artifacts` and `scan` are only allowed in the root config; `scan` supports
