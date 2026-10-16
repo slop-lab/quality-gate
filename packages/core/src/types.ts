@@ -115,6 +115,33 @@ export interface RuleMetadata<TOptions = unknown> {
   fixable: "none" | "suggestion" | "edit";
   docsUrl?: string;
   defaultOptions?: TOptions;
+  /** Additional root file-presence gate; explicit rule configuration still applies. */
+  when?: FilePresenceCondition;
+}
+
+export interface FilePresenceCondition {
+  /** Filename globs, evaluated against files rather than directories. */
+  allOf?: string[];
+  anyOf?: string[];
+  noneOf?: string[];
+  /** Search the starting directory only, or include ancestors up to the QG root. */
+  search?: "directory" | "ancestors";
+}
+
+export interface NearbyFileMatch {
+  directory: string;
+  paths: string[];
+}
+
+export interface FileDiscovery {
+  matches(
+    condition: FilePresenceCondition,
+    directory?: string,
+  ): Promise<boolean>;
+  findNearest(
+    patterns: string[],
+    directory?: string,
+  ): Promise<NearbyFileMatch | undefined>;
 }
 
 export interface RuleContext<TOptions = unknown> {
@@ -127,6 +154,7 @@ export interface RuleContext<TOptions = unknown> {
   severity: DiagnosticSeverity;
   resolveConfig(path: string): ResolvedRuleConfig<TOptions>;
   cache: RuleCache;
+  discovery: FileDiscovery;
 }
 
 export interface RuleCache {

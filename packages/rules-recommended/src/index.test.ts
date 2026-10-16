@@ -7,6 +7,8 @@ import { recommendedRules } from "./index.js";
 for (const mode of ["full", "changed"] as const) {
   test(`recommended rules run through core in ${mode} mode with project configuration`, async (t) => {
     const fixture = await createFixture({
+      "README.md": "# Fixture\n",
+      ".gitattributes": "* text=auto eol=lf\n",
       "empty/.gitkeep": "",
       "oversized.txt": "12345",
     });
@@ -26,7 +28,12 @@ for (const mode of ["full", "changed"] as const) {
         },
       },
       config: {
-        rules: { "files/max-bytes": ["warning", { limit: 4 }] },
+        rules: {
+          "files/max-bytes": [
+            "warning",
+            { limit: 4, ignoredPaths: ["README.md", ".gitattributes"] },
+          ],
+        },
       },
     });
     assert.deepEqual(

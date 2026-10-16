@@ -26,7 +26,7 @@
     "url": "git+https://github.com/slop-lab/quality-gate.git",
     "directory": "packages/rules-files"
   },
-  "description": "File limits and document reference rules for QG",
+  "description": "Required files, nearby file policies, file limits, and document rules for QG",
   "engines": {
     "node": ">=22.0.0"
   },

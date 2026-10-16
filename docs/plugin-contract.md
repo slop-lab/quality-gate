@@ -39,6 +39,7 @@ Each rule declares:
 - `defaultSeverity`
 - `defaultEnabled` (optional; defaults to `true`)
 - `preserveDiagnosticSeverity` (optional; retain lower native severities, capped by configured severity)
+- `when` (optional; a root file-presence gate evaluated before execution)
 - `supports`: `changed`, `full`, or both
 - `scope`: `file`, `directory`, `package`, or `repo`
 - `requires`: requested inputs
@@ -63,6 +64,9 @@ The current `RuleContext` provides normalized changes, filesystem and process
 providers, scan mode, resolved options and severity, path-specific config
 resolution, and a rule-owned cache. Filesystem reads use the index during
 staged CLI checks and the working tree otherwise.
+The shared `discovery` API supports nearby filename conditions and nearest
+ancestor marker lookup. See [file policies](file-policies.md) for conditions,
+automatic rule gates, and the per-scan snapshot/cache contract.
 
 The target input model may additionally provide:
 

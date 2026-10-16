@@ -112,6 +112,15 @@ The marker suppresses only the preceding word. Because the
 pattern also matches slash-separated prose, enable the rule in nested
 `.qg.yaml` files for document sets that use this reference convention.
 
+## Required repository and companion files
+
+`repo/require-readme` and `repo/require-gitattributes` are enabled by default.
+They require root `README.md` and a root `.gitattributes` establishing
+`* text=auto eol=lf`, including during changed and staged scans.
+The opt-in `files/required-companions` rule supports conditions based on nearby
+files, such as requiring a package README wherever a manifest exists.
+See [file policies](file-policies.md) for configuration and discovery semantics.
+
 ## JavaScript type checking
 
 `js/require-ts-check`, provided by `@slop-lab/qg-rules-js`, is enabled in the

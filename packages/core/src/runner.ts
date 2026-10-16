@@ -1,5 +1,6 @@
 import { NoopRuleCacheStore } from "./cache.js";
 import { resolveRuleConfig } from "./config.js";
+import { NearbyFileDiscovery } from "./discovery.js";
 import { NodeFileSystemProvider } from "./fs.js";
 import { GitChangedProvider, GitIndexFileSystemProvider } from "./git.js";
 import { NodeProcessProvider } from "./process.js";
@@ -29,6 +30,7 @@ export async function runQualityGate(options: RunOptions): Promise<RunResult> {
 
   const diagnostics: Diagnostic[] = [];
   const suppressions = new Map<string, DocumentSuppressions>();
+  const discovery = new NearbyFileDiscovery(fs);
 
   for (const rule of options.rules) {
     if (!rule.metadata.supports.includes(mode)) {
@@ -49,6 +51,9 @@ export async function runQualityGate(options: RunOptions): Promise<RunResult> {
       continue;
     }
 
+    if (rule.metadata.when && !(await discovery.matches(rule.metadata.when)))
+      continue;
+
     const ruleDiagnostics = await rule.check({
       root: options.root,
       mode,
@@ -59,6 +64,7 @@ export async function runQualityGate(options: RunOptions): Promise<RunResult> {
       severity: resolved.severity,
       resolveConfig: (path) => resolveRuleConfig(options.config, rule, path),
       cache: cacheStore.forRule(rule.metadata.id),
+      discovery,
     });
     for (const diagnostic of ruleDiagnostics) {
       const pathConfig = diagnostic.path

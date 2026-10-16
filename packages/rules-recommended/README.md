@@ -6,6 +6,10 @@ rule packages as runtime dependencies. Rule implementations and default
 severities come from the individual rule packages. Markdown character checks
 and suppression-reason checks are enabled by default, as is
 `js/require-ts-check` for JavaScript files.
+Root `README.md` and LF `.gitattributes` requirements are also enabled by
+default through `repo/require-readme` and `repo/require-gitattributes`.
+`files/required-companions` is available for configurable nearby-file policies
+and remains off by default. See [file policies](../../docs/file-policies.md).
 The included `external/biome`, `external/prettier`, and `external/eslint`
 adapters are off by default and require explicit project configuration.
 

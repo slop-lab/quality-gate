@@ -22,20 +22,14 @@ export const noNpmLockWithPnpmRule: Rule = {
     defaultSeverity: "error",
     supports: ["changed", "full"],
     scope: "repo",
-    requires: ["fileMetadata"],
+    requires: ["directoryListings"],
     fixable: "edit",
+    when: { allOf: ["pnpm-workspace.yaml", "package-lock.json"] },
   },
   async check(context) {
     if (
       context.mode === "changed" &&
       !hasChangedPath(context, ["package-lock.json", "pnpm-workspace.yaml"])
-    ) {
-      return [];
-    }
-
-    if (
-      !(await context.fs.exists("pnpm-workspace.yaml")) ||
-      !(await context.fs.exists("package-lock.json"))
     ) {
       return [];
     }
@@ -70,9 +64,10 @@ export const pnpmLockfileIsCurrentRule: Rule<PnpmLockfileIsCurrentOptions> = {
     defaultSeverity: "error",
     supports: ["changed", "full"],
     scope: "repo",
-    requires: ["fileContent", "process"],
+    requires: ["fileContent", "directoryListings", "process"],
     fixable: "suggestion",
     defaultOptions: defaultPnpmLockfileOptions,
+    when: { allOf: ["pnpm-workspace.yaml", "pnpm-lock.yaml"] },
   },
   async check(context) {
     const options = {
@@ -81,13 +76,6 @@ export const pnpmLockfileIsCurrentRule: Rule<PnpmLockfileIsCurrentOptions> = {
     };
 
     if (context.mode === "changed" && !hasRelevantPnpmLockfileChange(context)) {
-      return [];
-    }
-
-    if (
-      !(await context.fs.exists("pnpm-workspace.yaml")) ||
-      !(await context.fs.exists("pnpm-lock.yaml"))
-    ) {
       return [];
     }
 

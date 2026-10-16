@@ -19,7 +19,7 @@ The implementation is TypeScript. The runtime includes:
 
 - `@slop-lab/qg-core`: runner, Git change parsing, injectable input providers, and rule cache storage.
 - `@slop-lab/qg-rules-git`: Git hygiene checks, including `gitkeep/no-lone-gitkeep`.
-- `@slop-lab/qg-rules-files`: file limits, document references, Markdown character policies, and suppression-reason checks.
+- `@slop-lab/qg-rules-files`: required root and companion files, file limits, document references, Markdown character policies, and suppression-reason checks.
 - `@slop-lab/qg-rules-js`: JavaScript type-checking, package manager consistency, and opt-in external formatter/linter checks.
 - `@slop-lab/qg-rules-test`: test fixture checks.
 - `@slop-lab/qg-rules-recommended`: the default rule set, composed from the individual rule packages.
@@ -35,6 +35,7 @@ and supported options; the architecture document also describes future work.
 - [Plugin Contract](docs/plugin-contract.md)
 - [CLI](docs/cli.md)
 - [External tools](docs/external-tools.md)
+- [Required files and nearby-file detection](docs/file-policies.md)
 
 ## Use in another project
 
