@@ -40,3 +40,6 @@ rules:
 `.git`, `.local`, `.qg`, `node_modules`, and `dist` are excluded. Nested project
 configuration can override severity, options, or disable the rule by path.
 Staged scans inspect index contents, including partial staging.
+Content checks skip [registered generated artifacts](../../docs/generated-artifacts.md)
+unless `includeGenerated: true` is set. Package-manager integrity checks still
+validate the relevant lockfiles.

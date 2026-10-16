@@ -1,5 +1,6 @@
 import type {
   DiagnosticSeverity,
+  GeneratedArtifacts,
   QualityGateConfig,
   ResolvedRuleConfig,
   Rule,
@@ -10,6 +11,7 @@ export function resolveRuleConfig<TOptions>(
   config: QualityGateConfig | undefined,
   rule: Rule<TOptions>,
   path?: string,
+  artifacts?: GeneratedArtifacts,
 ): ResolvedRuleConfig<TOptions> {
   let resolved = mergeRuleConfig(
     rule.metadata.defaultEnabled === false
@@ -34,6 +36,14 @@ export function resolveRuleConfig<TOptions>(
     }
   }
 
+  if (
+    path &&
+    artifacts &&
+    rule.metadata.ignoreGeneratedArtifacts &&
+    artifacts.isGenerated(path) &&
+    !(isObject(resolved.options) && resolved.options.includeGenerated === true)
+  )
+    return { ...resolved, enabled: false };
   return resolved;
 }
 

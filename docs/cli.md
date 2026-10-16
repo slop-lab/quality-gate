@@ -112,6 +112,16 @@ The marker suppresses only the preceding word. Because the
 pattern also matches slash-separated prose, enable the rule in nested
 `.qg.yaml` files for document sets that use this reference convention.
 
+## File length and generated artifacts
+
+`files/max-lines` warns above 500 lines and errors above 1000 lines by default.
+Its `warningLimit` and `limit` options control those thresholds. Generated
+lockfiles and other registered artifacts are skipped across participating
+content rules. Add shared patterns through root `artifacts.generated.include`,
+use `exclude` for source exceptions, or enable `includeGenerated` for one rule.
+See [generated artifacts](generated-artifacts.md) for defaults and extension
+registration.
+
 ## Required repository and companion files
 
 `repo/require-readme` and `repo/require-gitattributes` are enabled by default.
@@ -249,8 +259,8 @@ are relative to the directory containing that config. Later, deeper matching
 configs win. The root-only alternatives `qg.config.yaml` and `qg.config.yml`
 are also supported.
 
-Configuration is YAML. Supported root fields are `scan`, `rules`, and
-`overrides`. `scan` is only allowed in the root config and supports
+Configuration is YAML. Supported root fields are `scan`, `artifacts`, `rules`,
+and `overrides`. `artifacts` and `scan` are only allowed in the root config; `scan` supports
 `defaultMode` (`changed` or `full`) and `base`. JavaScript/TypeScript config
 files and a `defineConfig` export are not currently supported.
 
@@ -265,7 +275,7 @@ rules:
     severity: error
     options:
       limit: 1000000
-      ignoredPaths: ["**/package-lock.json"]
+      ignoredPaths: ["vendor/**"]
 ```
 
 ```yaml

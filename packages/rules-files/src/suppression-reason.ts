@@ -21,6 +21,7 @@ export const requireSuppressionReasonRule: Rule<DocumentFileOptions> = {
     requires: ["fileContent"],
     fixable: "suggestion",
     defaultOptions: {},
+    ignoreGeneratedArtifacts: true,
   },
   async check(context) {
     const diagnostics: Diagnostic[] = [];

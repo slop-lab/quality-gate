@@ -2,10 +2,12 @@ import {
   cacheKey,
   type Diagnostic,
   type FileSystemProvider,
+  type GeneratedArtifactRuleOptions,
   type Rule,
 } from "@slop-lab/qg-core";
 
-export interface ValidDocumentReferenceOptions {
+export interface ValidDocumentReferenceOptions
+  extends GeneratedArtifactRuleOptions {
   extensions?: string[];
   suppression?: string;
 }
@@ -19,6 +21,7 @@ interface ReferenceOccurrence {
 const defaults: Required<ValidDocumentReferenceOptions> = {
   extensions: [".md", ".mdx", ".txt", ".adoc", ".rst"],
   suppression: "qg-suppress docs/valid-reference",
+  includeGenerated: false,
 };
 const referencePattern = /\b\w+(?:\/\w+)+\b/g;
 const parserVersion = "1";
@@ -35,6 +38,7 @@ export const validDocumentReferenceRule: Rule<ValidDocumentReferenceOptions> = {
     requires: ["fileContent", "fileMetadata"],
     fixable: "suggestion",
     defaultOptions: defaults,
+    ignoreGeneratedArtifacts: true,
   },
   async check(context) {
     const candidates =

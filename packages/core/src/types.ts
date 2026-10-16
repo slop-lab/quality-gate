@@ -117,6 +117,33 @@ export interface RuleMetadata<TOptions = unknown> {
   defaultOptions?: TOptions;
   /** Additional root file-presence gate; explicit rule configuration still applies. */
   when?: FilePresenceCondition;
+  /** Skip generated file contents through resolveConfig and diagnostic filtering. */
+  ignoreGeneratedArtifacts?: boolean;
+  /** Static contributions, collected before executing any rules. */
+  generatedArtifacts?: GeneratedArtifactDefinition[];
+}
+
+export interface GeneratedArtifactDefinition {
+  id: string;
+  files: string[];
+  excludedFiles?: string[];
+  description?: string;
+}
+
+export interface GeneratedArtifactsConfig {
+  defaults?: boolean;
+  include?: string[];
+  exclude?: string[];
+}
+
+export interface GeneratedArtifactRuleOptions {
+  /** Opt a content rule back into generated files. */
+  includeGenerated?: boolean;
+}
+
+export interface GeneratedArtifacts {
+  isGenerated(path: string): boolean;
+  matching(path: string): GeneratedArtifactDefinition[];
 }
 
 export interface FilePresenceCondition {
@@ -155,6 +182,7 @@ export interface RuleContext<TOptions = unknown> {
   resolveConfig(path: string): ResolvedRuleConfig<TOptions>;
   cache: RuleCache;
   discovery: FileDiscovery;
+  artifacts: GeneratedArtifacts;
 }
 
 export interface RuleCache {
@@ -187,6 +215,7 @@ export type RuleConfig<TOptions = unknown> =
   | ["off", TOptions];
 
 export interface QualityGateConfig {
+  artifacts?: { generated?: GeneratedArtifactsConfig };
   scan?: {
     defaultMode?: ScanMode;
     base?: string;
@@ -214,6 +243,7 @@ export interface RunOptions {
   fs?: FileSystemProvider;
   process?: ProcessProvider;
   cacheStore?: RuleCacheStore;
+  generatedArtifacts?: GeneratedArtifactDefinition[];
 }
 
 export interface RunResult {

@@ -1,6 +1,10 @@
 scan:
   defaultMode: changed
 
+artifacts:
+  generated:
+    include: ["**/*.tgz"]
+
 rules:
   git/no-tracked-local-files: error
   # Enable this in a nested docs directory after existing references are reviewed.
@@ -9,26 +13,12 @@ rules:
     severity: error
     options:
       limit: 1000000
-      ignoredPaths:
-        - "**/package-lock.json"
-        - "**/pnpm-lock.yaml"
-        - "**/yarn.lock"
-        - "**/*.tsbuildinfo"
   files/max-line-length:
     severity: error
     options:
       limit: 500
-      ignoredPaths:
-        - "**/package-lock.json"
-        - "**/pnpm-lock.yaml"
-        - "**/yarn.lock"
-        - "**/*.tsbuildinfo"
   files/max-lines:
     severity: error
     options:
-      limit: 5000
-      ignoredPaths:
-        - "**/package-lock.json"
-        - "**/pnpm-lock.yaml"
-        - "**/yarn.lock"
-        - "**/*.tsbuildinfo"
+      warningLimit: 500
+      limit: 1000

@@ -23,6 +23,8 @@ Install the selected tools as development dependencies in the target project,
 for example with `pnpm add -D @biomejs/biome prettier eslint`. Configure them
 using their own configuration files. QG keeps their configuration discovery,
 plugins, and ignore handling; `files` only narrows the paths QG submits.
+All adapters also honor the shared [generated artifact policy](generated-artifacts.md)
+before launching tools. Use `includeGenerated: true` to opt an adapter back in.
 ESLint needs a configuration suitable for the selected languages, including
 TypeScript plugins/parsers when checking TypeScript. QG does not generate one.
 
@@ -67,6 +69,7 @@ unlocated format failures use project/path configuration or tool-native ignores.
 | --- | --- |
 | `files` | Include globs; defaults to common file types supported by that adapter. |
 | `ignoredPaths` | Exclude globs; defaults to an empty list. |
+| `includeGenerated` | Check shared generated artifacts too; defaults to `false`. |
 | `ignoredDirectories` | Directory names to skip; defaults to `.git`, `.local`, `.qg`, `node_modules`, and `dist`. |
 | `args` | Additional tool flags, for example `["--config", "eslint.custom.mjs"]`. Biome receives these after its subcommand. |
 | `command` | Executable override, launched without a shell. |

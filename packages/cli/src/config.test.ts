@@ -62,6 +62,32 @@ test("alternate root config filename is supported", async (t) => {
   assert.equal(resolveRuleConfig(loaded, rule, "a.ts").options.limit, 42);
 });
 
+test("root artifact settings are loaded and nested declarations fail clearly", async (t) => {
+  const root = await mkdtemp(join(tmpdir(), "qg-config-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  await write(
+    root,
+    ".qg.yaml",
+    "artifacts:\n  generated:\n    defaults: false\n    include: ['api/**']\n    exclude: ['api/manual.ts']\n",
+  );
+  assert.deepEqual((await loadConfig(root))?.artifacts, {
+    generated: {
+      defaults: false,
+      include: ["api/**"],
+      exclude: ["api/manual.ts"],
+    },
+  });
+  await write(
+    root,
+    "packages/.qg.yaml",
+    "artifacts:\n  generated:\n    include: ['generated/**']\n",
+  );
+  await assert.rejects(
+    loadConfig(root),
+    /artifacts is only allowed in the root config/,
+  );
+});
+
 function config(limit: number): string {
   return `rules:\n  test/limit:\n    severity: error\n    options: { limit: ${limit} }\n`;
 }

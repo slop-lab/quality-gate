@@ -1,4 +1,8 @@
-import { matchesAnyGlob, type RuleContext } from "@slop-lab/qg-core";
+import {
+  type GeneratedArtifactRuleOptions,
+  matchesAnyGlob,
+  type RuleContext,
+} from "@slop-lab/qg-core";
 
 export const markdownExtensions = [".md", ".markdown", ".mdx"];
 const ignoredDirectories = new Set([
@@ -9,7 +13,7 @@ const ignoredDirectories = new Set([
   "dist",
 ]);
 
-export interface DocumentFileOptions {
+export interface DocumentFileOptions extends GeneratedArtifactRuleOptions {
   extensions?: string[];
   ignoredPaths?: string[];
 }

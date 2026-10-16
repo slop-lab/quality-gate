@@ -1,24 +1,23 @@
 import {
   type Diagnostic,
+  type DiagnosticSeverity,
+  type GeneratedArtifactRuleOptions,
   matchesAnyGlob,
   type Rule,
   type RuleContext,
   type RuleMetadata,
 } from "@slop-lab/qg-core";
 
-export interface FileLimitOptions {
+export interface FileLimitOptions extends GeneratedArtifactRuleOptions {
   limit: number;
+  /** max-lines only: warn above this count before reaching the error limit. */
+  warningLimit?: number;
   ignoredPaths?: string[];
   ignoredDirectories?: string[];
 }
 
-const ignoredPaths = [
-  "**/package-lock.json",
-  "**/pnpm-lock.yaml",
-  "**/yarn.lock",
-  "**/*.tsbuildinfo",
-];
-const ignoredDirectories = [".git", ".qg", "node_modules", "dist"];
+const ignoredPaths: string[] = [];
+const ignoredDirectories = [".git", ".local", ".qg", "node_modules", "dist"];
 
 export const maxBytesRule: Rule<FileLimitOptions> = {
   metadata: metadata(
@@ -84,8 +83,9 @@ export const maxLinesRule: Rule<FileLimitOptions> = {
   metadata: metadata(
     "files/max-lines",
     "Maximum line count",
-    "Reports text files with more than the configured number of lines.",
-    5_000,
+    "Warns above 500 lines and errors above 1000 lines by default.",
+    1_000,
+    500,
   ),
   async check(context) {
     return checkFiles(
@@ -98,12 +98,21 @@ export const maxLinesRule: Rule<FileLimitOptions> = {
           text.length === 0
             ? 0
             : text.split(/\r?\n/).length - (text.endsWith("\n") ? 1 : 0);
-        if (count <= options.limit) return [];
+        const severity =
+          count > options.limit
+            ? "error"
+            : count > options.warningLimit
+              ? "warning"
+              : undefined;
+        if (!severity) return [];
+        const limit =
+          severity === "error" ? options.limit : options.warningLimit;
         return [
           diagnostic(
             context,
             path,
-            `File has ${count} lines; maximum is ${options.limit}.`,
+            `File has ${count} lines; ${severity} threshold is ${limit}.`,
+            severity,
           ),
         ];
       },
@@ -118,17 +127,25 @@ function metadata(
   name: string,
   description: string,
   limit: number,
+  warningLimit?: number,
 ): RuleMetadata<FileLimitOptions> {
   return {
     id,
     name,
     description,
     defaultSeverity: "error" as const,
+    ignoreGeneratedArtifacts: true,
+    preserveDiagnosticSeverity: warningLimit !== undefined,
     supports: ["changed", "full"],
     scope: "file" as const,
     requires: ["fileContent"],
     fixable: "none" as const,
-    defaultOptions: { limit, ignoredPaths, ignoredDirectories },
+    defaultOptions: {
+      limit,
+      ignoredPaths,
+      ignoredDirectories,
+      ...(warningLimit !== undefined ? { warningLimit } : {}),
+    },
   };
 }
 
@@ -151,6 +168,10 @@ async function checkFiles(
     if (!resolved.enabled) continue;
     const options = normalizeOptions(resolved.options);
     if (matchesAnyGlob(path, options.ignoredPaths)) continue;
+    if (
+      path.split("/").some((part) => options.ignoredDirectories.includes(part))
+    )
+      continue;
     if (!(await context.fs.isFile(path))) continue;
     diagnostics.push(
       ...(await check(path, await context.fs.readFileBytes(path), options)).map(
@@ -199,8 +220,16 @@ async function allFiles(
 function normalizeOptions(
   options: FileLimitOptions,
 ): Required<FileLimitOptions> {
+  for (const [name, value] of [
+    ["limit", options.limit],
+    ["warningLimit", options.warningLimit],
+  ] as const)
+    if (value !== undefined && (!Number.isSafeInteger(value) || value < 0))
+      throw new Error(`File ${name} must be a non-negative integer.`);
   return {
     limit: options.limit,
+    warningLimit: options.warningLimit ?? options.limit,
+    includeGenerated: options.includeGenerated ?? false,
     ignoredPaths: options.ignoredPaths ?? ignoredPaths,
     ignoredDirectories: options.ignoredDirectories ?? ignoredDirectories,
   };
@@ -210,10 +239,11 @@ function diagnostic(
   context: RuleContext<FileLimitOptions>,
   path: string,
   message: string,
+  severity?: DiagnosticSeverity,
 ): Diagnostic {
   return {
     ruleId: "",
-    severity: context.severity,
+    severity: severity ?? context.severity,
     message,
     path,
     scope: "file",

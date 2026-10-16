@@ -1,11 +1,12 @@
 import {
   type Diagnostic,
+  type GeneratedArtifactRuleOptions,
   matchesAnyGlob,
   type Rule,
   type RuleContext,
 } from "@slop-lab/qg-core";
 
-export interface RequireTsCheckOptions {
+export interface RequireTsCheckOptions extends GeneratedArtifactRuleOptions {
   extensions?: string[];
   ignoredPaths?: string[];
   ignoredDirectories?: string[];
@@ -13,6 +14,7 @@ export interface RequireTsCheckOptions {
 
 const defaults: Required<RequireTsCheckOptions> = {
   extensions: [".js", ".jsx", ".mjs", ".cjs"],
+  includeGenerated: false,
   ignoredPaths: [],
   ignoredDirectories: [".git", ".local", ".qg", "node_modules", "dist"],
 };
@@ -29,6 +31,7 @@ export const requireTsCheckRule: Rule<RequireTsCheckOptions> = {
     requires: ["fileContent", "directoryListings"],
     fixable: "suggestion",
     defaultOptions: defaults,
+    ignoreGeneratedArtifacts: true,
   },
   async check(context) {
     const diagnostics: Diagnostic[] = [];

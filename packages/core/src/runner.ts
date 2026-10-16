@@ -31,6 +31,15 @@ export async function runQualityGate(options: RunOptions): Promise<RunResult> {
   const diagnostics: Diagnostic[] = [];
   const suppressions = new Map<string, DocumentSuppressions>();
   const discovery = new NearbyFileDiscovery(fs);
+  const artifacts = new GeneratedArtifactRegistry(
+    [
+      ...options.rules.flatMap(
+        (rule) => rule.metadata.generatedArtifacts ?? [],
+      ),
+      ...(options.generatedArtifacts ?? []),
+    ],
+    options.config?.artifacts?.generated,
+  );
 
   for (const rule of options.rules) {
     if (!rule.metadata.supports.includes(mode)) {
@@ -62,13 +71,15 @@ export async function runQualityGate(options: RunOptions): Promise<RunResult> {
       process,
       options: resolved.options,
       severity: resolved.severity,
-      resolveConfig: (path) => resolveRuleConfig(options.config, rule, path),
+      resolveConfig: (path) =>
+        resolveRuleConfig(options.config, rule, path, artifacts),
       cache: cacheStore.forRule(rule.metadata.id),
       discovery,
+      artifacts,
     });
     for (const diagnostic of ruleDiagnostics) {
       const pathConfig = diagnostic.path
-        ? resolveRuleConfig(options.config, rule, diagnostic.path)
+        ? resolveRuleConfig(options.config, rule, diagnostic.path, artifacts)
         : resolved;
       if (pathConfig.enabled) {
         if (
@@ -106,3 +117,5 @@ export async function runQualityGate(options: RunOptions): Promise<RunResult> {
 function resolveMode(options: RunOptions): ScanMode {
   return options.mode ?? options.config?.scan?.defaultMode ?? "changed";
 }
+
+import { GeneratedArtifactRegistry } from "./artifacts.js";

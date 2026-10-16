@@ -6,6 +6,7 @@ import {
   cacheKey,
   type Diagnostic,
   type FileSystemProvider,
+  type GeneratedArtifactRuleOptions,
   matchesAnyGlob,
   NodeFileSystemProvider,
   type ProcessResult,
@@ -13,7 +14,7 @@ import {
   type RuleContext,
 } from "@slop-lab/qg-core";
 
-export interface ExternalToolOptions {
+export interface ExternalToolOptions extends GeneratedArtifactRuleOptions {
   /** Override the executable; arguments are passed directly, without a shell. */
   command?: string;
   /** Arguments before the tool's subcommand/flags (for example, a Node entry point). */
@@ -90,6 +91,7 @@ function externalRule(tool: Tool): Rule<ExternalToolOptions> {
       description: `Checks snapshot contents using the project's ${tool} installation and configuration. Explicit opt-in required.`,
       defaultSeverity: "error",
       defaultEnabled: false,
+      ignoreGeneratedArtifacts: true,
       preserveDiagnosticSeverity: true,
       supports: ["changed", "full"],
       scope: "file",

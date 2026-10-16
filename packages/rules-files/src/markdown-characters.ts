@@ -33,6 +33,7 @@ export const allowedMarkdownCharactersRule: Rule<AllowedMarkdownCharactersOption
       requires: ["fileContent"],
       fixable: "suggestion",
       defaultOptions: {},
+      ignoreGeneratedArtifacts: true,
     },
     async check(context) {
       const diagnostics: Diagnostic[] = [];

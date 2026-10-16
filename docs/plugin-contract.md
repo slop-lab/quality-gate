@@ -40,6 +40,8 @@ Each rule declares:
 - `defaultEnabled` (optional; defaults to `true`)
 - `preserveDiagnosticSeverity` (optional; retain lower native severities, capped by configured severity)
 - `when` (optional; a root file-presence gate evaluated before execution)
+- `ignoreGeneratedArtifacts` (optional; opt content checks into shared artifact exclusions)
+- `generatedArtifacts` (optional; static artifact pattern registrations)
 - `supports`: `changed`, `full`, or both
 - `scope`: `file`, `directory`, `package`, or `repo`
 - `requires`: requested inputs
@@ -67,6 +69,12 @@ staged CLI checks and the working tree otherwise.
 The shared `discovery` API supports nearby filename conditions and nearest
 ancestor marker lookup. See [file policies](file-policies.md) for conditions,
 automatic rule gates, and the per-scan snapshot/cache contract.
+The `artifacts` query API exposes generated classifications. Participating
+content rules check `context.resolveConfig(path).enabled` before reading or
+executing tools; that result includes shared generated exclusions and the
+per-rule `includeGenerated` option. See [generated artifacts](generated-artifacts.md)
+for project settings and rule/plugin registrations. Filesystem and discovery
+providers still expose generated files to targeted integrity checks.
 
 The target input model may additionally provide:
 

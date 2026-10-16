@@ -36,6 +36,7 @@ and supported options; the architecture document also describes future work.
 - [CLI](docs/cli.md)
 - [External tools](docs/external-tools.md)
 - [Required files and nearby-file detection](docs/file-policies.md)
+- [File length and generated artifacts](docs/generated-artifacts.md)
 
 ## Use in another project
 

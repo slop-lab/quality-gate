@@ -1,12 +1,19 @@
-import type { Diagnostic, Rule, RuleContext } from "@slop-lab/qg-core";
+import type {
+  Diagnostic,
+  GeneratedArtifactRuleOptions,
+  Rule,
+  RuleContext,
+} from "@slop-lab/qg-core";
 
-export interface NoDirectoryFixtureCopyOptions {
+export interface NoDirectoryFixtureCopyOptions
+  extends GeneratedArtifactRuleOptions {
   ignoredDirectories?: string[];
   testFileSuffixes?: string[];
 }
 
 const defaultOptions: Required<NoDirectoryFixtureCopyOptions> = {
   ignoredDirectories: [".git", "dist", "node_modules"],
+  includeGenerated: false,
   testFileSuffixes: [".test.ts", ".test.tsx", ".spec.ts", ".spec.tsx"],
 };
 
@@ -22,6 +29,7 @@ export const noDirectoryFixtureCopyRule: Rule<NoDirectoryFixtureCopyOptions> = {
     requires: ["fileContent", "directoryListings"],
     fixable: "suggestion",
     defaultOptions,
+    ignoreGeneratedArtifacts: true,
   },
   async check(context) {
     const options = {
@@ -35,6 +43,11 @@ export const noDirectoryFixtureCopyRule: Rule<NoDirectoryFixtureCopyOptions> = {
     const diagnostics: Diagnostic[] = [];
 
     for (const path of paths) {
+      if (
+        !context.resolveConfig(path).enabled ||
+        !(await context.fs.isFile(path))
+      )
+        continue;
       const content = await context.fs.readFile(path);
       for (const location of findCalls(content, "createFixtureFromDirectory")) {
         diagnostics.push({

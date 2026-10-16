@@ -48,6 +48,10 @@ export async function loadConfig(
         `${relative(root, path)}: scan is only allowed in the root config`,
       );
     }
+    if (nested.artifacts)
+      throw new Error(
+        `${relative(root, path)}: artifacts is only allowed in the root config`,
+      );
     result ??= {};
     result.overrides ??= [];
     if (nested.rules) {
@@ -139,6 +143,44 @@ function isMissing(error: unknown): boolean {
 function normalizeConfig(value: unknown, path: string): QualityGateConfig {
   const object = requireObject(value, `${path} root`);
   const config: QualityGateConfig = {};
+  if (object.artifacts !== undefined) {
+    const artifacts = requireObject(object.artifacts, "artifacts");
+    const generated =
+      artifacts.generated === undefined
+        ? undefined
+        : requireObject(artifacts.generated, "artifacts.generated");
+    if (
+      generated?.defaults !== undefined &&
+      typeof generated.defaults !== "boolean"
+    )
+      throw new Error("artifacts.generated.defaults must be a boolean");
+    config.artifacts =
+      generated === undefined
+        ? {}
+        : {
+            generated: {
+              ...(generated.defaults === undefined
+                ? {}
+                : { defaults: generated.defaults as boolean }),
+              ...(generated.include === undefined
+                ? {}
+                : {
+                    include: requireStrings(
+                      generated.include,
+                      "artifacts.generated.include",
+                    ),
+                  }),
+              ...(generated.exclude === undefined
+                ? {}
+                : {
+                    exclude: requireStrings(
+                      generated.exclude,
+                      "artifacts.generated.exclude",
+                    ),
+                  }),
+            },
+          };
+  }
   if (object.scan !== undefined) {
     config.scan = requireObject(
       object.scan,
