@@ -9,21 +9,3 @@ rules:
   git/no-tracked-local-files: error
   # Enable this in a nested docs directory after existing references are reviewed.
   docs/valid-reference: off
-  files/max-bytes:
-    severity: error
-    options:
-      limit: 1000000
-  files/max-line-length:
-    severity: error
-    options:
-      limit: 500
-  files/max-lines:
-    severity: error
-    options:
-      warningLimit: 500
-      limit: 1000
-  files/max-files-per-directory:
-    severity: error
-    options:
-      warningLimit: 50
-      limit: 100

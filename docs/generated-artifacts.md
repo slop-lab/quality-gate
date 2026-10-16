@@ -29,8 +29,8 @@ Both values must be non-negative integers. Path overrides can adjust either
 threshold. `files/max-bytes` and `files/max-line-length` retain their separate
 byte and character limits.
 
-This repository uses the same 500/1000 configuration in its root `.qg.yaml`;
-`just ci` runs it through the repository's full QG check.
+This repository uses these built-in defaults through the recommended rule set;
+`just ci` runs them through the repository's full QG check.
 
 ## Shared artifact classification
 
