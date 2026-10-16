@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import type { RuleCache, RuleCacheStore } from "./types.js";
@@ -27,7 +27,8 @@ export class JsonFileRuleCacheStore implements RuleCacheStore {
     );
   }
   async clearRule(ruleId: string): Promise<void> {
-    await rm(join(this.directory, `${safeName(ruleId)}.json`), { force: true });
+    const path = join(this.directory, `${safeName(ruleId)}.json`);
+    await withCacheLock(path, () => rm(path, { force: true }));
   }
 }
 
@@ -35,23 +36,33 @@ class JsonFileRuleCache implements RuleCache {
   private values: Record<string, unknown> | undefined;
   constructor(private readonly path: string) {}
   async get<T>(key: string): Promise<T | undefined> {
-    await this.load();
-    return this.values?.[key] as T | undefined;
+    return withCacheLock(this.path, async () => {
+      await this.load();
+      return this.values?.[key] as T | undefined;
+    });
   }
   async set<T>(key: string, value: T): Promise<void> {
-    await this.load();
-    this.values ??= {};
-    this.values[key] = value;
-    await this.save();
+    await withCacheLock(this.path, async () => {
+      this.values = undefined;
+      await this.load();
+      this.values ??= {};
+      this.values[key] = value;
+      await this.save();
+    });
   }
   async delete(key: string): Promise<void> {
-    await this.load();
-    if (this.values) delete this.values[key];
-    await this.save();
+    await withCacheLock(this.path, async () => {
+      this.values = undefined;
+      await this.load();
+      if (this.values) delete this.values[key];
+      await this.save();
+    });
   }
   async clear(): Promise<void> {
-    this.values = {};
-    await rm(this.path, { force: true });
+    await withCacheLock(this.path, async () => {
+      this.values = {};
+      await rm(this.path, { force: true });
+    });
   }
   private async load(): Promise<void> {
     if (this.values) return;
@@ -68,9 +79,34 @@ class JsonFileRuleCache implements RuleCache {
   }
   private async save(): Promise<void> {
     await mkdir(dirname(this.path), { recursive: true });
-    const temporary = `${this.path}.${process.pid}.tmp`;
-    await writeFile(temporary, JSON.stringify(this.values));
-    await rename(temporary, this.path);
+    const temporary = `${this.path}.${randomUUID()}.tmp`;
+    try {
+      await writeFile(temporary, JSON.stringify(this.values));
+      await rename(temporary, this.path);
+    } finally {
+      await rm(temporary, { force: true });
+    }
+  }
+}
+
+// Only retain locks for active operations; serialize writes from parallel daemon checks.
+const pendingOperations = new Map<string, Promise<void>>();
+
+async function withCacheLock<T>(
+  path: string,
+  action: () => Promise<T>,
+): Promise<T> {
+  const previous = pendingOperations.get(path) ?? Promise.resolve();
+  const operation = previous.then(action);
+  const settled = operation.then(
+    () => {},
+    () => {},
+  );
+  pendingOperations.set(path, settled);
+  try {
+    return await operation;
+  } finally {
+    if (pendingOperations.get(path) === settled) pendingOperations.delete(path);
   }
 }
 

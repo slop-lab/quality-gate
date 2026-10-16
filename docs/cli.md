@@ -274,7 +274,10 @@ overrides:
 
 Rule settings accept a severity (`off`, `info`, `warning`, or `error`), a
 `[severity, options]` pair, or an object with `severity` and `options`.
-Omitted rules use their built-in default severity and options.
+Omitted rules use their built-in enabled state, severity, and options.
+`external/biome`, `external/prettier`, and `external/eslint` are off by default.
+See [external tools](external-tools.md) for configuration, snapshot behavior,
+and daemon/cache support.
 
 ## Planned capabilities
 

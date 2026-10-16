@@ -37,6 +37,8 @@ Each rule declares:
 - `name`
 - `description`
 - `defaultSeverity`
+- `defaultEnabled` (optional; defaults to `true`)
+- `preserveDiagnosticSeverity` (optional; retain lower native severities, capped by configured severity)
 - `supports`: `changed`, `full`, or both
 - `scope`: `file`, `directory`, `package`, or `repo`
 - `requires`: requested inputs
@@ -125,6 +127,11 @@ them when config or dependency state changes. The current rule interface has
 no lifecycle hooks.
 
 ## External Tools
+
+The JS rule package provides opt-in Biome, Prettier, and ESLint adapters.
+See [external tools](external-tools.md) for their current contracts. They
+send snapshot contents through stdin, use the rule cache, and can connect to
+an independently managed Biome server without lifecycle hooks.
 
 Plugins may wrap existing tools, but they must declare:
 

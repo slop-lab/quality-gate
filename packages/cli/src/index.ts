@@ -213,7 +213,9 @@ function printRules(format: "stylish" | "json"): void {
   }
 
   for (const rule of rules) {
-    console.log(`${rule.id} (${rule.defaultSeverity})`);
+    console.log(
+      `${rule.id} (${rule.defaultEnabled === false ? "off" : rule.defaultSeverity})`,
+    );
     console.log(`  ${rule.description}`);
   }
 }

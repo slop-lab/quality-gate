@@ -6,6 +6,8 @@ rule packages as runtime dependencies. Rule implementations and default
 severities come from the individual rule packages. Markdown character checks
 and suppression-reason checks are enabled by default, as is
 `js/require-ts-check` for JavaScript files.
+The included `external/biome`, `external/prettier`, and `external/eslint`
+adapters are off by default and require explicit project configuration.
 
 Use it with the independent runner:
 

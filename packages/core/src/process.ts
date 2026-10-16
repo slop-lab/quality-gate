@@ -7,12 +7,22 @@ import type {
 
 export class NodeProcessProvider implements ProcessProvider {
   async exec(options: ProcessExecOptions): Promise<ProcessResult> {
-    return new Promise((resolve) => {
-      execFile(
+    return new Promise((resolve, reject) => {
+      const child = execFile(
         options.command,
         options.args,
-        { cwd: options.cwd, env: options.env },
+        {
+          cwd: options.cwd,
+          env: options.env ? { ...process.env, ...options.env } : process.env,
+          timeout: options.timeoutMs,
+          maxBuffer: 16 * 1024 * 1024,
+          windowsHide: true,
+        },
         (error, stdout, stderr) => {
+          if (error && (typeof error.code !== "number" || error.killed)) {
+            reject(error);
+            return;
+          }
           const exitCode =
             typeof error === "object" &&
             error !== null &&
@@ -30,6 +40,11 @@ export class NodeProcessProvider implements ProcessProvider {
           });
         },
       );
+      child.stdin?.on("error", (error: NodeJS.ErrnoException) => {
+        if (error.code !== "EPIPE" && error.code !== "ERR_STREAM_DESTROYED")
+          reject(error);
+      });
+      child.stdin?.end(options.input);
     });
   }
 }

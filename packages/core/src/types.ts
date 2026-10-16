@@ -49,6 +49,8 @@ export interface ProcessExecOptions {
   args: string[];
   cwd: string;
   env?: Record<string, string | undefined>;
+  input?: string;
+  timeoutMs?: number;
 }
 
 export interface ProcessResult {
@@ -105,6 +107,8 @@ export interface RuleMetadata<TOptions = unknown> {
   name: string;
   description: string;
   defaultSeverity: DiagnosticSeverity;
+  defaultEnabled?: boolean;
+  preserveDiagnosticSeverity?: boolean;
   supports: ScanMode[];
   scope: RuleScope;
   requires: string[];

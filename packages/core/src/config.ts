@@ -12,7 +12,9 @@ export function resolveRuleConfig<TOptions>(
   path?: string,
 ): ResolvedRuleConfig<TOptions> {
   let resolved = mergeRuleConfig(
-    rule.metadata.defaultSeverity,
+    rule.metadata.defaultEnabled === false
+      ? "off"
+      : rule.metadata.defaultSeverity,
     rule.metadata.defaultOptions as TOptions,
     config?.rules?.[rule.metadata.id] as RuleConfig<TOptions> | undefined,
   );

@@ -36,7 +36,16 @@ export async function runQualityGate(options: RunOptions): Promise<RunResult> {
     }
 
     const resolved = resolveRuleConfig(options.config, rule);
-    if (!resolved.enabled) {
+    if (
+      !resolved.enabled &&
+      !options.config?.overrides?.some((override) => {
+        const value = override.rules[rule.metadata.id];
+        return (
+          value !== undefined &&
+          (Array.isArray(value) ? value[0] : value) !== "off"
+        );
+      })
+    ) {
       continue;
     }
 
@@ -70,7 +79,13 @@ export async function runQualityGate(options: RunOptions): Promise<RunResult> {
           }
           if (document?.isSuppressed(diagnostic)) continue;
         }
-        diagnostics.push({ ...diagnostic, severity: pathConfig.severity });
+        const levels = { info: 0, warning: 1, error: 2 };
+        const severity =
+          rule.metadata.preserveDiagnosticSeverity &&
+          levels[diagnostic.severity] < levels[pathConfig.severity]
+            ? diagnostic.severity
+            : pathConfig.severity;
+        diagnostics.push({ ...diagnostic, severity });
       }
     }
   }

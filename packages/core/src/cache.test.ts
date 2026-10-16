@@ -34,3 +34,19 @@ test("cacheKey is content addressed", () => {
   );
   assert.notEqual(cacheKey("a", "b"), cacheKey("a", "c"));
 });
+
+test("concurrent cache writers publish complete JSON without sharing temporary files", async (t) => {
+  const root = await mkdtemp(join(tmpdir(), "qg-cache-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const store = new JsonFileRuleCacheStore(root);
+  await Promise.all(
+    Array.from({ length: 10 }, (_, index) =>
+      store.forRule("external/prettier").set(`file${index}`, index),
+    ),
+  );
+  for (let index = 0; index < 10; index += 1)
+    assert.equal(
+      await store.forRule("external/prettier").get<number>(`file${index}`),
+      index,
+    );
+});
