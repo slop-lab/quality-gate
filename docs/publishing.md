@@ -43,8 +43,9 @@ git status --short
 
 `mise.toml` pins Node.js 24.21.0, pnpm 11.10.0, Just 1.47.0, and Biome 2.5.15.
 Bootstrap installs from `pnpm-lock.yaml`, builds the packages, and installs this
-clone's QG pre-commit hook. `release-check` runs Biome, full QG checks, TypeScript
-builds, tests, and npm package previews for all eight public workspaces.
+clone's QG pre-commit hook. `release-check` runs the full QG rule scan and
+`qg run-hook pre-commit`, which performs the configured full Biome check,
+TypeScript build, and tests. It then previews all eight public npm workspaces.
 
 The package previews run each `prepack` script (`npm run build`) but do not
 create a release or publish to a registry. Check that each preview contains

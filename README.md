@@ -115,11 +115,18 @@ mise exec -- just test
 ```
 
 `just bootstrap` also installs the QG pre-commit hook for this clone. For an
-existing checkout, run `just hooks-install`. The repository enables staged Biome formatting through
+existing checkout, run `just qg hooks install`. The repository enables staged Biome formatting through
 QG and runs full Biome checks, the build, TypeScript checks, and tests through
 `hooks.preCommit.checks`.
-Use `just qg run-hook pre-commit` to run the complete hook manually, or `just check` for
-full QG rules (including Biome).
+Use `just qg run-hook pre-commit` to run the complete hook manually,
+`just qg check --full` for a full rule scan, or `just ci` for both.
+Full Biome lint/assist checks run through the configured hook commands; the
+staged Biome rule checks formatting. `just ci` uses those same QG commands,
+including the configured build/test step, instead of separate lint/check aliases.
+
+`just qg ...` builds before running the CLI. Successful builds are silent;
+failed builds display the compiler/bundler output and stop the command.
+`just build`, `just test`, and `just format` remain available for focused work.
 
 Run the checkout's CLI with `mise exec -- just qg rules`.
 

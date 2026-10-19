@@ -6,48 +6,27 @@ qg_cli := "packages/cli/dist/index.mjs"
 default:
   @just --list
 
-install:
-  pnpm install
-
 bootstrap:
   pnpm install --frozen-lockfile
   just build
   node {{qg_cli}} hooks install
 
-hooks-install: build
-  node {{qg_cli}} hooks install
-
 build:
-  pnpm exec tsc -b
-  pnpm exec tsdown
+  @node scripts/build.mjs
 
 test: build
-  pnpm exec node --test packages/*/dist/**/*.test.js
-
-lint:
-  pnpm exec biome lint .
+  @pnpm exec node --test packages/*/dist/**/*.test.js
 
 format:
   pnpm exec biome format --write .
 
-biome-check:
-  pnpm exec biome check .
-
-qg-full: build
-  node {{qg_cli}} check --full
-
-qg-changed: build
-  node {{qg_cli}} check --changed
-
-qg-rules: build
-  node {{qg_cli}} rules
-
 qg *args: build
-  node {{qg_cli}} {{args}}
+  @node {{qg_cli}} {{args}}
 
-check: biome-check qg-full
-
-ci: check test
+# Full rule scan, then the configured Biome/build/test hook checks.
+ci: build
+  @node {{qg_cli}} check --full
+  @node {{qg_cli}} run-hook pre-commit
 
 # Validate and preview all eight public npm packages without publishing.
 release-check: ci
