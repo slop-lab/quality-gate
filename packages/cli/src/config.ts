@@ -275,9 +275,17 @@ function normalizeRule(value: unknown, label: string): RuleConfig {
   const object = requireObject(value, label);
   const severity = object.severity ?? "error";
   if (!isSeverity(severity)) throw new Error(`${label}.severity is invalid`);
-  return object.options === undefined
-    ? severity
-    : [severity, requireObject(object.options, `${label}.options`)];
+  if (object.message !== undefined && typeof object.message !== "string")
+    throw new Error(`${label}.message must be a string`);
+  return {
+    severity,
+    ...(object.options === undefined
+      ? {}
+      : { options: requireObject(object.options, `${label}.options`) }),
+    ...(object.message === undefined
+      ? {}
+      : { message: object.message as string }),
+  };
 }
 
 function isSeverity(

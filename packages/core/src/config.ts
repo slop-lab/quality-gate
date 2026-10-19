@@ -31,6 +31,7 @@ export function resolveRuleConfig<TOptions>(
           resolved.enabled ? resolved.severity : "off",
           resolved.options,
           override.rules[rule.metadata.id] as RuleConfig<TOptions> | undefined,
+          resolved.message,
         );
       }
     }
@@ -94,21 +95,29 @@ function mergeRuleConfig<TOptions>(
   severity: DiagnosticSeverity | "off",
   options: TOptions,
   value: RuleConfig<TOptions> | undefined,
+  message?: string,
 ): ResolvedRuleConfig<TOptions> {
   if (value === undefined) {
     return {
       enabled: severity !== "off",
       severity: severityValue(severity),
       options,
+      ...(message === undefined ? {} : { message }),
     };
   }
 
-  const nextSeverity = Array.isArray(value) ? value[0] : value;
-  const nextOptions = Array.isArray(value) ? value[1] : undefined;
+  const setting = Array.isArray(value)
+    ? { severity: value[0], options: value[1] }
+    : typeof value === "string"
+      ? { severity: value }
+      : value;
+  const nextSeverity = setting.severity ?? "error";
+  const nextMessage = setting.message ?? message;
   return {
     enabled: nextSeverity !== "off",
     severity: severityValue(nextSeverity),
-    options: mergeOptions(options, nextOptions),
+    options: mergeOptions(options, setting.options),
+    ...(nextMessage === undefined ? {} : { message: nextMessage }),
   };
 }
 

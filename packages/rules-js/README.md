@@ -6,6 +6,7 @@ opt-in; the JavaScript and package manager checks are enabled by default.
 
 - `js/require-ts-check`: require an effective leading `// @ts-check` directive.
 - `package-manager/no-npm-lock-with-pnpm`: reject npm lockfiles in pnpm workspaces.
+- `package/allowed-name`: opt-in package name allowlist (see below).
 - `pnpm/lockfile-is-current`: check that pnpm would leave its lockfile unchanged.
 - `external/biome`, `external/prettier`, `external/eslint`: optional read-only
   integrations with project-installed formatters and linters. See
@@ -43,3 +44,22 @@ Staged scans inspect index contents, including partial staging.
 Content checks skip [registered generated artifacts](../../docs/generated-artifacts.md)
 unless `includeGenerated: true` is set. Package-manager integrity checks still
 validate the relevant lockfiles.
+
+Enable `package/allowed-name` to restrict the `name` field of root and nested
+`package.json` files. Each `allowedPatterns` entry is a regular expression
+matched against the entire name; any matching pattern passes. Missing, empty,
+or non-string names and malformed JSON are reported. An empty allowlist rejects
+all names. This rule is disabled by default.
+
+```yaml
+rules:
+  package/allowed-name:
+    severity: error
+    options:
+      allowedPatterns: ["@slop-lab/qg(-.*)?", "@this-project/[^/]+"]
+```
+
+Changed scans check added, modified, copied, and renamed manifests; full scans
+check all manifests. `ignoredPaths`, `ignoredDirectories`, path overrides,
+generated artifact exclusions, and staged index contents work as for
+`js/require-ts-check`.

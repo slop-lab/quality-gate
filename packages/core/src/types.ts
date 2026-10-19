@@ -202,6 +202,8 @@ export interface RuleCacheStore {
 }
 
 export interface ResolvedRuleConfig<TOptions = unknown> {
+  /** Configured replacement for diagnostic messages. */
+  message?: string;
   enabled: boolean;
   severity: DiagnosticSeverity;
   options: TOptions;
@@ -216,7 +218,13 @@ export type RuleConfig<TOptions = unknown> =
   | DiagnosticSeverity
   | "off"
   | [DiagnosticSeverity, TOptions]
-  | ["off", TOptions];
+  | ["off", TOptions]
+  | {
+      severity?: DiagnosticSeverity | "off";
+      options?: TOptions;
+      /** Replace the message on diagnostics emitted by this rule. */
+      message?: string;
+    };
 
 export interface QualityGateConfig {
   artifacts?: { generated?: GeneratedArtifactsConfig };

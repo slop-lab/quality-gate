@@ -156,3 +156,56 @@ async function write(
   await mkdir(dirname(fullPath), { recursive: true });
   await writeFile(fullPath, content);
 }
+
+test("messages load from root and nested YAML and inherit through shorthand overrides", async (t) => {
+  const root = await mkdtemp(join(tmpdir(), "qg-config-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  await write(
+    root,
+    ".qg.yaml",
+    `rules:
+  test/limit:
+    severity: warning
+    message: "Root recovery instructions"
+    options: { limit: 100 }
+`,
+  );
+  await write(
+    root,
+    "packages/.qg.yaml",
+    `rules:
+  test/limit:
+    message: "패키지 복구 안내"
+    options: { limit: 50 }
+overrides:
+  - files: ["app/**"]
+    rules:
+      test/limit: [info, { limit: 10 }]
+`,
+  );
+  const loaded = await loadConfig(root);
+  assert.equal(
+    resolveRuleConfig(loaded, rule, "root.ts").message,
+    "Root recovery instructions",
+  );
+  const nested = resolveRuleConfig(loaded, rule, "packages/app/a.ts");
+  assert.equal(nested.message, "패키지 복구 안내");
+  assert.equal(nested.options.limit, 10);
+  assert.equal(nested.severity, "info");
+});
+
+test("non-string diagnostic messages fail with a configuration error", async (t) => {
+  const root = await mkdtemp(join(tmpdir(), "qg-config-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  for (const value of ["42", "false", "null", "[]", "{}"]) {
+    await write(
+      root,
+      ".qg.yaml",
+      `rules:\n  test/limit:\n    message: ${value}\n`,
+    );
+    await assert.rejects(
+      loadConfig(root),
+      /rules.test\/limit.message must be a string/,
+    );
+  }
+});

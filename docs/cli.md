@@ -303,7 +303,22 @@ overrides:
 ```
 
 Rule settings accept a severity (`off`, `info`, `warning`, or `error`), a
-`[severity, options]` pair, or an object with `severity` and `options`.
+`[severity, options]` pair, or an object with `severity`, `options`, and an
+optional `message`. `message` replaces the diagnostic text for any rule, including
+external rules, in both text and JSON output. Locations, severity, suggested
+fixes, and other diagnostic fields are retained. Nested configs and path
+overrides can replace the message; severity-only and options-only overrides
+inherit it. Without `message`, the rule's original diagnostic text is used.
+
+```yaml
+rules:
+  package/allowed-name:
+    severity: error
+    message: "Publish packages as @slop-lab/qg or @slop-lab/qg-*; use @this-project/... for local packages."
+    options:
+      allowedPatterns: ["@slop-lab/qg(-.*)?", "@this-project/[^/]+"]
+```
+
 Omitted rules use their built-in enabled state, severity, and options.
 `external/biome`, `external/prettier`, and `external/eslint` are off by default.
 See [external tools](external-tools.md) for configuration, snapshot behavior,

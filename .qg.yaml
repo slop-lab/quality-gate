@@ -6,6 +6,11 @@ artifacts:
     include: ["**/*.tgz"]
 
 rules:
+  package/allowed-name:
+    severity: error
+    message: "패키지 이름의 경우 publish 대상은 @slop-lab/qg 또는 @slop-lab/qg-*, 로컬 전용은 @this-project/...를 사용하세요."
+    options:
+      allowedPatterns: ["@slop-lab/qg(-.*)?", "@this-project/[^/]+"]
   git/no-tracked-local-files: error
   # Enable this in a nested docs directory after existing references are reviewed.
   docs/valid-reference: off

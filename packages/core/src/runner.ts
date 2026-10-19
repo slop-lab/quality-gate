@@ -53,7 +53,11 @@ export async function runQualityGate(options: RunOptions): Promise<RunResult> {
         const value = override.rules[rule.metadata.id];
         return (
           value !== undefined &&
-          (Array.isArray(value) ? value[0] : value) !== "off"
+          (Array.isArray(value)
+            ? value[0]
+            : typeof value === "string"
+              ? value
+              : value.severity) !== "off"
         );
       })
     ) {
@@ -108,7 +112,11 @@ export async function runQualityGate(options: RunOptions): Promise<RunResult> {
           levels[diagnostic.severity] < levels[pathConfig.severity]
             ? diagnostic.severity
             : pathConfig.severity;
-        diagnostics.push({ ...diagnostic, severity });
+        diagnostics.push({
+          ...diagnostic,
+          severity,
+          message: pathConfig.message ?? diagnostic.message,
+        });
       }
     }
   }
