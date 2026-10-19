@@ -47,6 +47,14 @@ clone's QG pre-commit hook. `release-check` runs the full QG rule scan and
 `qg run-hook pre-commit`, which performs the configured full Biome check,
 TypeScript build, and tests. It then previews all eight public npm workspaces.
 
+Successful checks and tests print `PASS` without individual passing test names
+or totals. Successful package previews also print `PASS`. Their detailed output
+is shown on failure. To inspect the complete file lists explicitly, run:
+
+```sh
+mise exec -- npm pack --workspaces --dry-run --include-workspace-root=false
+```
+
 The package previews run each `prepack` script (`npm run build`) but do not
 create a release or publish to a registry. Check that each preview contains
 `package.json`, `README.md`, `LICENSE`, and the `dist/index.mjs` / type entry

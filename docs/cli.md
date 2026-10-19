@@ -9,7 +9,8 @@ installation, prefix it with `pnpm exec`.
 ### `check`
 
 Run a rule scan and report diagnostics. Running `qg` without a command is an
-alias for `qg check`.
+alias for `qg check`. Successful text-mode checks print `PASS`; warnings and
+errors remain visible. Explicit JSON output keeps the structured result.
 
 ```sh
 qg check
@@ -117,8 +118,9 @@ Hook installation is verified automatically at CLI startup, separately from rule
 scans. A missing, outdated, non-executable, or unrecognized hook produces a setup
 warning on **stderr**, with installation instructions. It does not change rule
 diagnostics, JSON stdout, or the exit status. Help and hook installation skip
-this check; outside a Git worktree it is not applicable. No separate doctor
-command is needed.
+this check; outside a Git worktree it is not applicable. Successful automatic
+setup is silent, while explicit hook installation prints `OK`. No separate
+doctor command is needed.
 
 The check uses Git's effective hooks directory and compares the installed hook
 with QG's current generated script. Custom wrappers and other hook managers are

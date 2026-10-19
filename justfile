@@ -7,18 +7,18 @@ default:
   @just --list
 
 bootstrap:
-  pnpm install --frozen-lockfile
-  just build
-  node {{qg_cli}} hooks install
+  @node scripts/run-task.mjs install
+  @just build
+  @node {{qg_cli}} hooks install
 
 build:
-  @node scripts/build.mjs
+  @node scripts/run-task.mjs build
 
 test: build
-  @pnpm exec node --test packages/*/dist/**/*.test.js
+  @node --test --test-reporter=./scripts/test-reporter.mjs packages/*/dist/**/*.test.js
 
 format:
-  pnpm exec biome format --write .
+  @node scripts/run-task.mjs format
 
 qg *args: build
   @node {{qg_cli}} {{args}}
@@ -30,4 +30,4 @@ ci: build
 
 # Validate and preview all eight public npm packages without publishing.
 release-check: ci
-  npm pack --workspaces --dry-run --include-workspace-root=false
+  @node scripts/run-task.mjs pack

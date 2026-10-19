@@ -113,7 +113,15 @@ test("installed pre-commit checks index contents and runs configured additional 
   );
   await git("add", ".");
   await git("commit", "--quiet", "-m", "initial");
-  await exec(process.execPath, [cli, "hooks", "install", "--root", root]);
+  const installation = await exec(process.execPath, [
+    cli,
+    "hooks",
+    "install",
+    "--root",
+    root,
+  ]);
+  assert.equal(installation.stdout, "OK\n");
+  assert.equal(installation.stderr, "");
 
   await writeFile(join(root, "package.json"), '{"name":"invalid"}');
   await git("add", "package.json");
@@ -135,7 +143,15 @@ test("installed pre-commit checks index contents and runs configured additional 
     /Fix the additional check[\s\S]*additional failure/,
   );
   // Plain staged scans do not run hook-only commands.
-  await exec(process.execPath, [cli, "check", "--staged", "--root", root]);
+  const checked = await exec(process.execPath, [
+    cli,
+    "check",
+    "--staged",
+    "--root",
+    root,
+  ]);
+  assert.equal(checked.stdout, "PASS\n");
+  assert.equal(checked.stderr, "");
   await rm(join(root, "fail-extra"));
   await git("commit", "--quiet", "--allow-empty", "-m", "valid index");
   assert.equal(
@@ -193,7 +209,7 @@ test("CLI startup verifies hooks outside rule results; implicit qg aliases check
   assert.equal(implicit.stdout, explicit.stdout);
   assert.equal(implicit.stderr, explicit.stderr);
   assert.match(implicit.stderr, /QG setup warning:.*not installed/);
-  assert.match(implicit.stdout, /No diagnostics/);
+  assert.equal(implicit.stdout, "PASS\n");
   const json = await exec(
     process.execPath,
     [cli, "check", "--format", "json"],
@@ -218,6 +234,13 @@ test("CLI startup verifies hooks outside rule results; implicit qg aliases check
   const disabled = await exec(process.execPath, [cli], { cwd: root });
   assert.equal(disabled.stderr, "");
   assert.equal(disabled.stdout, implicit.stdout);
+  const cleared = await exec(
+    process.execPath,
+    [cli, "cache", "clear", "--rule", "test/unused"],
+    { cwd: root },
+  );
+  assert.equal(cleared.stdout, "OK\n");
+  assert.equal(cleared.stderr, "");
   await assert.rejects(
     exec(
       process.execPath,
@@ -256,16 +279,13 @@ test("automatic setup installs and updates managed hooks, honors hooksPath, and 
   await run("--help");
   await assert.rejects(stat(path), /ENOENT/);
   const first = await run("check", "--format", "json");
-  assert.match(first.stderr, /QG setup: Installed/);
+  assert.equal(first.stderr, "");
   assert.deepEqual(JSON.parse(first.stdout).diagnostics, []);
   const expected = await readFile(path, "utf8");
   assert.match(expected, /run-hook pre-commit/);
   assert.equal((await run()).stderr, "");
   await writeFile(path, expected.replace("run-hook pre-commit", "pre-commit"));
-  assert.match(
-    (await run("rules", "--format", "json")).stderr,
-    /QG setup: Installed/,
-  );
+  assert.equal((await run("rules", "--format", "json")).stderr, "");
   assert.equal(await readFile(path, "utf8"), expected);
   const custom = "#!/bin/sh\n# Custom hook managed elsewhere\nexit 0\n";
   await writeFile(path, custom);

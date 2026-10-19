@@ -127,6 +127,10 @@ including the configured build/test step, instead of separate lint/check aliases
 `just qg ...` builds before running the CLI. Successful builds are silent;
 failed builds display the compiler/bundler output and stop the command.
 `just build`, `just test`, and `just format` remain available for focused work.
+Successful checks and test runs print `PASS`; setup and formatting print `OK`.
+Passing test names, test totals, and successful command logs are omitted by
+default. Failures retain diagnostics and command output. Help, rule listings,
+daemon status, and explicit JSON requests keep their requested results.
 
 Run the checkout's CLI with `mise exec -- just qg rules`.
 

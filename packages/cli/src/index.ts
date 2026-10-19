@@ -76,10 +76,7 @@ async function checkSetup(root: string, configPath?: string): Promise<void> {
   if (!issue) return;
   if (policy === "auto") {
     try {
-      const installed = await installHooks(root, cliPath);
-      console.error(
-        `QG setup: Installed pre-commit hook at ${installed.path}.`,
-      );
+      await installHooks(root, cliPath);
       return;
     } catch (error) {
       console.error(
@@ -149,7 +146,7 @@ async function runSpecialCommand(argv: string[]): Promise<number | undefined> {
       fileURLToPath(import.meta.url),
       force,
     );
-    console.log(`Installed QG staged pre-commit hook at ${result.path}.`);
+    console.log("OK");
     if (result.backup)
       console.log(`Previous hook backed up to ${result.backup}.`);
     return 0;
@@ -176,7 +173,9 @@ async function runSpecialCommand(argv: string[]): Promise<number | undefined> {
     );
     console.log(
       response
-        ? `qg daemon ${action === "stop" ? "stopped" : "running"}`
+        ? action === "stop"
+          ? "OK"
+          : "qg daemon running"
         : "qg daemon is not running",
     );
     return response ? 0 : 1;
@@ -185,7 +184,7 @@ async function runSpecialCommand(argv: string[]): Promise<number | undefined> {
     throw new Error("Usage: qg cache clear --rule <rule-id>");
   }
   await new JsonFileRuleCacheStore(joinCache(root)).clearRule(argv[3]);
-  console.log(`Cleared cache for ${argv[3]}.`);
+  console.log("OK");
   return 0;
 }
 
@@ -311,11 +310,6 @@ function printRules(loaded: Rule[], format: "stylish" | "json"): void {
 }
 
 function printStylish(diagnostics: Diagnostic[]): void {
-  if (diagnostics.length === 0) {
-    console.log("No diagnostics.");
-    return;
-  }
-
   for (const diagnostic of diagnostics) {
     const location = diagnostic.path ? `${diagnostic.path}: ` : "";
     console.log(
@@ -329,6 +323,8 @@ function printStylish(diagnostics: Diagnostic[]): void {
       }
     }
   }
+  if (!diagnostics.some((diagnostic) => diagnostic.severity === "error"))
+    console.log("PASS");
 }
 
 function printHelp(): void {
