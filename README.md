@@ -23,7 +23,7 @@ The implementation is TypeScript. The runtime includes:
 - `@slop-lab/qg-rules-js`: JavaScript type-checking, package manager consistency, and opt-in external formatter/linter checks.
 - `@slop-lab/qg-rules-test`: test fixture checks.
 - `@slop-lab/qg-rules-recommended`: the default rule set, composed from the individual rule packages.
-- `@slop-lab/qg`: the `qg` CLI for `check`, `pre-commit`, `hooks install`, `rules`, `daemon`, and `cache clear --rule`.
+- `@slop-lab/qg`: the `qg` CLI for `check`, `run-hook`, `hooks install`, `rules`, `daemon`, and `cache clear --rule`.
 
 The CLI defaults to staged changes and index contents. Use `check --full` for
 a repository-wide working tree scan. See [CLI](docs/cli.md) for configuration
@@ -69,8 +69,8 @@ dependencies. Your package manager installs these automatically. Core has no
 dependency on the CLI or rule packages and can be embedded with custom rules.
 
 The installed hook runs staged QG rules plus any additional commands configured
-under `hooks.preCommit.checks` in `.qg.yaml`. Run `pnpm exec qg pre-commit` to
-reproduce it manually. See [pre-commit setup](docs/cli.md#pre-commit-and-hooks-install)
+under `hooks.preCommit.checks` in `.qg.yaml`. Run `pnpm exec qg run-hook pre-commit` to
+reproduce it manually. See [pre-commit setup](docs/cli.md#run-hook-pre-commit-and-hooks-install)
 to migrate formatter, typecheck, and test checks from existing hooks.
 
 To run an unpublished checkout:
@@ -103,7 +103,7 @@ mise exec -- just test
 existing checkout, run `just hooks-install`. The repository enables staged Biome formatting through
 QG and runs full Biome checks, the build, TypeScript checks, and tests through
 `hooks.preCommit.checks`.
-Use `just qg pre-commit` to run the complete hook manually, or `just check` for
+Use `just qg run-hook pre-commit` to run the complete hook manually, or `just check` for
 full QG rules (including Biome).
 
 Run the checkout's CLI with `mise exec -- just qg rules`.

@@ -27,11 +27,15 @@ rules:
     options: { limit: 1000000 }
 ```
 
+The CLI automatically warns on stderr if the local QG hook is missing or
+outdated. Set `hooks.preCommit.installation` to `auto` to install or update QG hooks
+automatically, or `off` to skip hook setup. The default is `check` (warn only). Rule diagnostics and exit status remain independent.
+
 Install a Git pre-commit hook with the published package:
 
 ```sh
 pnpm exec qg hooks install
-pnpm exec qg pre-commit  # run the complete hook manually
+pnpm exec qg run-hook pre-commit  # run the complete hook manually
 ```
 
 The hook checks staged contents and runs extra commands configured in the root
@@ -49,7 +53,7 @@ hooks:
 
 Enable `external/biome`, `external/prettier`, or `external/eslint` rules to move
 existing formatter/linter hook checks into QG. Other commands belong in
-`hooks.preCommit.checks`. See [pre-commit setup](../../docs/cli.md#pre-commit-and-hooks-install)
+`hooks.preCommit.checks`. See [pre-commit setup](../../docs/cli.md#run-hook-pre-commit-and-hooks-install)
 for installation, migration, and snapshot details.
 
 An optional project daemon supports persistent rule caches:

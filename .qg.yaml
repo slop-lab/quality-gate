@@ -21,6 +21,7 @@ rules:
 
 hooks:
   preCommit:
+    installation: auto
     checks:
       - name: biome-check
         command: node

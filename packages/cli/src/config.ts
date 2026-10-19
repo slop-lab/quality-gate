@@ -166,10 +166,22 @@ function normalizeConfig(value: unknown, path: string): QualityGateConfig {
       hooks.preCommit === undefined
         ? {}
         : requireObject(hooks.preCommit, "hooks.preCommit");
+    if (
+      preCommit.installation !== undefined &&
+      !["check", "auto", "off"].includes(preCommit.installation as string)
+    )
+      throw new Error(
+        "hooks.preCommit.installation must be check, auto, or off",
+      );
     if (preCommit.checks !== undefined && !Array.isArray(preCommit.checks))
       throw new Error("hooks.preCommit.checks must be an array");
     config.hooks = {
       preCommit: {
+        ...(preCommit.installation === undefined
+          ? {}
+          : {
+              installation: preCommit.installation as "check" | "auto" | "off",
+            }),
         checks: ((preCommit.checks as unknown[] | undefined) ?? []).map(
           normalizePreCommitCheck,
         ),

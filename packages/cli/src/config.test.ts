@@ -247,3 +247,30 @@ test("pre-commit command checks load from root config and reject invalid declara
     /hooks is only allowed in the root config/,
   );
 });
+
+test("hook installation policy is a single validated setting", async (t) => {
+  const root = await mkdtemp(join(tmpdir(), "qg-config-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  for (const installation of ["check", "auto", "off"]) {
+    await write(
+      root,
+      ".qg.yaml",
+      JSON.stringify({ hooks: { preCommit: { installation } } }),
+    );
+    assert.equal(
+      (await loadConfig(root))?.hooks?.preCommit?.installation,
+      installation,
+    );
+  }
+  for (const installation of [true, false, null, "invalid", {}]) {
+    await write(
+      root,
+      ".qg.yaml",
+      JSON.stringify({ hooks: { preCommit: { installation } } }),
+    );
+    await assert.rejects(
+      loadConfig(root),
+      /hooks.preCommit.installation must be check, auto, or off/,
+    );
+  }
+});

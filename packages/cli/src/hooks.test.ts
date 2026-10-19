@@ -15,7 +15,7 @@ import { type TestContext, test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import { recommendedRules } from "@slop-lab/qg-rules-recommended";
-import { installHooks } from "./hooks.js";
+import { inspectPreCommitHook, installHooks } from "./hooks.js";
 
 const exec = promisify(execFile);
 const cli = fileURLToPath(new URL("./index.mjs", import.meta.url));
@@ -34,6 +34,7 @@ test("hook installation respects hooksPath, is idempotent, and backs up an expli
   const { root, git } = await repository(t);
   await git("config", "core.hooksPath", ".hooks");
   await mkdir(join(root, ".hooks"));
+  assert.match((await inspectPreCommitHook(root, cli)) ?? "", /not installed/);
   const path = join(root, ".hooks", "pre-commit");
   const previous = "#!/bin/sh\nexit 7\n";
   await writeFile(path, previous);
@@ -41,6 +42,7 @@ test("hook installation respects hooksPath, is idempotent, and backs up an expli
   assert.equal(await readFile(path, "utf8"), previous);
   const installed = await installHooks(root, cli, true);
   assert.equal(installed.path, path);
+  assert.equal(await inspectPreCommitHook(root, cli), undefined);
   assert.ok(installed.backup);
   assert.equal(await readFile(installed.backup, "utf8"), previous);
   const content = await readFile(path, "utf8");
@@ -49,6 +51,10 @@ test("hook installation respects hooksPath, is idempotent, and backs up an expli
   assert.equal(await readFile(path, "utf8"), content);
   if (process.platform !== "win32") {
     await chmod(path, 0o644);
+    assert.match(
+      (await inspectPreCommitHook(root, cli)) ?? "",
+      /not executable/,
+    );
     await installHooks(root, cli);
     assert.ok((await stat(path)).mode & 0o111);
   }
@@ -140,5 +146,116 @@ test("installed package hooks use the stable dependency path rather than a versi
   const content = await readFile(installed.path, "utf8");
   assert.match(content, /node_modules\/@slop-lab\/qg\/dist\/index.mjs/);
   assert.doesNotMatch(content, /versioned/);
-  await assert.rejects(git("hook", "run", "pre-commit"), /\["pre-commit"\]/);
+  await assert.rejects(
+    git("hook", "run", "pre-commit"),
+    /\["run-hook","pre-commit"\]/,
+  );
+});
+
+test("CLI startup verifies hooks outside rule results; implicit qg aliases check and off skips setup only", async (t) => {
+  const { root } = await repository(t);
+  const config = {
+    rules: Object.fromEntries(
+      recommendedRules.map((rule) => [rule.metadata.id, "off"]),
+    ),
+    hooks: {
+      preCommit: {
+        installation: "check",
+        checks: [
+          {
+            name: "extra",
+            command: process.execPath,
+            args: ["-e", "process.exit(1)"],
+            message: "extra failed",
+          },
+        ],
+      },
+    },
+  };
+  const save = () => writeFile(join(root, ".qg.yaml"), JSON.stringify(config));
+  await save();
+  const implicit = await exec(process.execPath, [cli], { cwd: root });
+  const explicit = await exec(process.execPath, [cli, "check"], { cwd: root });
+  assert.equal(implicit.stdout, explicit.stdout);
+  assert.equal(implicit.stderr, explicit.stderr);
+  assert.match(implicit.stderr, /QG setup warning:.*not installed/);
+  assert.match(implicit.stdout, /No diagnostics/);
+  const json = await exec(
+    process.execPath,
+    [cli, "check", "--format", "json"],
+    { cwd: root },
+  );
+  assert.deepEqual(JSON.parse(json.stdout).diagnostics, []);
+  assert.match(json.stderr, /QG setup warning/);
+  const help = await exec(process.execPath, [cli, "--help"], { cwd: root });
+  assert.equal(help.stderr, "");
+  assert.match(help.stdout, /qg run-hook pre-commit/);
+  assert.doesNotMatch(help.stdout, /qg doctor/);
+  await assert.rejects(
+    exec(process.execPath, [cli, "pre-commit"], { cwd: root }),
+    /Unknown command/,
+  );
+  await assert.rejects(
+    exec(process.execPath, [cli, "run-hook", "unsupported"], { cwd: root }),
+    /Usage: qg run-hook pre-commit/,
+  );
+  config.hooks.preCommit.installation = "off";
+  await save();
+  const disabled = await exec(process.execPath, [cli], { cwd: root });
+  assert.equal(disabled.stderr, "");
+  assert.equal(disabled.stdout, implicit.stdout);
+  await assert.rejects(
+    exec(
+      process.execPath,
+      [cli, "run-hook", "pre-commit", "--format", "json"],
+      { cwd: root },
+    ),
+    (error: unknown) => {
+      const result = error as { stdout: string; stderr: string; code: number };
+      assert.equal(result.code, 1);
+      assert.equal(result.stderr, "");
+      assert.equal(
+        JSON.parse(result.stdout).diagnostics[0].message,
+        "extra: extra failed",
+      );
+      return true;
+    },
+  );
+});
+
+test("automatic setup installs and updates managed hooks, honors hooksPath, and preserves custom hooks", async (t) => {
+  const { root, git } = await repository(t);
+  await git("config", "core.hooksPath", ".hooks");
+  await writeFile(
+    join(root, ".qg.yaml"),
+    JSON.stringify({
+      rules: Object.fromEntries(
+        recommendedRules.map((rule) => [rule.metadata.id, "off"]),
+      ),
+      hooks: { preCommit: { installation: "auto" } },
+    }),
+  );
+  const run = (...args: string[]) =>
+    exec(process.execPath, [cli, ...args], { cwd: root });
+  const path = join(root, ".hooks", "pre-commit");
+  // Help never installs anything, even when automatic setup is configured.
+  await run("--help");
+  await assert.rejects(stat(path), /ENOENT/);
+  const first = await run("check", "--format", "json");
+  assert.match(first.stderr, /QG setup: Installed/);
+  assert.deepEqual(JSON.parse(first.stdout).diagnostics, []);
+  const expected = await readFile(path, "utf8");
+  assert.match(expected, /run-hook pre-commit/);
+  assert.equal((await run()).stderr, "");
+  await writeFile(path, expected.replace("run-hook pre-commit", "pre-commit"));
+  assert.match(
+    (await run("rules", "--format", "json")).stderr,
+    /QG setup: Installed/,
+  );
+  assert.equal(await readFile(path, "utf8"), expected);
+  const custom = "#!/bin/sh\n# Custom hook managed elsewhere\nexit 0\n";
+  await writeFile(path, custom);
+  const blocked = await run("check");
+  assert.match(blocked.stderr, /Cannot automatically install.*already exists/);
+  assert.equal(await readFile(path, "utf8"), custom);
 });

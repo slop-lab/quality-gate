@@ -8,7 +8,8 @@ installation, prefix it with `pnpm exec`.
 
 ### `check`
 
-Run a scan and report diagnostics.
+Run a rule scan and report diagnostics. Running `qg` without a command is an
+alias for `qg check`.
 
 ```sh
 qg check
@@ -46,7 +47,7 @@ Ref comparisons select paths from Git but read current working tree contents.
 changes and untracked files. Scan selection flags are processed in order, so
 prefer one selection per invocation.
 
-### `pre-commit` and `hooks install`
+### `run-hook pre-commit` and `hooks install`
 
 Install the published CLI as a development dependency and install the hook:
 
@@ -64,7 +65,7 @@ CLI and does not download packages during commits. Reinstalling a QG hook is
 idempotent. For an existing custom hook, first migrate its checks into QG, then
 use `qg hooks install --force`; the previous script is backed up before replacement.
 
-The hook runs `qg pre-commit`. That command always checks staged paths and index
+The hook runs `qg run-hook pre-commit`. That command always checks staged paths and index
 contents, even if `scan.defaultMode` is `full`, and then runs extra checks from
 the **root** configuration in order:
 
@@ -110,7 +111,38 @@ All configured checks run even if another check fails. Failure output and
 configured recovery messages appear in text output; JSON output includes
 command details and stdout/stderr in diagnostic metadata. Ordinary `qg check`
 (including `--staged` and `--full`) does not run hook-only commands. To reproduce
-the complete hook manually, run `npx qg pre-commit` or `pnpm exec qg pre-commit`.
+the complete hook manually, run `npx qg run-hook pre-commit` or `pnpm exec qg run-hook pre-commit`.
+
+Hook installation is verified automatically at CLI startup, separately from rule
+scans. A missing, outdated, non-executable, or unrecognized hook produces a setup
+warning on **stderr**, with installation instructions. It does not change rule
+diagnostics, JSON stdout, or the exit status. Help and hook installation skip
+this check; outside a Git worktree it is not applicable. No separate doctor
+command is needed.
+
+The check uses Git's effective hooks directory and compares the installed hook
+with QG's current generated script. Custom wrappers and other hook managers are
+not inferred from shell text. `hooks.preCommit.installation` controls the startup
+behavior with one field:
+
+- `check` (default): verify installation and warn without modifying Git hooks.
+- `auto`: install a missing QG hook, update an outdated QG hook, or repair its
+  executable permission. Existing custom hooks are left intact with an
+  actionable warning; automatic setup does not use `--force`.
+- `off`: skip automatic verification and installation.
+
+For a clone using another hook manager or intentionally not installing hooks:
+
+```yaml
+hooks:
+  preCommit:
+    installation: off  # check (default), auto, or off
+```
+
+This disables automatic hook setup only. `qg run-hook pre-commit` still
+runs staged rules and all configured additional checks. The setting is allowed
+only in the root configuration and applies equally to implicit `qg`, explicit
+`qg check`, and other operational CLI commands, including daemon clients.
 
 ### `daemon`
 

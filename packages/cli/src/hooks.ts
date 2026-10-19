@@ -19,6 +19,36 @@ export async function installHooks(
   cliPath: string,
   force = false,
 ): Promise<{ path: string; backup?: string }> {
+  const { hooks, path, content } = await hookLocation(directory, cliPath);
+  let previous: string | undefined;
+  try {
+    const stat = await lstat(path);
+    if (!stat.isFile())
+      throw new Error(`Cannot replace non-file hook: ${path}`);
+    previous = await readFile(path, "utf8");
+  } catch (error) {
+    if (!isMissing(error)) throw error;
+  }
+  let backup: string | undefined;
+  if (
+    previous !== undefined &&
+    previous !== content &&
+    !previous.startsWith(header)
+  ) {
+    if (!force)
+      throw new Error(
+        `A pre-commit hook already exists at ${path}. Move its checks into .qg.yaml, then run qg hooks install --force to back it up and replace it.`,
+      );
+    backup = `${path}.qg-backup-${Date.now()}`;
+    await copyFile(path, backup, constants.COPYFILE_EXCL);
+  }
+  await mkdir(hooks, { recursive: true });
+  if (previous !== content) await writeFile(path, content, { mode: 0o755 });
+  await chmod(path, 0o755);
+  return { path, ...(backup ? { backup } : {}) };
+}
+
+async function hookLocation(directory: string, cliPath: string) {
   const git = async (...args: string[]) =>
     (await exec("git", args, { cwd: directory })).stdout.trim();
   const root = await git("rev-parse", "--show-toplevel");
@@ -50,33 +80,50 @@ export async function installHooks(
     relativeEntry.startsWith("../") || isAbsolute(relativeEntry)
       ? entry.replaceAll("\\", "/")
       : `./${relativeEntry}`;
-  const content = `${header}set -eu\ncd "$(git rev-parse --show-toplevel)"\nexec node ${shellQuote(executable)} pre-commit\n`;
-  let previous: string | undefined;
+  const content = `${header}set -eu\ncd "$(git rev-parse --show-toplevel)"\nexec node ${shellQuote(executable)} run-hook pre-commit\n`;
+  return { hooks, path, content, entry };
+}
+
+/** Return an actionable setup issue, outside the rule diagnostic pipeline. */
+export async function inspectPreCommitHook(
+  directory: string,
+  cliPath: string,
+): Promise<string | undefined> {
   try {
-    const stat = await lstat(path);
-    if (!stat.isFile())
-      throw new Error(`Cannot replace non-file hook: ${path}`);
-    previous = await readFile(path, "utf8");
+    const { path, content, entry } = await hookLocation(directory, cliPath);
+    let installed: string;
+    let executable: boolean;
+    try {
+      const info = await lstat(path);
+      executable = process.platform === "win32" || Boolean(info.mode & 0o111);
+      installed = await readFile(path, "utf8");
+    } catch (error) {
+      if (isMissing(error))
+        return `QG pre-commit hook is not installed at ${path}.`;
+      throw error;
+    }
+    if (!executable) return `Pre-commit hook is not executable: ${path}.`;
+    if (installed !== content)
+      return `Pre-commit hook does not match the current QG hook at ${path}.`;
+    try {
+      await readFile(entry);
+    } catch (error) {
+      if (isMissing(error))
+        return `QG hook CLI entry point is missing: ${entry}.`;
+      throw error;
+    }
+    return undefined;
   } catch (error) {
-    if (!isMissing(error)) throw error;
+    // Outside a Git worktree, there is no local pre-commit hook to verify.
+    if (
+      error instanceof Error &&
+      "stderr" in error &&
+      typeof error.stderr === "string" &&
+      /not a git repository|must be run in a work tree/.test(error.stderr)
+    )
+      return undefined;
+    return `Cannot verify the QG pre-commit hook: ${error instanceof Error ? error.message : String(error)}`;
   }
-  let backup: string | undefined;
-  if (
-    previous !== undefined &&
-    previous !== content &&
-    !previous.startsWith(header)
-  ) {
-    if (!force)
-      throw new Error(
-        `A pre-commit hook already exists at ${path}. Move its checks into .qg.yaml, then run qg hooks install --force to back it up and replace it.`,
-      );
-    backup = `${path}.qg-backup-${Date.now()}`;
-    await copyFile(path, backup, constants.COPYFILE_EXCL);
-  }
-  await mkdir(hooks, { recursive: true });
-  if (previous !== content) await writeFile(path, content, { mode: 0o755 });
-  await chmod(path, 0o755);
-  return { path, ...(backup ? { backup } : {}) };
 }
 
 function shellQuote(value: string): string {

@@ -12,11 +12,11 @@ import {
 import { recommendedRules } from "@slop-lab/qg-rules-recommended";
 import { loadConfig } from "./config.js";
 import { daemonDirectory, requestDaemon, startDaemon } from "./daemon.js";
-import { installHooks } from "./hooks.js";
+import { inspectPreCommitHook, installHooks } from "./hooks.js";
 import { runPreCommitChecks } from "./pre-commit.js";
 
 interface CliOptions {
-  command: "check" | "pre-commit" | "rules" | "help";
+  command: "check" | "run-hook" | "rules" | "help";
   mode?: ScanMode;
   base?: string;
   head?: string;
@@ -37,6 +37,8 @@ async function main(argv: string[]): Promise<number> {
     return 0;
   }
 
+  await checkSetup(options.root, options.config);
+
   if (options.command === "rules") {
     printRules(options.format);
     return 0;
@@ -44,13 +46,13 @@ async function main(argv: string[]): Promise<number> {
 
   // The daemon runs rule scans; hook commands run once in this client.
   const checkArgs =
-    options.command === "pre-commit"
-      ? ["check", ...argv.slice(1), "--staged"]
+    options.command === "run-hook"
+      ? ["check", ...argv.slice(2), "--staged"]
       : argv;
   const remote = await requestDaemon(options.root, "check", checkArgs);
   if (remote?.error) throw new Error(remote.error);
   const result = remote?.result ?? (await executeCheck(options));
-  if (options.command === "pre-commit") {
+  if (options.command === "run-hook") {
     const config = await loadConfig(options.root, options.config);
     result.diagnostics.push(
       ...(await runPreCommitChecks(
@@ -61,6 +63,32 @@ async function main(argv: string[]): Promise<number> {
   }
   printResult(result, options.format);
   return exitCodeFor(result);
+}
+
+async function checkSetup(root: string, configPath?: string): Promise<void> {
+  const config = await loadConfig(root, configPath);
+  const policy = config?.hooks?.preCommit?.installation ?? "check";
+  if (policy === "off") return;
+  const cliPath = fileURLToPath(import.meta.url);
+  const issue = await inspectPreCommitHook(root, cliPath);
+  if (!issue) return;
+  if (policy === "auto") {
+    try {
+      const installed = await installHooks(root, cliPath);
+      console.error(
+        `QG setup: Installed pre-commit hook at ${installed.path}.`,
+      );
+      return;
+    } catch (error) {
+      console.error(
+        `QG setup warning: Cannot automatically install the pre-commit hook: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      return;
+    }
+  }
+  console.error(
+    `QG setup warning: ${issue} Run qg hooks install, or set hooks.preCommit.installation to auto or off.`,
+  );
 }
 
 async function executeCheck(
@@ -127,6 +155,7 @@ async function runSpecialCommand(argv: string[]): Promise<number | undefined> {
   const rootIndex = argv.indexOf("--root");
   const root =
     rootIndex >= 0 && argv[rootIndex + 1] ? argv[rootIndex + 1] : cwd();
+  await checkSetup(root);
   if (command === "daemon") {
     const action = argv[1] ?? "status";
     if (action === "start") {
@@ -219,7 +248,7 @@ function parseArgs(argv: string[]): CliOptions {
     }
   }
 
-  if (command === "pre-commit") {
+  if (command === "run-hook") {
     options.mode = "changed";
     options.staged = true;
     options.workingTree = false;
@@ -229,7 +258,16 @@ function parseArgs(argv: string[]): CliOptions {
 
 function readCommand(args: string[]): CliOptions["command"] {
   const first = args[0];
-  if (first === "check" || first === "rules" || first === "pre-commit") {
+  if (first === "run-hook") {
+    args.shift();
+    if (args[0] === "--help" || args[0] === "-h") return "help";
+    if (args.shift() !== "pre-commit")
+      throw new Error(
+        "Usage: qg run-hook pre-commit [--root <path>] [--config <path>] [--format stylish|json]",
+      );
+    return "run-hook";
+  }
+  if (first === "check" || first === "rules") {
     args.shift();
     return first;
   }
@@ -297,9 +335,11 @@ Usage:
   qg check [--changed|--full] [--base <ref>] [--format stylish|json]
   qg rules [--format stylish|json]
   qg hooks install [--root <path>] [--force]
-  qg pre-commit [--format stylish|json]
+  qg run-hook pre-commit [--format stylish|json]
   qg daemon <start|status|stop>
   qg cache clear --rule <rule-id>
+
+qg with no command is an alias for qg check.
 
 Options:
   --changed       Scan Git affected paths.

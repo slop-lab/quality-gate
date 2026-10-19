@@ -235,7 +235,13 @@ export interface PreCommitCheck {
 }
 
 export interface QualityGateConfig {
-  hooks?: { preCommit?: { checks?: PreCommitCheck[] } };
+  hooks?: {
+    preCommit?: {
+      /** Local hook setup at CLI startup; defaults to check. */
+      installation?: "check" | "auto" | "off";
+      checks?: PreCommitCheck[];
+    };
+  };
   artifacts?: { generated?: GeneratedArtifactsConfig };
   scan?: {
     defaultMode?: ScanMode;
