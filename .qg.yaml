@@ -1,3 +1,5 @@
+presets: [js, test]
+
 scan:
   defaultMode: changed
 

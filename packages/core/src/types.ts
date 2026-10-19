@@ -235,6 +235,8 @@ export interface PreCommitCheck {
 }
 
 export interface QualityGateConfig {
+  /** Optional CLI rule sets, installed separately in the project. */
+  presets?: ("js" | "test")[];
   hooks?: {
     preCommit?: {
       /** Local hook setup at CLI startup; defaults to check. */

@@ -4,16 +4,17 @@ import { fileURLToPath } from "node:url";
 import {
   type Diagnostic,
   JsonFileRuleCacheStore,
+  type Rule,
   type RuleCacheStore,
   type RunResult,
   runQualityGate,
   type ScanMode,
 } from "@slop-lab/qg-core";
-import { recommendedRules } from "@slop-lab/qg-rules-recommended";
 import { loadConfig } from "./config.js";
 import { daemonDirectory, requestDaemon, startDaemon } from "./daemon.js";
 import { inspectPreCommitHook, installHooks } from "./hooks.js";
 import { runPreCommitChecks } from "./pre-commit.js";
+import { loadRules } from "./rule-sets.js";
 
 interface CliOptions {
   command: "check" | "run-hook" | "rules" | "help";
@@ -40,7 +41,8 @@ async function main(argv: string[]): Promise<number> {
   await checkSetup(options.root, options.config);
 
   if (options.command === "rules") {
-    printRules(options.format);
+    const config = await loadConfig(options.root, options.config);
+    printRules(await loadRules(options.root, config), options.format);
     return 0;
   }
 
@@ -95,6 +97,7 @@ async function executeCheck(
   options: CliOptions,
   cacheStore?: RuleCacheStore,
 ): Promise<RunResult> {
+  const config = await loadConfig(options.root, options.config);
   return runQualityGate({
     root: options.root,
     mode: options.mode,
@@ -102,8 +105,8 @@ async function executeCheck(
     head: options.head,
     staged: options.staged,
     workingTree: options.workingTree,
-    rules: recommendedRules,
-    config: await loadConfig(options.root, options.config),
+    rules: await loadRules(options.root, config),
+    config,
     cacheStore,
   });
 }
@@ -292,8 +295,8 @@ function requireValue(flag: string, args: string[]): string {
   return value;
 }
 
-function printRules(format: "stylish" | "json"): void {
-  const rules = recommendedRules.map((rule) => rule.metadata);
+function printRules(loaded: Rule[], format: "stylish" | "json"): void {
+  const rules = loaded.map((rule) => rule.metadata);
   if (format === "json") {
     console.log(JSON.stringify(rules, null, 2));
     return;

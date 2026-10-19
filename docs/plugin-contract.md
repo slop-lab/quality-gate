@@ -6,8 +6,9 @@ This document combines the current rule interface with future plugin design
 requirements. Today, library callers pass `Rule` objects and injectable
 providers to `runQualityGate`; the CLI loads its default set from the separate
 `@slop-lab/qg-rules-recommended` package. Core does not depend on rule packages.
-Dynamic plugin loading, lifecycle hooks, rich input discovery, and automatic
-fix application are not implemented.
+The CLI can additionally load the separately installed `js` and `test` presets
+selected in the root configuration. Custom plugin loading, lifecycle hooks,
+rich input discovery, and automatic fix application are not implemented.
 
 ## Principles
 
@@ -64,6 +65,16 @@ the default is `file`. Aggregate directory rules resolve options with
 `context.resolveConfig(path, "directory")`. These distinguish self-only
 directory overrides from settings for a file at the same relative path.
 See [directory limits and configuration scopes](directory-limits.md).
+
+## Testing custom rules
+
+Use `@slop-lab/qg-test-utils` as a development dependency alongside core.
+`createFixture` creates temporary projects, `runRule` executes one rule with
+typed options or full configuration, and `assertDiagnostic` checks selected
+fields. The helper supports synthetic changed paths, real staged Git input,
+process/filesystem mocks, cache stores, generated artifacts, and path overrides.
+See the [test utility guide](../packages/test-utils/README.md) for examples,
+configuration precedence, and fixture cleanup.
 
 ## Useful Inputs
 

@@ -7,10 +7,12 @@ import {
   readFile,
   rm,
   stat,
+  symlink,
   writeFile,
 } from "node:fs/promises";
+import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { type TestContext, test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
@@ -62,7 +64,19 @@ test("hook installation respects hooksPath, is idempotent, and backs up an expli
 
 test("installed pre-commit checks index contents and runs configured additional checks only in hook mode", async (t) => {
   const { root, git } = await repository(t);
+  const optional = join(root, "node_modules", "@slop-lab");
+  await mkdir(optional, { recursive: true });
+  await symlink(
+    dirname(
+      createRequire(import.meta.url).resolve(
+        "@slop-lab/qg-rules-js/package.json",
+      ),
+    ),
+    join(optional, "qg-rules-js"),
+    "junction",
+  );
   const config = {
+    presets: ["js"],
     scan: { defaultMode: "full" },
     rules: {
       ...Object.fromEntries(

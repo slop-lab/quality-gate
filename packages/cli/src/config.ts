@@ -44,6 +44,10 @@ export async function loadConfig(
   for (const path of nestedPaths) {
     const directory = normalizePath(relative(root, dirname(path)));
     const nested = await readConfig(path, relative(root, path));
+    if (nested.presets)
+      throw new Error(
+        `${relative(root, path)}: presets is only allowed in the root config`,
+      );
     if (nested.scan) {
       throw new Error(
         `${relative(root, path)}: scan is only allowed in the root config`,
@@ -160,6 +164,12 @@ function isMissing(error: unknown): boolean {
 function normalizeConfig(value: unknown, path: string): QualityGateConfig {
   const object = requireObject(value, `${path} root`);
   const config: QualityGateConfig = {};
+  if (object.presets !== undefined) {
+    const presets = requireStrings(object.presets, "presets");
+    if (presets.some((preset) => preset !== "js" && preset !== "test"))
+      throw new Error("presets may only contain js or test");
+    config.presets = presets as ("js" | "test")[];
+  }
   if (object.hooks !== undefined) {
     const hooks = requireObject(object.hooks, "hooks");
     const preCommit =

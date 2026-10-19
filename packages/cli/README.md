@@ -4,8 +4,8 @@
 Requires Node.js 24 or later.
 
 The CLI uses `@slop-lab/qg-core` and `@slop-lab/qg-rules-recommended` as runtime
-dependencies. Your package manager installs these and the individual rule
-packages automatically.
+dependencies. The default set contains Git and file checks. JavaScript and
+TypeScript test rules are separate optional packages.
 
 ```sh
 pnpm add -D @slop-lab/qg
@@ -26,6 +26,11 @@ rules:
     severity: error
     options: { limit: 1000000 }
 ```
+
+For JS/TS projects, install `@slop-lab/qg-rules-js` separately and select
+`presets: [js]` in the root config. Install `@slop-lab/qg-rules-test` and select
+`presets: [test]` for its TypeScript fixture policy. Combine both as
+`presets: [js, test]`. Installed packages are not activated automatically.
 
 The CLI automatically warns on stderr if the local QG hook is missing or
 outdated. Set `hooks.preCommit.installation` to `auto` to install or update QG hooks

@@ -1,8 +1,19 @@
 # QG JavaScript Rules
 
-`@slop-lab/qg-rules-js` exports `jsRules` and each individual rule. The
-recommended QG rule set includes these rules. External adapters require explicit
-opt-in; the JavaScript and package manager checks are enabled by default.
+`@slop-lab/qg-rules-js` exports `jsRules` and each individual rule. It is a
+separate, optional package and is not included in `qg-rules-recommended`.
+Install it in the project and opt in through the root QG configuration:
+
+```sh
+npm install --save-dev @slop-lab/qg-rules-js
+```
+
+```yaml
+presets: [js]
+```
+
+Once selected, JavaScript and package manager checks are enabled by default.
+Package-name restrictions and external adapters still require explicit opt-in.
 
 - `js/require-ts-check`: require an effective leading `// @ts-check` directive.
 - `package-manager/no-npm-lock-with-pnpm`: reject npm lockfiles in pnpm workspaces.

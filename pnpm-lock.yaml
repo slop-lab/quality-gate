@@ -11,6 +11,12 @@ importers:
       '@biomejs/biome':
         specifier: 2.5.15
         version: 2.5.15
+      '@slop-lab/qg-rules-js':
+        specifier: 0.1.0
+        version: link:packages/rules-js
+      '@slop-lab/qg-rules-test':
+        specifier: 0.1.0
+        version: link:packages/rules-test
       '@types/node':
         specifier: ^24.0.0
         version: 24.13.2
@@ -76,13 +82,13 @@ importers:
       '@slop-lab/qg-rules-git':
         specifier: 0.1.0
         version: link:../rules-git
+    devDependencies:
       '@slop-lab/qg-rules-js':
         specifier: 0.1.0
         version: link:../rules-js
       '@slop-lab/qg-rules-test':
         specifier: 0.1.0
         version: link:../rules-test
-    devDependencies:
       '@slop-lab/qg-test-utils':
         specifier: 0.1.0
         version: link:../test-utils

@@ -22,7 +22,8 @@ The implementation is TypeScript. The runtime includes:
 - `@slop-lab/qg-rules-files`: required root and companion files, file limits, document references, Markdown character policies, and suppression-reason checks.
 - `@slop-lab/qg-rules-js`: JavaScript type-checking, package manager consistency, and opt-in external formatter/linter checks.
 - `@slop-lab/qg-rules-test`: test fixture checks.
-- `@slop-lab/qg-rules-recommended`: the default rule set, composed from the individual rule packages.
+- `@slop-lab/qg-test-utils`: fixtures, rule execution, and assertions for custom rule tests.
+- `@slop-lab/qg-rules-recommended`: the language-independent default Git and file rule set.
 - `@slop-lab/qg`: the `qg` CLI for `check`, `run-hook`, `hooks install`, `rules`, `daemon`, and `cache clear --rule`.
 
 The CLI defaults to staged changes and index contents. Use `check --full` for
@@ -64,9 +65,22 @@ For package scripts, call the local binary directly:
 }
 ```
 
-The CLI declares core, the recommended rule set, and YAML parsing as runtime
-dependencies. Your package manager installs these automatically. Core has no
+The CLI declares core, the recommended Git/file rule set, and YAML parsing as
+runtime dependencies. Your package manager installs these automatically. Core has no
 dependency on the CLI or rule packages and can be embedded with custom rules.
+
+JavaScript and TypeScript rules are separate opt-in packages:
+
+```sh
+npm install --save-dev @slop-lab/qg-rules-js @slop-lab/qg-rules-test
+```
+
+```yaml
+presets: [js, test]
+```
+
+Install only the packages your project needs. The default CLI installation does
+not include either package. `qg rules` lists the rules selected for the project.
 
 The installed hook runs staged QG rules plus any additional commands configured
 under `hooks.preCommit.checks` in `.qg.yaml`. Run `pnpm exec qg run-hook pre-commit` to
@@ -115,7 +129,7 @@ each package's `src/index.ts` as its public entrypoint. The `exports`, `main`,
 change the build entrypoints rather than editing those fields by hand.
 Package imports remain external to the build. Publish core first, then the
 individual rule packages, then `@slop-lab/qg-rules-recommended`, and finally
-`@slop-lab/qg`. `@slop-lab/qg-test-utils` remains private. Testing unpublished
+`@slop-lab/qg`. Test utilities can be published after core. Testing unpublished
 tarballs in another project requires installing all workspace dependency
 tarballs together; the CLI tarball alone needs those versions in the registry.
 
@@ -130,6 +144,7 @@ order, with npm:
 
 ```sh
 npm publish --workspace @slop-lab/qg-core
+npm publish --workspace @slop-lab/qg-test-utils
 npm publish --workspace @slop-lab/qg-rules-git
 npm publish --workspace @slop-lab/qg-rules-files
 npm publish --workspace @slop-lab/qg-rules-js
@@ -139,5 +154,5 @@ npm publish --workspace @slop-lab/qg
 ```
 
 Each package's `prepack` builds its entry point through `npm run build`.
-Public access is set in each public package's `publishConfig`. The root package
-and `@slop-lab/qg-test-utils` are private and must not be published.
+Public access is set in each public package's `publishConfig`. Only the root
+package is private and must not be published.

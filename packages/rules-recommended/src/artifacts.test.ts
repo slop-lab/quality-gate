@@ -1,11 +1,15 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { type QualityGateConfig, runQualityGate } from "@slop-lab/qg-core";
+import { jsRules } from "@slop-lab/qg-rules-js";
+import { testRules } from "@slop-lab/qg-rules-test";
 import { createFixture } from "@slop-lab/qg-test-utils";
 import { recommendedRules } from "./index.js";
 
+const allRules = [...recommendedRules, ...jsRules, ...testRules];
+
 const off = Object.fromEntries(
-  recommendedRules.map((rule) => [rule.metadata.id, "off" as const]),
+  allRules.map((rule) => [rule.metadata.id, "off" as const]),
 );
 
 test("generated artifacts skip all built-in content checks and never launch external tools", async (t) => {
@@ -20,7 +24,7 @@ test("generated artifacts skip all built-in content checks and never launch exte
   });
   t.after(() => fixture.cleanup());
   const rules = { ...off } as NonNullable<QualityGateConfig["rules"]>;
-  for (const rule of recommendedRules.filter(
+  for (const rule of allRules.filter(
     (rule) => rule.metadata.ignoreGeneratedArtifacts,
   ))
     rules[rule.metadata.id] = "error";
@@ -33,7 +37,7 @@ test("generated artifacts skip all built-in content checks and never launch exte
   const result = await runQualityGate({
     root: fixture.root,
     mode: "full",
-    rules: recommendedRules,
+    rules: allRules,
     config: { artifacts: { generated: { include: ["api/**"] } }, rules },
     process: {
       async exec() {
@@ -76,7 +80,7 @@ test("project source exceptions and per-rule opt-in apply across JS and Markdown
   const result = await runQualityGate({
     root: fixture.root,
     mode: "full",
-    rules: recommendedRules,
+    rules: allRules,
     config,
   });
   assert.deepEqual(
@@ -100,7 +104,7 @@ test("generated targets remain visible to document references and package manage
   const result = await runQualityGate({
     root: fixture.root,
     mode: "full",
-    rules: recommendedRules,
+    rules: allRules,
     config: {
       artifacts: { generated: { include: ["api/**", "pnpm-workspace.yaml"] } },
       rules: {

@@ -203,7 +203,7 @@ the exit status.
 
 `@slop-lab/qg-core` is independent of the CLI and all rule packages. The CLI
 declares core, the recommended rule set, and YAML parsing as runtime
-dependencies. The recommended set composes the individual rule packages;
+dependencies. The recommended set composes language-independent Git and file rules;
 package imports are kept external by the build and installed by the package
 manager. All packages use ESM so the CLI can import core and rules on Node.js 24.
 

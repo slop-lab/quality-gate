@@ -1,16 +1,19 @@
+import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   type ChangedProvider,
   type ChangeEntry,
   type Diagnostic,
   NodeFileSystemProvider,
-  type ProcessProvider,
+  type QualityGateConfig,
   type Rule,
+  type RunOptions,
   type RunResult,
+  resolveRuleConfig,
   runQualityGate,
   type ScanMode,
 } from "@slop-lab/qg-core";
@@ -25,49 +28,89 @@ export interface TestFixture {
   cleanup(): Promise<void>;
 }
 
-export interface RunRuleOptions {
+export interface RunRuleOptions<TOptions = unknown>
+  extends Omit<RunOptions, "root" | "rules" | "mode" | "config"> {
   fixture: TestFixture;
-  rule: Rule;
+  rule: Rule<TOptions>;
+  /** Defaults to full, or changed when staged/workingTree is selected. */
   mode?: ScanMode;
+  /** Synthetic changes; omit with staged/workingTree to read real Git changes. */
   changes?: ChangeEntry[];
-  process?: ProcessProvider;
+  config?: QualityGateConfig;
+  /** Override root rule options; path overrides still take precedence. */
+  options?: Partial<TOptions>;
+  severity?: Diagnostic["severity"] | "off";
 }
 
-export interface ExpectedDiagnostic {
-  ruleId?: string;
-  severity?: Diagnostic["severity"];
+export type ExpectedDiagnostic = Partial<Omit<Diagnostic, "message">> & {
   message?: string | RegExp;
-  path?: string;
-  scope?: Diagnostic["scope"];
-}
+};
 
 export async function createFixture(
   files: Record<string, string>,
 ): Promise<TestFixture> {
   const root = await mkFixtureRoot();
 
-  for (const [path, content] of Object.entries(files)) {
-    await writeFixtureFile(root, path, content);
+  try {
+    for (const [path, content] of Object.entries(files)) {
+      await writeFixtureFile(root, path, content);
+    }
+    return fixtureFromRoot(root);
+  } catch (error) {
+    await rm(root, { recursive: true, force: true });
+    throw error;
   }
-
-  return fixtureFromRoot(root);
 }
 
-export function runRule({
+export function runRule<TOptions = unknown>({
   fixture,
   rule,
-  mode = "full",
-  changes = [],
-  process,
-}: RunRuleOptions): Promise<RunResult> {
+  changes,
+  config,
+  options,
+  severity,
+  ...runOptions
+}: RunRuleOptions<TOptions>): Promise<RunResult> {
+  if (changes !== undefined && runOptions.changedProvider !== undefined)
+    throw new Error("Pass either changes or changedProvider, not both.");
+  let resolvedConfig = config;
+  if (options !== undefined || severity !== undefined) {
+    const resolved = resolveRuleConfig(config, rule);
+    const base: unknown = resolved.options;
+    const next: unknown = options;
+    const merged =
+      isObject(base) && isObject(next) ? { ...base, ...next } : (next ?? base);
+    resolvedConfig = {
+      ...config,
+      rules: {
+        ...config?.rules,
+        [rule.metadata.id]: {
+          severity: severity ?? (resolved.enabled ? resolved.severity : "off"),
+          options: merged,
+          ...(resolved.message === undefined
+            ? {}
+            : { message: resolved.message }),
+        },
+      },
+    };
+  }
+  const realChanges =
+    runOptions.staged ||
+    runOptions.workingTree ||
+    runOptions.base !== undefined ||
+    runOptions.head !== undefined;
   return runQualityGate({
+    ...runOptions,
     root: fixture.root,
-    mode,
+    mode: runOptions.mode ?? (realChanges ? "changed" : "full"),
     rules: [rule],
+    config: resolvedConfig,
     changedProvider:
-      mode === "changed" ? fixture.changedProvider(changes) : undefined,
-    fs: fixture.fs,
-    process,
+      runOptions.changedProvider ??
+      (changes !== undefined || !realChanges
+        ? fixture.changedProvider(changes ?? [])
+        : undefined),
+    fs: runOptions.fs ?? (runOptions.staged ? undefined : fixture.fs),
   });
 }
 
@@ -78,64 +121,47 @@ export function assertDiagnostic(
   if (!diagnostic) {
     throw new Error("Expected diagnostic, but received undefined.");
   }
-
-  if (expected.ruleId !== undefined && diagnostic.ruleId !== expected.ruleId) {
-    throw new Error(
-      `Expected ruleId ${expected.ruleId}, received ${diagnostic.ruleId}.`,
-    );
-  }
-
-  if (
-    expected.severity !== undefined &&
-    diagnostic.severity !== expected.severity
-  ) {
-    throw new Error(
-      `Expected severity ${expected.severity}, received ${diagnostic.severity}.`,
-    );
-  }
-
-  if (expected.message instanceof RegExp) {
-    if (!expected.message.test(diagnostic.message)) {
-      throw new Error(
-        `Expected message to match ${expected.message}, received ${diagnostic.message}.`,
+  for (const [key, value] of Object.entries(expected)) {
+    if (value === undefined) continue;
+    if (key === "message" && value instanceof RegExp) {
+      // Repeated assertions must not mutate a caller's stateful /g or /y regex.
+      assert.match(diagnostic.message, new RegExp(value.source, value.flags));
+    } else {
+      assert.deepStrictEqual(
+        diagnostic[key as keyof Diagnostic],
+        value,
+        `Diagnostic ${key} mismatch`,
       );
     }
-  } else if (
-    expected.message !== undefined &&
-    diagnostic.message !== expected.message
-  ) {
-    throw new Error(
-      `Expected message ${expected.message}, received ${diagnostic.message}.`,
-    );
   }
+}
 
-  if (expected.path !== undefined && diagnostic.path !== expected.path) {
-    throw new Error(
-      `Expected path ${expected.path}, received ${diagnostic.path}.`,
-    );
-  }
-
-  if (expected.scope !== undefined && diagnostic.scope !== expected.scope) {
-    throw new Error(
-      `Expected scope ${expected.scope}, received ${diagnostic.scope}.`,
-    );
-  }
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 export async function createFixtureFromDirectory(
   sourceDirectory: string | URL,
 ): Promise<TestFixture> {
-  const root = await mkFixtureRoot();
-  const source =
+  const source = resolve(
     sourceDirectory instanceof URL
       ? fileURLToPath(sourceDirectory)
-      : sourceDirectory;
-  await cp(source, root, {
-    recursive: true,
-    filter: (sourcePath) =>
-      !sourcePath.includes("node_modules") && !sourcePath.includes("dist"),
-  });
-  return fixtureFromRoot(root);
+      : sourceDirectory,
+  );
+  const root = await mkFixtureRoot();
+  try {
+    await cp(source, root, {
+      recursive: true,
+      filter: (sourcePath) =>
+        !relative(source, sourcePath)
+          .split(sep)
+          .some((part) => part === "node_modules" || part === "dist"),
+    });
+    return fixtureFromRoot(root);
+  } catch (error) {
+    await rm(root, { recursive: true, force: true });
+    throw error;
+  }
 }
 
 async function mkFixtureRoot(): Promise<string> {
@@ -156,10 +182,10 @@ function fixtureFromRoot(root: string): TestFixture {
       };
     },
     path(relativePath) {
-      return join(root, relativePath);
+      return fixturePath(root, relativePath);
     },
     read(relativePath) {
-      return readFile(join(root, relativePath), "utf8");
+      return readFile(fixturePath(root, relativePath), "utf8");
     },
     write(relativePath, content) {
       return writeFixtureFile(root, relativePath, content);
@@ -175,7 +201,22 @@ async function writeFixtureFile(
   path: string,
   content: string,
 ): Promise<void> {
-  const fullPath = join(root, path);
+  const fullPath = fixturePath(root, path);
   await mkdir(dirname(fullPath), { recursive: true });
   await writeFile(fullPath, content);
+}
+
+function fixturePath(root: string, path: string): string {
+  const fullPath = resolve(root, path);
+  const fromRoot = relative(root, fullPath);
+  if (
+    isAbsolute(path) ||
+    /[\\:\0]/.test(path) ||
+    fromRoot === ".." ||
+    fromRoot.startsWith(`..${sep}`)
+  )
+    throw new Error(
+      `Fixture path must stay inside the fixture root and use '/': ${path}`,
+    );
+  return fullPath;
 }

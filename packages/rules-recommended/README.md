@@ -1,17 +1,13 @@
 # QG Recommended Rules
 
 `@slop-lab/qg-rules-recommended` exports `recommendedRules`, the default rule
-set used by the `qg` CLI. It composes the Git, file, JavaScript, and test
-rule packages as runtime dependencies. Rule implementations and default
-severities come from the individual rule packages. Markdown character checks
-and suppression-reason checks are enabled by default, as is
-`js/require-ts-check` for JavaScript files.
+set used by the `qg` CLI. It contains language-independent Git and file rules.
+It has no runtime dependency on the JS or test rule packages. Markdown character
+checks and suppression-reason checks are enabled by default.
 Root `README.md` and LF `.gitattributes` requirements are also enabled by
 default through `repo/require-readme` and `repo/require-gitattributes`.
 `files/required-companions` is available for configurable nearby-file policies
 and remains off by default. See [file policies](https://github.com/slop-lab/quality-gate/blob/main/docs/file-policies.md).
-The included `external/biome`, `external/prettier`, and `external/eslint`
-adapters are off by default and require explicit project configuration.
 `files/max-lines` warns above 500 lines and errors above 1000 lines. Shared
 [generated artifact registrations](https://github.com/slop-lab/quality-gate/blob/main/docs/generated-artifacts.md) exempt
 generated content across participating file, JS, test, and external-tool rules.
@@ -39,3 +35,10 @@ const result = await runQualityGate({
 Core does not load any rules automatically. Library callers can use this set,
 individual rule packages, or their own `Rule` objects. CLI users configure
 severity and options through `.qg.yaml` or `.qg.yml`.
+
+JavaScript and TypeScript projects can separately install
+`@slop-lab/qg-rules-js` and opt in with `presets: [js]` in the root `.qg.yaml`.
+The TypeScript fixture policy is separately available from
+`@slop-lab/qg-rules-test` with `presets: [test]`.
+Library callers compose these exports explicitly, for example
+`rules: [...recommendedRules, ...jsRules]`; core does not load CLI presets.

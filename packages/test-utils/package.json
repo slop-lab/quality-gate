@@ -1,7 +1,6 @@
 {
   "name": "@slop-lab/qg-test-utils",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "dependencies": {
     "@slop-lab/qg-core": "0.1.0"
@@ -21,7 +20,7 @@
     "url": "git+https://github.com/slop-lab/quality-gate.git",
     "directory": "packages/test-utils"
   },
-  "description": "Internal rule testing helpers for QG",
+  "description": "Fixtures, rule execution, and diagnostic assertions for testing custom QG rules",
   "engines": {
     "node": ">=24.0.0"
   },
@@ -32,5 +31,8 @@
     ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
 }

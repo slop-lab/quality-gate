@@ -12,8 +12,6 @@ import {
   noLoneGitkeepRule,
   noTrackedLocalFilesRule,
 } from "@slop-lab/qg-rules-git";
-import { jsRules } from "@slop-lab/qg-rules-js";
-import { testRules } from "@slop-lab/qg-rules-test";
 
 /** The default rule set used by the CLI and available to library callers. */
 export const recommendedRules: Rule[] = [
@@ -26,6 +24,4 @@ export const recommendedRules: Rule[] = [
   validDocumentReferenceRule,
   allowedMarkdownCharactersRule,
   requireSuppressionReasonRule,
-  ...jsRules,
-  ...testRules,
 ];

@@ -4,6 +4,9 @@
 including `test/no-directory-fixture-copy`.
 Requires Node.js 24 or later. Licensed under MIT.
 
-These rules are included by `@slop-lab/qg-rules-recommended` and the `qg` CLI.
+This package is independent of `@slop-lab/qg-rules-recommended`. Install it
+with `npm install --save-dev @slop-lab/qg-rules-test` and select `presets: [test]`
+in the root `.qg.yaml`. Library callers can compose its `testRules` export with
+other rules.
 See the [CLI documentation](https://github.com/slop-lab/quality-gate/blob/main/docs/cli.md)
 for rule configuration and staged scans.

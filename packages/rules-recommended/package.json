@@ -27,12 +27,12 @@
   "dependencies": {
     "@slop-lab/qg-core": "0.1.0",
     "@slop-lab/qg-rules-files": "0.1.0",
-    "@slop-lab/qg-rules-git": "0.1.0",
-    "@slop-lab/qg-rules-js": "0.1.0",
-    "@slop-lab/qg-rules-test": "0.1.0"
+    "@slop-lab/qg-rules-git": "0.1.0"
   },
   "devDependencies": {
-    "@slop-lab/qg-test-utils": "0.1.0"
+    "@slop-lab/qg-test-utils": "0.1.0",
+    "@slop-lab/qg-rules-js": "0.1.0",
+    "@slop-lab/qg-rules-test": "0.1.0"
   },
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",

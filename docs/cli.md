@@ -178,10 +178,30 @@ qg rules
 qg rules --format json
 ```
 
-The CLI loads its default set from the runtime dependency
-`@slop-lab/qg-rules-recommended`. Core and the rule packages are installed as
-separate dependencies. Loading additional plugins through CLI flags or
-configuration is not currently supported.
+The CLI loads language-independent Git and file rules from
+`@slop-lab/qg-rules-recommended`. `qg rules` lists the rules loaded for the
+current project's root configuration.
+
+Optional language/tooling packages must be installed separately and explicitly
+selected in the **root** `.qg.yaml`:
+
+```sh
+npm install --save-dev @slop-lab/qg-rules-js @slop-lab/qg-rules-test
+```
+
+```yaml
+presets: [js, test]
+```
+
+`js` loads `jsRules` from the project's `@slop-lab/qg-rules-js` installation.
+`test` loads `testRules` from `@slop-lab/qg-rules-test`. Select either or both;
+an installed package, `package.json`, or JS file alone does not activate a
+preset. Duplicate selections are loaded once. Missing packages and enabled
+rule IDs from unloaded presets fail with setup guidance. Nested configs can
+configure loaded rules, but cannot select presets.
+
+Custom plugin package loading is not currently supported. Library callers can
+pass any composed `Rule[]` directly to `runQualityGate`.
 
 ### `cache`
 
@@ -235,8 +255,8 @@ See [file policies](file-policies.md) for configuration and discovery semantics.
 
 ## JavaScript type checking
 
-`js/require-ts-check`, provided by `@slop-lab/qg-rules-js`, is enabled in the
-recommended rule set. JavaScript files must have an effective `// @ts-check`
+`js/require-ts-check`, provided by the separately installed
+`@slop-lab/qg-rules-js`, is enabled after selecting `presets: [js]`. JavaScript files must have an effective `// @ts-check`
 directive before executable code. It checks `.js`, `.jsx`, `.mjs`, and `.cjs`
 files in full or changed scans, using index contents for staged checks.
 
