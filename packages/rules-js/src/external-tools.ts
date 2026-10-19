@@ -32,7 +32,7 @@ export interface ExternalToolOptions extends GeneratedArtifactRuleOptions {
   /** Biome only: connect to an already running Biome server. */
   useServer?: boolean;
   /** Biome only. */
-  mode?: "check" | "lint" | "format";
+  mode?: "format";
 }
 
 type Tool = "biome" | "prettier" | "eslint";
@@ -97,7 +97,11 @@ function externalRule(tool: Tool): Rule<ExternalToolOptions> {
       scope: "file",
       requires: ["fileContent", "directoryListings", "process", "workingTree"],
       fixable: "none",
-      defaultOptions: { cache: true, timeoutMs: 30_000, mode: "check" },
+      defaultOptions: {
+        cache: true,
+        timeoutMs: 30_000,
+        ...(tool === "biome" ? { mode: "format" as const } : {}),
+      },
     },
     async check(context) {
       const diagnostics: Diagnostic[] = [];
@@ -123,7 +127,7 @@ function externalRule(tool: Tool): Rule<ExternalToolOptions> {
         const input = await context.fs.readFile(path);
         const args = [
           ...executable.args,
-          ...(tool === "biome" ? [options.mode ?? "check"] : []),
+          ...(tool === "biome" ? [options.mode ?? "format"] : []),
           ...(options.args ?? []),
           ...managedArgs(tool, options, resolve(context.root, path)),
         ];
@@ -273,9 +277,11 @@ function validateOptions(tool: Tool, options: ExternalToolOptions): void {
   if (
     tool === "biome" &&
     options.mode !== undefined &&
-    !["check", "lint", "format"].includes(options.mode)
+    options.mode !== "format"
   )
-    throw new Error("external/biome: mode must be check, lint, or format.");
+    throw new Error(
+      "external/biome: only format mode supports reliable stdin validation. Run biome check or biome lint through hooks.preCommit.checks instead.",
+    );
   for (const arg of options.args ?? []) {
     if (
       /^--(?:write|fix(?:-.*)?|cache(?:-.*)?|output-file|reporter|stdin(?:-.*)?|check|list-different|watch)(?:=|$)/.test(
@@ -366,7 +372,7 @@ function diagnosticsFor(
       );
     return diagnostics;
   }
-  if (tool === "biome" && options.mode === "format" && result.exitCode === 0)
+  if (tool === "biome" && result.exitCode === 0)
     return result.stdout === input
       ? []
       : [diagnostic("Biome formatting differs from the checked contents.")];
@@ -375,7 +381,7 @@ function diagnosticsFor(
     diagnostic(
       tool === "prettier"
         ? "Prettier formatting differs from the checked contents."
-        : `Biome ${options.mode ?? "check"} failed: ${result.stderr.trim() || "the checked contents do not pass"}`,
+        : `Biome ${options.mode ?? "format"} failed: ${result.stderr.trim() || "the checked contents do not pass"}`,
     ),
   ];
 }

@@ -1,6 +1,6 @@
 {
   "name": "@slop-lab/qg",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "files": [
     "dist/*.mjs",
@@ -9,14 +9,14 @@
     "dist/*.d.mts.map"
   ],
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=24.0.0"
   },
   "bin": {
     "qg": "dist/index.mjs"
   },
   "scripts": {
     "build": "tsc -b && tsdown --config ../../tsdown.config.ts --filter @slop-lab/qg",
-    "prepack": "pnpm run build"
+    "prepack": "npm run build"
   },
   "publishConfig": {
     "access": "public"
@@ -34,9 +34,10 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@slop-lab/qg-core": "workspace:*",
-    "@slop-lab/qg-rules-recommended": "workspace:*",
+    "@slop-lab/qg-core": "0.1.0",
+    "@slop-lab/qg-rules-recommended": "0.1.0",
     "yaml": "^2.9.1"
   },
-  "module": "./dist/index.mjs"
+  "module": "./dist/index.mjs",
+  "license": "MIT"
 }

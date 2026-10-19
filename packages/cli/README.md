@@ -1,7 +1,7 @@
 # QG
 
 `@slop-lab/qg` provides the `qg` CLI for repository quality checks.
-Requires Node.js 22 or later.
+Requires Node.js 24 or later.
 
 The CLI uses `@slop-lab/qg-core` and `@slop-lab/qg-rules-recommended` as runtime
 dependencies. Your package manager installs these and the individual rule
@@ -53,7 +53,7 @@ hooks:
 
 Enable `external/biome`, `external/prettier`, or `external/eslint` rules to move
 existing formatter/linter hook checks into QG. Other commands belong in
-`hooks.preCommit.checks`. See [pre-commit setup](../../docs/cli.md#run-hook-pre-commit-and-hooks-install)
+`hooks.preCommit.checks`. See [pre-commit setup](https://github.com/slop-lab/quality-gate/blob/main/docs/cli.md#run-hook-pre-commit-and-hooks-install)
 for installation, migration, and snapshot details.
 
 An optional project daemon supports persistent rule caches:

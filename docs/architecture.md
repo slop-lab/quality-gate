@@ -205,7 +205,7 @@ the exit status.
 declares core, the recommended rule set, and YAML parsing as runtime
 dependencies. The recommended set composes the individual rule packages;
 package imports are kept external by the build and installed by the package
-manager. All packages use ESM so the CLI can import core and rules on Node.js 22.
+manager. All packages use ESM so the CLI can import core and rules on Node.js 24.
 
 The target runner and entrypoints are responsible for:
 

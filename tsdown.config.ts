@@ -20,7 +20,7 @@ export default defineConfig(
         entry: ["src/index.ts"],
         format: "esm",
         platform: "node",
-        target: "node22",
+        target: "node24",
         dts: true,
         // tsc also emits the test files into dist for node --test.
         clean: false,

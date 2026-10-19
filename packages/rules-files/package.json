@@ -1,12 +1,12 @@
 {
   "name": "@slop-lab/qg-rules-files",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "dependencies": {
-    "@slop-lab/qg-core": "workspace:*"
+    "@slop-lab/qg-core": "0.1.0"
   },
   "devDependencies": {
-    "@slop-lab/qg-test-utils": "workspace:*"
+    "@slop-lab/qg-test-utils": "0.1.0"
   },
   "files": [
     "dist/*.mjs",
@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "build": "tsc -b && tsdown --config ../../tsdown.config.ts --filter @slop-lab/qg-rules-files",
-    "prepack": "pnpm run build"
+    "prepack": "npm run build"
   },
   "publishConfig": {
     "access": "public"
@@ -28,7 +28,7 @@
   },
   "description": "Required files, nearby file policies, file limits, and document rules for QG",
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=24.0.0"
   },
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
@@ -36,5 +36,6 @@
   "exports": {
     ".": "./dist/index.mjs",
     "./package.json": "./package.json"
-  }
+  },
+  "license": "MIT"
 }

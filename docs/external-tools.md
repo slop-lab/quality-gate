@@ -10,7 +10,7 @@ rules:
   external/biome:
     severity: error
     options:
-      mode: check
+      mode: format
       files: ["src/**/*.ts", "src/**/*.tsx"]
   external/prettier:
     severity: error
@@ -55,10 +55,12 @@ stdin interface. ESLint diagnostics preserve locations and native rule IDs in
 metadata. A QG severity of `error` retains native ESLint warnings, while
 `warning` or `info` caps their severity. The CLI fails only on QG errors.
 
-Biome 2.5.15's stdin check/lint interface returns a file-level failure rather
-than individual diagnostics, even with a JSON reporter. Its `format` mode
-returns formatted stdout, which QG compares with the input. Biome and Prettier
-format failures therefore have no invented line/column. Use their own
+Biome's adapter defaults to `format`, returning formatted stdout for comparison
+with the input. Biome 2.5.15's stdin `check`/`lint` protocol does not provide
+reliable pass/fail diagnostics; QG rejects these modes with instructions to run
+full Biome checks through `hooks.preCommit.checks` instead. See
+[hook commands](cli.md#run-hook-pre-commit-and-hooks-install).
+Biome and Prettier format failures have no invented line/column. Use their own
 diagnostic/fix commands for detailed formatting output. QG's HTML-comment
 suppressions apply to located diagnostics (such as ESLint messages in markup);
 unlocated format failures use project/path configuration or tool-native ignores.
@@ -78,7 +80,7 @@ unlocated format failures use project/path configuration or tool-native ignores.
 | `timeoutMs` | Per-process timeout; defaults to 30000 ms. |
 | `cache` | Enable QG result caching when a cache store is available; defaults to `true`. |
 | `cacheInputs` | Additional individual files affecting results, relative to root or absolute; all must exist. |
-| `mode` | Biome only: `check` (default), `lint`, or `format`. |
+| `mode` | Biome only: `format` (default and the only supported stdin mode). |
 | `useServer` | Biome only: connect to an already running Biome daemon; defaults to `false`. |
 
 To run a nonstandard installation on Windows or Unix:

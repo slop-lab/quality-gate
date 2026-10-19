@@ -424,3 +424,31 @@ test("ESLint nonzero warning thresholds become QG errors even without native err
     ["warning", "error"],
   );
 });
+
+test("Biome defaults to snapshot formatting and rejects unreliable stdin check/lint modes", async (t) => {
+  const fixture = await createFixture({ "a.js": "export const x = 1;\n" });
+  t.after(() => fixture.cleanup());
+  const tool = mockTool({
+    exitCode: 0,
+    stdout: "export const x = 1;\n",
+    stderr: "",
+  });
+  const run = (setting: QualityGateConfig["rules"]) =>
+    runQualityGate({
+      root: fixture.root,
+      mode: "full",
+      rules: [biomeRule],
+      process: tool.provider,
+      config: { rules: setting },
+    });
+  assert.deepEqual((await run({ "external/biome": "error" })).diagnostics, []);
+  assert.equal(tool.checks()[0]?.args[0], "format");
+  for (const mode of ["check", "lint"]) {
+    const before = tool.calls.length;
+    await assert.rejects(
+      run({ "external/biome": ["error", { mode }] }),
+      /Run biome check or biome lint through hooks.preCommit.checks/,
+    );
+    assert.equal(tool.calls.length, before);
+  }
+});

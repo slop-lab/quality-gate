@@ -24,10 +24,10 @@ importers:
   packages/cli:
     dependencies:
       '@slop-lab/qg-core':
-        specifier: workspace:*
+        specifier: 0.1.0
         version: link:../core
       '@slop-lab/qg-rules-recommended':
-        specifier: workspace:*
+        specifier: 0.1.0
         version: link:../rules-recommended
       yaml:
         specifier: ^2.9.1
@@ -38,69 +38,69 @@ importers:
   packages/rules-files:
     dependencies:
       '@slop-lab/qg-core':
-        specifier: workspace:*
+        specifier: 0.1.0
         version: link:../core
     devDependencies:
       '@slop-lab/qg-test-utils':
-        specifier: workspace:*
+        specifier: 0.1.0
         version: link:../test-utils
 
   packages/rules-git:
     dependencies:
       '@slop-lab/qg-core':
-        specifier: workspace:*
+        specifier: 0.1.0
         version: link:../core
     devDependencies:
       '@slop-lab/qg-test-utils':
-        specifier: workspace:*
+        specifier: 0.1.0
         version: link:../test-utils
 
   packages/rules-js:
     dependencies:
       '@slop-lab/qg-core':
-        specifier: workspace:*
+        specifier: 0.1.0
         version: link:../core
     devDependencies:
       '@slop-lab/qg-test-utils':
-        specifier: workspace:*
+        specifier: 0.1.0
         version: link:../test-utils
 
   packages/rules-recommended:
     dependencies:
       '@slop-lab/qg-core':
-        specifier: workspace:*
+        specifier: 0.1.0
         version: link:../core
       '@slop-lab/qg-rules-files':
-        specifier: workspace:*
+        specifier: 0.1.0
         version: link:../rules-files
       '@slop-lab/qg-rules-git':
-        specifier: workspace:*
+        specifier: 0.1.0
         version: link:../rules-git
       '@slop-lab/qg-rules-js':
-        specifier: workspace:*
+        specifier: 0.1.0
         version: link:../rules-js
       '@slop-lab/qg-rules-test':
-        specifier: workspace:*
+        specifier: 0.1.0
         version: link:../rules-test
     devDependencies:
       '@slop-lab/qg-test-utils':
-        specifier: workspace:*
+        specifier: 0.1.0
         version: link:../test-utils
 
   packages/rules-test:
     dependencies:
       '@slop-lab/qg-core':
-        specifier: workspace:*
+        specifier: 0.1.0
         version: link:../core
     devDependencies:
       '@slop-lab/qg-test-utils':
-        specifier: workspace:*
+        specifier: 0.1.0
         version: link:../test-utils
 
   packages/test-utils:
     dependencies:
       '@slop-lab/qg-core':
-        specifier: workspace:*
+        specifier: 0.1.0
         version: link:../core
 
 packages:

@@ -1,6 +1,6 @@
 {
   "name": "@slop-lab/qg-rules-recommended",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Default recommended rule set for QG",
   "type": "module",
   "files": [
@@ -11,10 +11,10 @@
   ],
   "scripts": {
     "build": "tsc -b && tsdown --config ../../tsdown.config.ts --filter @slop-lab/qg-rules-recommended",
-    "prepack": "pnpm run build"
+    "prepack": "npm run build"
   },
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=24.0.0"
   },
   "publishConfig": {
     "access": "public"
@@ -25,14 +25,14 @@
     "directory": "packages/rules-recommended"
   },
   "dependencies": {
-    "@slop-lab/qg-core": "workspace:*",
-    "@slop-lab/qg-rules-files": "workspace:*",
-    "@slop-lab/qg-rules-git": "workspace:*",
-    "@slop-lab/qg-rules-js": "workspace:*",
-    "@slop-lab/qg-rules-test": "workspace:*"
+    "@slop-lab/qg-core": "0.1.0",
+    "@slop-lab/qg-rules-files": "0.1.0",
+    "@slop-lab/qg-rules-git": "0.1.0",
+    "@slop-lab/qg-rules-js": "0.1.0",
+    "@slop-lab/qg-rules-test": "0.1.0"
   },
   "devDependencies": {
-    "@slop-lab/qg-test-utils": "workspace:*"
+    "@slop-lab/qg-test-utils": "0.1.0"
   },
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
@@ -40,5 +40,6 @@
   "exports": {
     ".": "./dist/index.mjs",
     "./package.json": "./package.json"
-  }
+  },
+  "license": "MIT"
 }

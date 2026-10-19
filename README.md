@@ -81,7 +81,7 @@ mise exec -- just bootstrap
 mise exec -- just qg rules
 ```
 
-Requires Node.js 22 or later. Create `.qg.yaml` in the target project
+Requires Node.js 24 or later. Create `.qg.yaml` in the target project
 to configure rules, and add `.local/` to its `.gitignore` if using the daemon.
 
 ## Development
@@ -118,3 +118,26 @@ individual rule packages, then `@slop-lab/qg-rules-recommended`, and finally
 `@slop-lab/qg`. `@slop-lab/qg-test-utils` remains private. Testing unpublished
 tarballs in another project requires installing all workspace dependency
 tarballs together; the CLI tarball alone needs those versions in the registry.
+
+## Publishing
+
+Packages use version `0.1.0`, require Node.js 24 or later, and are licensed
+under MIT. Internal dependency versions use ordinary npm semver; pnpm links
+matching packages locally through `pnpm-workspace.yaml`.
+
+Run `just ci` before publishing. Publish from the repository root in dependency
+order, with npm:
+
+```sh
+npm publish --workspace @slop-lab/qg-core
+npm publish --workspace @slop-lab/qg-rules-git
+npm publish --workspace @slop-lab/qg-rules-files
+npm publish --workspace @slop-lab/qg-rules-js
+npm publish --workspace @slop-lab/qg-rules-test
+npm publish --workspace @slop-lab/qg-rules-recommended
+npm publish --workspace @slop-lab/qg
+```
+
+Each package's `prepack` builds its entry point through `npm run build`.
+Public access is set in each public package's `publishConfig`. The root package
+and `@slop-lab/qg-test-utils` are private and must not be published.

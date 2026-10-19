@@ -10,7 +10,7 @@ opt-in; the JavaScript and package manager checks are enabled by default.
 - `pnpm/lockfile-is-current`: check that pnpm would leave its lockfile unchanged.
 - `external/biome`, `external/prettier`, `external/eslint`: optional read-only
   integrations with project-installed formatters and linters. See
-  [external tools](../../docs/external-tools.md) for setup, snapshots, daemon
+  [external tools](https://github.com/slop-lab/quality-gate/blob/main/docs/external-tools.md) for setup, snapshots, daemon
   support, and cache behavior.
 
 The JavaScript check inspects `.js`, `.jsx`, `.mjs`, and `.cjs` files in changed
@@ -41,7 +41,7 @@ rules:
 `.git`, `.local`, `.qg`, `node_modules`, and `dist` are excluded. Nested project
 configuration can override severity, options, or disable the rule by path.
 Staged scans inspect index contents, including partial staging.
-Content checks skip [registered generated artifacts](../../docs/generated-artifacts.md)
+Content checks skip [registered generated artifacts](https://github.com/slop-lab/quality-gate/blob/main/docs/generated-artifacts.md)
 unless `includeGenerated: true` is set. Package-manager integrity checks still
 validate the relevant lockfiles.
 
