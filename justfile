@@ -48,3 +48,7 @@ qg *args: build
 check: biome-check qg-full
 
 ci: check test
+
+# Validate and preview all eight public npm packages without publishing.
+release-check: ci
+  npm pack --workspaces --dry-run --include-workspace-root=false

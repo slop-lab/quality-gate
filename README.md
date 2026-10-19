@@ -35,6 +35,7 @@ and supported options; the architecture document also describes future work.
 - [Architecture](docs/architecture.md)
 - [Plugin Contract](docs/plugin-contract.md)
 - [CLI](docs/cli.md)
+- [Publishing](docs/publishing.md)
 - [External tools](docs/external-tools.md)
 - [Required files and nearby-file detection](docs/file-policies.md)
 - [File length and generated artifacts](docs/generated-artifacts.md)
@@ -139,20 +140,13 @@ Packages use version `0.1.0`, require Node.js 24 or later, and are licensed
 under MIT. Internal dependency versions use ordinary npm semver; pnpm links
 matching packages locally through `pnpm-workspace.yaml`.
 
-Run `just ci` before publishing. Publish from the repository root in dependency
-order, with npm:
+For a fresh machine, authentication, package previews, exact publish order, and
+post-publish installation checks, follow the [publishing runbook](docs/publishing.md).
 
 ```sh
-npm publish --workspace @slop-lab/qg-core
-npm publish --workspace @slop-lab/qg-test-utils
-npm publish --workspace @slop-lab/qg-rules-git
-npm publish --workspace @slop-lab/qg-rules-files
-npm publish --workspace @slop-lab/qg-rules-js
-npm publish --workspace @slop-lab/qg-rules-test
-npm publish --workspace @slop-lab/qg-rules-recommended
-npm publish --workspace @slop-lab/qg
+mise exec -- just release-check
 ```
 
-Each package's `prepack` builds its entry point through `npm run build`.
-Public access is set in each public package's `publishConfig`. Only the root
-package is private and must not be published.
+This runs CI and `npm pack --dry-run` for all eight public packages, including
+their prepack builds. It does not publish. Public access is set in each package's
+`publishConfig`; only the workspace root is private.
