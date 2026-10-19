@@ -226,7 +226,16 @@ export type RuleConfig<TOptions = unknown> =
       message?: string;
     };
 
+export interface PreCommitCheck {
+  name: string;
+  command: string;
+  args?: string[];
+  timeoutMs?: number;
+  message?: string;
+}
+
 export interface QualityGateConfig {
+  hooks?: { preCommit?: { checks?: PreCommitCheck[] } };
   artifacts?: { generated?: GeneratedArtifactsConfig };
   scan?: {
     defaultMode?: ScanMode;

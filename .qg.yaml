@@ -6,6 +6,10 @@ artifacts:
     include: ["**/*.tgz"]
 
 rules:
+  external/biome:
+    severity: error
+    options:
+      mode: format
   package/allowed-name:
     severity: error
     message: "패키지 이름의 경우 publish 대상은 @slop-lab/qg 또는 @slop-lab/qg-*, 로컬 전용은 @this-project/...를 사용하세요."
@@ -14,3 +18,15 @@ rules:
   git/no-tracked-local-files: error
   # Enable this in a nested docs directory after existing references are reviewed.
   docs/valid-reference: off
+
+hooks:
+  preCommit:
+    checks:
+      - name: biome-check
+        command: node
+        args: [node_modules/@biomejs/biome/bin/biome, check, .]
+        message: "Biome 검사에 실패했습니다. pnpm exec biome check .로 확인하세요."
+      - name: build-and-test
+        command: just
+        args: [test]
+        message: "빌드·타입 검사·테스트를 통과해야 커밋할 수 있습니다. just test로 확인하세요."

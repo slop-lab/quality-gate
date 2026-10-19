@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { cwd, exit } from "node:process";
+import { fileURLToPath } from "node:url";
 import {
   type Diagnostic,
   JsonFileRuleCacheStore,
@@ -11,9 +12,11 @@ import {
 import { recommendedRules } from "@slop-lab/qg-rules-recommended";
 import { loadConfig } from "./config.js";
 import { daemonDirectory, requestDaemon, startDaemon } from "./daemon.js";
+import { installHooks } from "./hooks.js";
+import { runPreCommitChecks } from "./pre-commit.js";
 
 interface CliOptions {
-  command: "check" | "rules" | "help";
+  command: "check" | "pre-commit" | "rules" | "help";
   mode?: ScanMode;
   base?: string;
   head?: string;
@@ -39,11 +42,25 @@ async function main(argv: string[]): Promise<number> {
     return 0;
   }
 
-  const remote = await requestDaemon(options.root, "check", argv);
+  // The daemon runs rule scans; hook commands run once in this client.
+  const checkArgs =
+    options.command === "pre-commit"
+      ? ["check", ...argv.slice(1), "--staged"]
+      : argv;
+  const remote = await requestDaemon(options.root, "check", checkArgs);
   if (remote?.error) throw new Error(remote.error);
   const result = remote?.result ?? (await executeCheck(options));
+  if (options.command === "pre-commit") {
+    const config = await loadConfig(options.root, options.config);
+    result.diagnostics.push(
+      ...(await runPreCommitChecks(
+        options.root,
+        config?.hooks?.preCommit?.checks ?? [],
+      )),
+    );
+  }
   printResult(result, options.format);
-  return remote?.code ?? exitCodeFor(result);
+  return exitCodeFor(result);
 }
 
 async function executeCheck(
@@ -81,6 +98,31 @@ function exitCodeFor(result: RunResult): number {
 
 async function runSpecialCommand(argv: string[]): Promise<number | undefined> {
   const command = argv[0];
+  if (command === "hooks") {
+    if (argv.includes("--help") || argv.includes("-h")) {
+      console.log("Usage: qg hooks install [--root <path>] [--force]");
+      return 0;
+    }
+    if (argv[1] !== "install")
+      throw new Error("Usage: qg hooks install [--root <path>] [--force]");
+    let root = cwd();
+    let force = false;
+    const args = argv.slice(2);
+    for (let arg = args.shift(); arg !== undefined; arg = args.shift()) {
+      if (arg === "--root") root = requireValue(arg, args);
+      else if (arg === "--force") force = true;
+      else throw new Error(`Unknown argument: ${arg}`);
+    }
+    const result = await installHooks(
+      root,
+      fileURLToPath(import.meta.url),
+      force,
+    );
+    console.log(`Installed QG staged pre-commit hook at ${result.path}.`);
+    if (result.backup)
+      console.log(`Previous hook backed up to ${result.backup}.`);
+    return 0;
+  }
   if (command !== "daemon" && command !== "cache") return undefined;
   const rootIndex = argv.indexOf("--root");
   const root =
@@ -146,6 +188,8 @@ function parseArgs(argv: string[]): CliOptions {
         options.head = requireValue(arg, args);
         break;
       case "--staged":
+        options.mode = "changed";
+        options.workingTree = false;
         options.staged = true;
         break;
       case "--working-tree":
@@ -175,12 +219,17 @@ function parseArgs(argv: string[]): CliOptions {
     }
   }
 
+  if (command === "pre-commit") {
+    options.mode = "changed";
+    options.staged = true;
+    options.workingTree = false;
+  }
   return options;
 }
 
 function readCommand(args: string[]): CliOptions["command"] {
   const first = args[0];
-  if (first === "check" || first === "rules") {
+  if (first === "check" || first === "rules" || first === "pre-commit") {
     args.shift();
     return first;
   }
@@ -231,6 +280,13 @@ function printStylish(diagnostics: Diagnostic[]): void {
     console.log(
       `${diagnostic.severity.toUpperCase()} ${location}${diagnostic.message} (${diagnostic.ruleId})`,
     );
+    if (diagnostic.ruleId === "hooks/pre-commit") {
+      for (const key of ["stdout", "stderr", "error"]) {
+        const detail = diagnostic.metadata?.[key];
+        if (typeof detail === "string" && detail.trim())
+          console.log(detail.trim());
+      }
+    }
   }
 }
 
@@ -240,6 +296,8 @@ function printHelp(): void {
 Usage:
   qg check [--changed|--full] [--base <ref>] [--format stylish|json]
   qg rules [--format stylish|json]
+  qg hooks install [--root <path>] [--force]
+  qg pre-commit [--format stylish|json]
   qg daemon <start|status|stop>
   qg cache clear --rule <rule-id>
 

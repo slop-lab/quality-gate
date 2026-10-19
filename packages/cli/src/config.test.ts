@@ -209,3 +209,41 @@ test("non-string diagnostic messages fail with a configuration error", async (t)
     );
   }
 });
+
+test("pre-commit command checks load from root config and reject invalid declarations", async (t) => {
+  const root = await mkdtemp(join(tmpdir(), "qg-config-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const check = {
+    name: "test",
+    command: "pnpm",
+    args: ["test"],
+    timeoutMs: 1000,
+    message: "Fix tests",
+  };
+  await write(
+    root,
+    ".qg.yaml",
+    JSON.stringify({ hooks: { preCommit: { checks: [check] } } }),
+  );
+  assert.deepEqual((await loadConfig(root))?.hooks?.preCommit?.checks, [check]);
+  for (const invalid of [
+    {},
+    { ...check, command: "" },
+    { ...check, args: "test" },
+    { ...check, timeoutMs: -1 },
+    { ...check, message: 42 },
+  ]) {
+    await write(
+      root,
+      ".qg.yaml",
+      JSON.stringify({ hooks: { preCommit: { checks: [invalid] } } }),
+    );
+    await assert.rejects(loadConfig(root), /hooks.preCommit.checks\[0\]/);
+  }
+  await write(root, ".qg.yaml", "{}");
+  await write(root, "nested/.qg.yaml", "hooks: { preCommit: { checks: [] } }");
+  await assert.rejects(
+    loadConfig(root),
+    /hooks is only allowed in the root config/,
+  );
+});

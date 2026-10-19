@@ -27,6 +27,31 @@ rules:
     options: { limit: 1000000 }
 ```
 
+Install a Git pre-commit hook with the published package:
+
+```sh
+pnpm exec qg hooks install
+pnpm exec qg pre-commit  # run the complete hook manually
+```
+
+The hook checks staged contents and runs extra commands configured in the root
+`.qg.yaml`:
+
+```yaml
+hooks:
+  preCommit:
+    checks:
+      - name: tests
+        command: pnpm
+        args: [test]
+        message: "Fix tests before committing."
+```
+
+Enable `external/biome`, `external/prettier`, or `external/eslint` rules to move
+existing formatter/linter hook checks into QG. Other commands belong in
+`hooks.preCommit.checks`. See [pre-commit setup](../../docs/cli.md#pre-commit-and-hooks-install)
+for installation, migration, and snapshot details.
+
 An optional project daemon supports persistent rule caches:
 
 ```sh

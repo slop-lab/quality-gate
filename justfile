@@ -12,6 +12,10 @@ install:
 bootstrap:
   pnpm install --frozen-lockfile
   just build
+  node {{qg_cli}} hooks install
+
+hooks-install: build
+  node {{qg_cli}} hooks install
 
 build:
   pnpm exec tsc -b

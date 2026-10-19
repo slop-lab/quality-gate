@@ -46,6 +46,72 @@ Ref comparisons select paths from Git but read current working tree contents.
 changes and untracked files. Scan selection flags are processed in order, so
 prefer one selection per invocation.
 
+### `pre-commit` and `hooks install`
+
+Install the published CLI as a development dependency and install the hook:
+
+```sh
+npm install --save-dev @slop-lab/qg
+npx qg hooks install
+```
+
+With pnpm, use `pnpm add -D @slop-lab/qg` and `pnpm exec qg hooks install`.
+The installer writes an executable `pre-commit` hook in Git's effective hooks
+directory, including `core.hooksPath` and linked worktrees. Run it once per
+clone, or add `"prepare": "qg hooks install"` to an existing project's package
+scripts (merge it with an existing prepare script). It uses the project-local
+CLI and does not download packages during commits. Reinstalling a QG hook is
+idempotent. For an existing custom hook, first migrate its checks into QG, then
+use `qg hooks install --force`; the previous script is backed up before replacement.
+
+The hook runs `qg pre-commit`. That command always checks staged paths and index
+contents, even if `scan.defaultMode` is `full`, and then runs extra checks from
+the **root** configuration in order:
+
+```yaml
+rules:
+  external/biome:
+    severity: error
+    options: { mode: format }
+
+hooks:
+  preCommit:
+    checks:
+      - name: lint
+        command: npm
+        args: [run, lint]
+        message: "Fix lint errors before committing."
+      - name: typecheck
+        command: npm
+        args: [run, typecheck]
+        timeoutMs: 120000
+        message: "Fix type errors before committing."
+      - name: tests
+        command: npm
+        args: [test]
+        timeoutMs: 120000
+        message: "Fix failing tests before committing."
+```
+
+`name` and `command` are required. `args` defaults to `[]`, `timeoutMs` to
+120000, and `message` to a description of the failure. Arguments are passed
+directly without a shell; shell syntax and glob expansion require an explicit
+shell command. Commands run from the QG project root against the working tree;
+QG does not stash or modify partially staged files. Use rule adapters such as
+`external/biome`, `external/prettier`, or `external/eslint` for formatter/linter
+checks of staged contents. Install and configure the selected tool locally.
+For Biome 2.5.15, use the adapter's `format` mode for staged formatting and a
+hook command (such as `npm run lint` running `biome check .`) for full lint and
+assist validation: its stdin `check`/`lint` protocol does not provide reliable
+pass/fail diagnostics. The working-tree check includes unstaged changes.
+
+Any rule error, command failure, missing command, or timeout blocks the commit.
+All configured checks run even if another check fails. Failure output and
+configured recovery messages appear in text output; JSON output includes
+command details and stdout/stderr in diagnostic metadata. Ordinary `qg check`
+(including `--staged` and `--full`) does not run hook-only commands. To reproduce
+the complete hook manually, run `npx qg pre-commit` or `pnpm exec qg pre-commit`.
+
 ### `daemon`
 
 One optional daemon can run per project. `check` uses its local socket when

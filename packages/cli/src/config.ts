@@ -1,6 +1,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import { dirname, isAbsolute, join, relative } from "node:path";
 import type {
+  PreCommitCheck,
   QualityGateConfig,
   QualityGateOverride,
   RuleConfig,
@@ -48,6 +49,10 @@ export async function loadConfig(
         `${relative(root, path)}: scan is only allowed in the root config`,
       );
     }
+    if (nested.hooks)
+      throw new Error(
+        `${relative(root, path)}: hooks is only allowed in the root config`,
+      );
     if (nested.artifacts)
       throw new Error(
         `${relative(root, path)}: artifacts is only allowed in the root config`,
@@ -155,6 +160,22 @@ function isMissing(error: unknown): boolean {
 function normalizeConfig(value: unknown, path: string): QualityGateConfig {
   const object = requireObject(value, `${path} root`);
   const config: QualityGateConfig = {};
+  if (object.hooks !== undefined) {
+    const hooks = requireObject(object.hooks, "hooks");
+    const preCommit =
+      hooks.preCommit === undefined
+        ? {}
+        : requireObject(hooks.preCommit, "hooks.preCommit");
+    if (preCommit.checks !== undefined && !Array.isArray(preCommit.checks))
+      throw new Error("hooks.preCommit.checks must be an array");
+    config.hooks = {
+      preCommit: {
+        checks: ((preCommit.checks as unknown[] | undefined) ?? []).map(
+          normalizePreCommitCheck,
+        ),
+      },
+    };
+  }
   if (object.artifacts !== undefined) {
     const artifacts = requireObject(object.artifacts, "artifacts");
     const generated =
@@ -311,4 +332,37 @@ function requireStrings(value: unknown, label: string): string[] {
     throw new Error(`${label} must be an array of strings`);
   }
   return value as string[];
+}
+
+function normalizePreCommitCheck(
+  value: unknown,
+  index: number,
+): PreCommitCheck {
+  const label = `hooks.preCommit.checks[${index}]`;
+  const object = requireObject(value, label);
+  for (const key of ["name", "command"])
+    if (typeof object[key] !== "string" || !(object[key] as string).trim())
+      throw new Error(`${label}.${key} must be a non-empty string`);
+  if (object.message !== undefined && typeof object.message !== "string")
+    throw new Error(`${label}.message must be a string`);
+  if (
+    object.timeoutMs !== undefined &&
+    (typeof object.timeoutMs !== "number" ||
+      !Number.isFinite(object.timeoutMs) ||
+      object.timeoutMs <= 0)
+  )
+    throw new Error(`${label}.timeoutMs must be positive`);
+  return {
+    name: object.name as string,
+    command: object.command as string,
+    ...(object.args === undefined
+      ? {}
+      : { args: requireStrings(object.args, `${label}.args`) }),
+    ...(object.message === undefined
+      ? {}
+      : { message: object.message as string }),
+    ...(object.timeoutMs === undefined
+      ? {}
+      : { timeoutMs: object.timeoutMs as number }),
+  };
 }
