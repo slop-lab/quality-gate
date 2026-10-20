@@ -17,6 +17,7 @@ import { type TestContext, test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import { recommendedRules } from "@slop-lab/qg-rules-recommended";
+import { requestDaemon, startDaemon } from "./daemon.js";
 import { inspectPreCommitHook, installHooks } from "./hooks.js";
 
 const exec = promisify(execFile);
@@ -292,4 +293,179 @@ test("automatic setup installs and updates managed hooks, honors hooksPath, and 
   const blocked = await run("check");
   assert.match(blocked.stderr, /Cannot automatically install.*already exists/);
   assert.equal(await readFile(path, "utf8"), custom);
+});
+
+test("CLI node-test hook reports failures in text and JSON and stays out of ordinary rule scans", async (t) => {
+  const { root } = await repository(t);
+  await writeFile(
+    join(root, ".qg.yaml"),
+    JSON.stringify({
+      rules: Object.fromEntries(
+        recommendedRules.map((rule) => [rule.metadata.id, "off"]),
+      ),
+      hooks: {
+        preCommit: {
+          installation: "off",
+          checks: [
+            {
+              name: "tests",
+              type: "node-test",
+              files: ["*.test.mjs"],
+              message: "Fix Node tests",
+            },
+          ],
+        },
+      },
+    }),
+  );
+  const file = join(root, "sample.test.mjs");
+  await writeFile(
+    file,
+    `import { test } from 'node:test'; test('failing case', () => { throw new Error('node test detail'); });`,
+  );
+  const run = (...args: string[]) =>
+    exec(process.execPath, [cli, ...args], { cwd: root });
+  assert.equal((await run("check", "--staged")).stdout, "PASS\n");
+  await assert.rejects(run("run-hook", "pre-commit"), (error: unknown) => {
+    const result = error as { code: number; stdout: string };
+    assert.equal(result.code, 1);
+    assert.match(result.stdout, /Fix Node tests/);
+    assert.match(result.stdout, /FAIL failing case/);
+    assert.match(result.stdout, /node test detail/);
+    return true;
+  });
+  await assert.rejects(
+    run("run-hook", "pre-commit", "--format", "json"),
+    (error: unknown) => {
+      const result = error as { code: number; stdout: string };
+      assert.equal(result.code, 1);
+      const diagnostic = JSON.parse(result.stdout).diagnostics[0];
+      assert.equal(diagnostic.ruleId, "checks/tests");
+      assert.match(diagnostic.metadata.stdout, /FAIL failing case/);
+      return true;
+    },
+  );
+  await writeFile(
+    file,
+    `import { test } from 'node:test'; test('passing case', () => { console.log('hidden success'); });`,
+  );
+  const passed = await run("run-hook", "pre-commit");
+  assert.equal(passed.stdout, "PASS\n");
+  assert.equal(passed.stderr, "");
+});
+
+test("shared external and node-test checks run on qg, check and hooks, with a rules-only escape and no daemon duplication", async (t) => {
+  const { root } = await repository(t);
+  await writeFile(
+    join(root, ".qg.yaml"),
+    JSON.stringify({
+      rules: Object.fromEntries(
+        recommendedRules.map((rule) => [rule.metadata.id, "off"]),
+      ),
+      checks: [
+        {
+          name: "external",
+          type: "command",
+          command: process.execPath,
+          args: [
+            "-e",
+            "require('node:fs').appendFileSync('runs', 'external\\n'); if(require('node:fs').existsSync('fail-external')) { console.error('external detail'); process.exit(1); }",
+          ],
+        },
+        { name: "tests", type: "node-test", files: ["*.test.mjs"] },
+      ],
+      hooks: {
+        preCommit: {
+          installation: "off",
+          checks: [
+            {
+              name: "hook-extra",
+              command: process.execPath,
+              args: [
+                "-e",
+                "require('node:fs').appendFileSync('runs', 'hook\\n')",
+              ],
+            },
+          ],
+        },
+      },
+    }),
+  );
+  const run = (...args: string[]) =>
+    exec(process.execPath, [cli, ...args], { cwd: root });
+  const testFile = join(root, "sample.test.mjs");
+  await writeFile(
+    testFile,
+    `import { test } from 'node:test'; test('pass', () => {});`,
+  );
+  for (const args of [
+    [],
+    ["check"],
+    ["check", "--full"],
+    ["run-hook", "pre-commit"],
+  ]) {
+    const passed = await run(...args);
+    assert.equal(passed.stdout, "PASS\n");
+    assert.equal(passed.stderr, "");
+    assert.equal(
+      await readFile(join(root, "runs"), "utf8"),
+      args[0] === "run-hook" ? "external\nhook\n" : "external\n",
+    );
+    await rm(join(root, "runs"));
+  }
+  await writeFile(
+    testFile,
+    `import { test } from 'node:test'; test('fails', () => { throw new Error('node detail'); });`,
+  );
+  await writeFile(join(root, "fail-external"), "");
+  assert.equal((await run("--rules-only")).stdout, "PASS\n");
+  await assert.rejects(readFile(join(root, "runs")), /ENOENT/);
+  await assert.rejects(run("check", "--format", "json"), (error: unknown) => {
+    const result = error as { code: number; stdout: string };
+    assert.equal(result.code, 1);
+    const diagnostics = JSON.parse(result.stdout).diagnostics;
+    assert.deepEqual(
+      diagnostics.map((diagnostic: { ruleId: string }) => diagnostic.ruleId),
+      ["checks/external", "checks/tests"],
+    );
+    assert.match(diagnostics[0].metadata.stderr, /external detail/);
+    assert.match(diagnostics[1].metadata.stdout, /node detail/);
+    return true;
+  });
+  await assert.rejects(
+    run("run-hook", "pre-commit", "--rules-only"),
+    /does not support --rules-only/,
+  );
+
+  await rm(join(root, "runs"));
+  await rm(join(root, "fail-external"));
+  await writeFile(
+    testFile,
+    `import { test } from 'node:test'; test('pass', () => {});`,
+  );
+  await t.test(
+    "daemon client runs external checks once",
+    async (daemonTest) => {
+      let scans = 0;
+      const daemon = startDaemon(root, async () => {
+        scans++;
+        return {
+          code: 0,
+          result: { mode: "changed", changes: [], diagnostics: [] },
+        };
+      });
+      daemonTest.after(async () => {
+        await requestDaemon(root, "stop");
+        await daemon;
+      });
+      for (let attempt = 0; attempt < 100; attempt++) {
+        if ((await requestDaemon(root, "ping"))?.code === 0) break;
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      }
+      assert.equal((await requestDaemon(root, "ping"))?.code, 0);
+      assert.equal((await run("check")).stdout, "PASS\n");
+      assert.equal(scans, 1);
+      assert.equal(await readFile(join(root, "runs"), "utf8"), "external\n");
+    },
+  );
 });

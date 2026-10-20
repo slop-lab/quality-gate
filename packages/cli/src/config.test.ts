@@ -291,3 +291,90 @@ test("optional presets are explicitly selected in root configuration", async (t)
     /presets is only allowed in the root config/,
   );
 });
+
+test("node-test hook configuration accepts file globs and rejects conflicting or invalid fields", async (t) => {
+  const root = await mkdtemp(join(tmpdir(), "qg-config-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const check = {
+    name: "tests",
+    type: "node-test",
+    files: ["test/**/*.test.mjs"],
+    timeoutMs: 1000,
+    message: "Fix tests",
+  };
+  await write(
+    root,
+    ".qg.yaml",
+    JSON.stringify({ hooks: { preCommit: { checks: [check] } } }),
+  );
+  assert.deepEqual((await loadConfig(root))?.hooks?.preCommit?.checks, [check]);
+  for (const invalid of [
+    { ...check, type: "unknown" },
+    { ...check, files: undefined },
+    { ...check, files: [] },
+    { ...check, files: [""] },
+    { ...check, files: [42] },
+    { ...check, files: "test.js" },
+    { ...check, command: "node" },
+    { ...check, args: [] },
+    { name: "command", command: "node", files: ["test.js"] },
+  ]) {
+    await write(
+      root,
+      ".qg.yaml",
+      JSON.stringify({ hooks: { preCommit: { checks: [invalid] } } }),
+    );
+    await assert.rejects(loadConfig(root), /hooks.preCommit.checks\[0\]/);
+  }
+});
+
+test("shared checks load at the root and reject malformed or nested configuration", async (t) => {
+  const root = await mkdtemp(join(tmpdir(), "qg-config-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const checks = [
+    { name: "external", type: "command", command: "tool", args: ["check"] },
+    { name: "tests", type: "node-test", files: ["test/**/*.test.mjs"] },
+  ];
+  await write(root, ".qg.yaml", JSON.stringify({ checks }));
+  assert.deepEqual((await loadConfig(root))?.checks, checks);
+  for (const invalid of [
+    null,
+    {},
+    "tool",
+    [{ name: "broken" }],
+    [{ ...checks[1], files: [] }],
+  ]) {
+    await write(root, ".qg.yaml", JSON.stringify({ checks: invalid }));
+    await assert.rejects(loadConfig(root), /checks/);
+  }
+  await write(root, ".qg.yaml", "{}");
+  await write(root, "nested/.qg.yaml", JSON.stringify({ checks }));
+  await assert.rejects(
+    loadConfig(root),
+    /checks is only allowed in the root config/,
+  );
+});
+
+test("custom ruleModules are restricted to non-empty module specifiers in root config", async (t) => {
+  const root = await mkdtemp(join(tmpdir(), "qg-config-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  await write(
+    root,
+    ".qg.yaml",
+    JSON.stringify({ ruleModules: ["./qg-rules.mjs", "custom-rules"] }),
+  );
+  assert.deepEqual((await loadConfig(root))?.ruleModules, [
+    "./qg-rules.mjs",
+    "custom-rules",
+  ]);
+  for (const ruleModules of ["./rules.mjs", [42], [""], [" "]]) {
+    await write(root, ".qg.yaml", JSON.stringify({ ruleModules }));
+    await assert.rejects(loadConfig(root), /ruleModules/);
+  }
+  await write(root, ".qg.yaml", "{}");
+  await write(root, "nested/.qg.yaml", "ruleModules: []");
+  await assert.rejects(
+    loadConfig(root),
+    /ruleModules is only allowed in the root config/,
+  );
+});

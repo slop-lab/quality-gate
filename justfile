@@ -15,7 +15,7 @@ build:
   @node scripts/run-task.mjs build
 
 test: build
-  @node --test --test-reporter=./scripts/test-reporter.mjs packages/*/dist/**/*.test.js
+  @node --test --test-reporter=./packages/cli/dist/node-test-reporter.mjs packages/*/dist/**/*.test.js
 
 format:
   @node scripts/run-task.mjs format
@@ -23,10 +23,9 @@ format:
 qg *args: build
   @node {{qg_cli}} {{args}}
 
-# Full rule scan, then the configured Biome/build/test hook checks.
+# Full rule scan and the shared Biome/build/test checks.
 ci: build
   @node {{qg_cli}} check --full
-  @node {{qg_cli}} run-hook pre-commit
 
 # Validate and preview all eight public npm packages without publishing.
 release-check: ci

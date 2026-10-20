@@ -165,5 +165,5 @@ function globToRegExp(glob: string): RegExp {
       source += char.replace(/[|\\{}()[\]^$+?.]/g, "\\$&");
     }
   }
-  return new RegExp(`${source}$`);
+  return new RegExp(`${source}(?![\\s\\S])`, "s");
 }

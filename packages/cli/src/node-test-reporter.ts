@@ -1,10 +1,8 @@
-// @ts-check
+import type { TestEvent } from "node:test/reporters";
 import { inspect } from "node:util";
 
-/** @param {AsyncIterable<import('node:test/reporters').TestEvent>} events */
-export default async function* report(events) {
-  /** @type {Map<string, string>} */
-  const output = new Map();
+export default async function* report(events: AsyncIterable<TestEvent>) {
+  const output = new Map<string, string>();
   let failed = false;
   for await (const { type, data } of events) {
     if (type === "test:stdout") {

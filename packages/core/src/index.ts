@@ -5,6 +5,7 @@ export * from "./discovery.js";
 export * from "./fs.js";
 export * from "./git.js";
 export * from "./process.js";
+export * from "./rule-provider.js";
 export * from "./runner.js";
 export * from "./suppression.js";
 export * from "./types.js";

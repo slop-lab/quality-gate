@@ -1,7 +1,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import { dirname, isAbsolute, join, relative } from "node:path";
 import type {
-  PreCommitCheck,
+  CheckConfig,
   QualityGateConfig,
   QualityGateOverride,
   RuleConfig,
@@ -44,6 +44,10 @@ export async function loadConfig(
   for (const path of nestedPaths) {
     const directory = normalizePath(relative(root, dirname(path)));
     const nested = await readConfig(path, relative(root, path));
+    if (nested.ruleModules)
+      throw new Error(
+        `${relative(root, path)}: ruleModules is only allowed in the root config`,
+      );
     if (nested.presets)
       throw new Error(
         `${relative(root, path)}: presets is only allowed in the root config`,
@@ -53,6 +57,10 @@ export async function loadConfig(
         `${relative(root, path)}: scan is only allowed in the root config`,
       );
     }
+    if (nested.checks)
+      throw new Error(
+        `${relative(root, path)}: checks is only allowed in the root config`,
+      );
     if (nested.hooks)
       throw new Error(
         `${relative(root, path)}: hooks is only allowed in the root config`,
@@ -170,6 +178,14 @@ function normalizeConfig(value: unknown, path: string): QualityGateConfig {
       throw new Error("presets may only contain js or test");
     config.presets = presets as ("js" | "test")[];
   }
+  if (object.ruleModules !== undefined) {
+    config.ruleModules = requireStrings(object.ruleModules, "ruleModules");
+    if (config.ruleModules.some((specifier) => !specifier.trim()))
+      throw new Error("ruleModules must contain non-empty module specifiers");
+  }
+  if (object.checks !== undefined) {
+    config.checks = normalizeChecks(object.checks, "checks");
+  }
   if (object.hooks !== undefined) {
     const hooks = requireObject(object.hooks, "hooks");
     const preCommit =
@@ -183,8 +199,6 @@ function normalizeConfig(value: unknown, path: string): QualityGateConfig {
       throw new Error(
         "hooks.preCommit.installation must be check, auto, or off",
       );
-    if (preCommit.checks !== undefined && !Array.isArray(preCommit.checks))
-      throw new Error("hooks.preCommit.checks must be an array");
     config.hooks = {
       preCommit: {
         ...(preCommit.installation === undefined
@@ -192,8 +206,9 @@ function normalizeConfig(value: unknown, path: string): QualityGateConfig {
           : {
               installation: preCommit.installation as "check" | "auto" | "off",
             }),
-        checks: ((preCommit.checks as unknown[] | undefined) ?? []).map(
-          normalizePreCommitCheck,
+        checks: normalizeChecks(
+          preCommit.checks === undefined ? [] : preCommit.checks,
+          "hooks.preCommit.checks",
         ),
       },
     };
@@ -356,15 +371,17 @@ function requireStrings(value: unknown, label: string): string[] {
   return value as string[];
 }
 
-function normalizePreCommitCheck(
-  value: unknown,
-  index: number,
-): PreCommitCheck {
-  const label = `hooks.preCommit.checks[${index}]`;
+function normalizeChecks(value: unknown, label: string): CheckConfig[] {
+  if (!Array.isArray(value)) throw new Error(`${label} must be an array`);
+  return value.map((check, index) =>
+    normalizeCheck(check, `${label}[${index}]`),
+  );
+}
+
+function normalizeCheck(value: unknown, label: string): CheckConfig {
   const object = requireObject(value, label);
-  for (const key of ["name", "command"])
-    if (typeof object[key] !== "string" || !(object[key] as string).trim())
-      throw new Error(`${label}.${key} must be a non-empty string`);
+  if (typeof object.name !== "string" || !object.name.trim())
+    throw new Error(`${label}.name must be a non-empty string`);
   if (object.message !== undefined && typeof object.message !== "string")
     throw new Error(`${label}.message must be a string`);
   if (
@@ -374,12 +391,36 @@ function normalizePreCommitCheck(
       object.timeoutMs <= 0)
   )
     throw new Error(`${label}.timeoutMs must be positive`);
+  let runner:
+    | { type: "node-test"; files: string[] }
+    | { type?: "command"; command: string; args?: string[] };
+  if (object.type === "node-test") {
+    if (object.command !== undefined || object.args !== undefined)
+      throw new Error(`${label}: node-test does not accept command or args`);
+    const files = requireStrings(object.files, `${label}.files`);
+    if (!files.length || files.some((file) => !file.trim()))
+      throw new Error(
+        `${label}.files must contain non-empty test paths or globs`,
+      );
+    runner = { type: "node-test", files };
+  } else {
+    if (object.type !== undefined && object.type !== "command")
+      throw new Error(`${label}.type must be command or node-test`);
+    if (typeof object.command !== "string" || !object.command.trim())
+      throw new Error(`${label}.command must be a non-empty string`);
+    if (object.files !== undefined)
+      throw new Error(`${label}.files is only supported for node-test`);
+    runner = {
+      ...(object.type === undefined ? {} : { type: "command" }),
+      command: object.command,
+      ...(object.args === undefined
+        ? {}
+        : { args: requireStrings(object.args, `${label}.args`) }),
+    };
+  }
   return {
+    ...runner,
     name: object.name as string,
-    command: object.command as string,
-    ...(object.args === undefined
-      ? {}
-      : { args: requireStrings(object.args, `${label}.args`) }),
     ...(object.message === undefined
       ? {}
       : { message: object.message as string }),

@@ -8,8 +8,8 @@ installation, prefix it with `pnpm exec`.
 
 ### `check`
 
-Run a rule scan and report diagnostics. Running `qg` without a command is an
-alias for `qg check`. Successful text-mode checks print `PASS`; warnings and
+Run rules followed by shared external command and Node.js test checks. Running
+`qg` without a command is an alias for `qg check`. Successful text-mode checks print `PASS`; warnings and
 errors remain visible. Explicit JSON output keeps the structured result.
 
 ```sh
@@ -17,6 +17,7 @@ qg check
 qg check --staged
 qg check --changed --base origin/main
 qg check --full
+qg check --rules-only
 qg check --working-tree
 qg check --format json
 ```
@@ -27,6 +28,8 @@ filesystem inputs from the Git index. Configuration files are loaded from the
 working tree. Use `--full` for a repository-wide working tree scan.
 
 Supported options:
+
+- `--rules-only`: skip shared command/test checks and run only rules.
 
 - `--changed`: select changed mode and disable the default staged selection.
 - `--full`: select full mode and disable the default staged selection.
@@ -67,8 +70,8 @@ idempotent. For an existing custom hook, first migrate its checks into QG, then
 use `qg hooks install --force`; the previous script is backed up before replacement.
 
 The hook runs `qg run-hook pre-commit`. That command always checks staged paths and index
-contents, even if `scan.defaultMode` is `full`, and then runs extra checks from
-the **root** configuration in order:
+contents, even if `scan.defaultMode` is `full`. Like `qg` and `qg check`, it then
+runs shared `checks` from the **root** configuration in declaration order:
 
 ```yaml
 rules:
@@ -78,27 +81,46 @@ rules:
 
 hooks:
   preCommit:
-    checks:
-      - name: lint
-        command: npm
-        args: [run, lint]
-        message: "Fix lint errors before committing."
-      - name: typecheck
-        command: npm
-        args: [run, typecheck]
-        timeoutMs: 120000
-        message: "Fix type errors before committing."
-      - name: tests
-        command: npm
-        args: [test]
-        timeoutMs: 120000
-        message: "Fix failing tests before committing."
+    installation: auto
+
+checks:
+  - name: lint
+    type: command
+    command: npm
+    args: [run, lint]
+    message: "Fix lint errors before committing."
+  - name: typecheck
+    command: npm
+    args: [run, typecheck]
+    timeoutMs: 120000
+    message: "Fix type errors before committing."
+  - name: tests
+    type: node-test
+    files: ["test/**/*.test.mjs"]
+    timeoutMs: 120000
+    message: "Fix failing tests before committing."
 ```
 
-`name` and `command` are required. `args` defaults to `[]`, `timeoutMs` to
-120000, and `message` to a description of the failure. Arguments are passed
-directly without a shell; shell syntax and glob expansion require an explicit
-shell command. Commands run from the QG project root against the working tree;
+Add an external tool or project script as a `type: command` check. QG uses its
+exit status, displays its output on failure, and runs each check once per
+invocation. Checks run in the CLI client even when a daemon handles the rule scan;
+external checks are never cached. Every check requires `name`. Command checks
+require `command`; `type: command` is optional and `args` defaults to `[]`. Arguments are passed directly without a
+shell; shell syntax and glob expansion require an explicit shell command.
+
+For Node.js tests, use `type: node-test` and a non-empty `files` array of paths or
+glob patterns relative to the project root. QG expands and deduplicates these
+paths and runs `node --test` with the same Node.js executable as QG. Each pattern
+must match at least one path; a missing test suite fails the check. `command` and
+`args` are not supported on this check type. Build compiled tests in a preceding
+command check when needed. No test script, Just installation, or extra test
+package is required in a consuming project. The reporter ships with QG and can
+also be used directly: `node --test --test-reporter=@slop-lab/qg/node-test-reporter`.
+Passing test lists and counts are hidden; failures include names, locations,
+assertions, and captured output. QG prints one final `PASS` when the hook succeeds.
+
+Both check types support `timeoutMs` (default 120000) and `message` (default a
+description of the failure). Checks run from the QG project root against the working tree;
 QG does not stash or modify partially staged files. Use rule adapters such as
 `external/biome`, `external/prettier`, or `external/eslint` for formatter/linter
 checks of staged contents. Install and configure the selected tool locally.
@@ -110,9 +132,13 @@ pass/fail diagnostics. The working-tree check includes unstaged changes.
 Any rule error, command failure, missing command, or timeout blocks the commit.
 All configured checks run even if another check fails. Failure output and
 configured recovery messages appear in text output; JSON output includes
-command details and stdout/stderr in diagnostic metadata. Ordinary `qg check`
-(including `--staged` and `--full`) does not run hook-only commands. To reproduce
-the complete hook manually, run `npx qg run-hook pre-commit` or `pnpm exec qg run-hook pre-commit`.
+command details and stdout/stderr in diagnostic metadata. Both `qg` and
+`qg check` (including `--staged` and `--full`) run shared checks after rules.
+Use `qg check --rules-only` to run only rules; this option is unavailable in hook
+mode so a commit cannot skip its configured checks. Existing
+`hooks.preCommit.checks` remain supported as additional hook-only checks, executed
+after shared checks. Move them to top-level `checks` to run them in both modes.
+To reproduce the complete hook manually, run `npx qg run-hook pre-commit` or `pnpm exec qg run-hook pre-commit`.
 
 Hook installation is verified automatically at CLI startup, separately from rule
 scans. A missing, outdated, non-executable, or unrecognized hook produces a setup
@@ -145,6 +171,24 @@ This disables automatic hook setup only. `qg run-hook pre-commit` still
 runs staged rules and all configured additional checks. The setting is allowed
 only in the root configuration and applies equally to implicit `qg`, explicit
 `qg check`, and other operational CLI commands, including daemon clients.
+
+### Custom rule modules
+
+Load project rules through top-level `ruleModules` in the root configuration:
+
+```yaml
+ruleModules: ["./qg-rules.mjs"]
+rules:
+  project/feature-entry: error
+```
+
+Modules export a named `rules` array, a named `ruleProvider`, or either as the
+default export. Relative paths resolve from the QG root; packages resolve from
+its dependencies. Duplicate IDs and malformed modules fail explicitly.
+`qg rules` includes custom rules, and normal checks and hooks run enabled rules.
+Modules load from the working tree; restart persistent daemons after code changes.
+See [file path policies](file-paths.md) for regex and code-based rules, or
+[rule execution providers](rule-providers.md) for public subprocess/daemon interfaces.
 
 ### `daemon`
 

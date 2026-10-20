@@ -226,22 +226,31 @@ export type RuleConfig<TOptions = unknown> =
       message?: string;
     };
 
-export interface PreCommitCheck {
+export type CheckConfig = {
   name: string;
-  command: string;
-  args?: string[];
   timeoutMs?: number;
   message?: string;
-}
+} & (
+  | { type?: "command"; command: string; args?: string[] }
+  | { type: "node-test"; files: string[] }
+);
+
+/** @deprecated Use CheckConfig for shared checks. */
+export type PreCommitCheck = CheckConfig;
 
 export interface QualityGateConfig {
   /** Optional CLI rule sets, installed separately in the project. */
   presets?: ("js" | "test")[];
+  /** Project-relative modules or installed packages exporting custom rules. */
+  ruleModules?: string[];
+  /** Shared command/test checks, executed after rules by the CLI and hooks. */
+  checks?: CheckConfig[];
   hooks?: {
     preCommit?: {
       /** Local hook setup at CLI startup; defaults to check. */
       installation?: "check" | "auto" | "off";
-      checks?: PreCommitCheck[];
+      /** Additional checks specific to pre-commit; shared checks run first. */
+      checks?: CheckConfig[];
     };
   };
   artifacts?: { generated?: GeneratedArtifactsConfig };

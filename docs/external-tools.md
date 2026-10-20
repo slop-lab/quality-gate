@@ -60,7 +60,7 @@ metadata. A QG severity of `error` retains native ESLint warnings, while
 Biome's adapter defaults to `format`, returning formatted stdout for comparison
 with the input. Biome 2.5.15's stdin `check`/`lint` protocol does not provide
 reliable pass/fail diagnostics; QG rejects these modes with instructions to run
-full Biome checks through `hooks.preCommit.checks` instead. See
+full Biome checks through top-level `checks` instead. See
 [hook commands](cli.md#run-hook-pre-commit-and-hooks-install).
 Biome and Prettier format failures have no invented line/column. Use their own
 diagnostic/fix commands for detailed formatting output. QG's HTML-comment

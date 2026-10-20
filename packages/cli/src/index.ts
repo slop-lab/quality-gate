@@ -10,10 +10,10 @@ import {
   runQualityGate,
   type ScanMode,
 } from "@slop-lab/qg-core";
+import { runChecks } from "./checks.js";
 import { loadConfig } from "./config.js";
 import { daemonDirectory, requestDaemon, startDaemon } from "./daemon.js";
 import { inspectPreCommitHook, installHooks } from "./hooks.js";
-import { runPreCommitChecks } from "./pre-commit.js";
 import { loadRules } from "./rule-sets.js";
 
 interface CliOptions {
@@ -23,6 +23,7 @@ interface CliOptions {
   head?: string;
   staged?: boolean;
   workingTree?: boolean;
+  rulesOnly?: boolean;
   format: "stylish" | "json";
   root: string;
   config?: string;
@@ -46,7 +47,7 @@ async function main(argv: string[]): Promise<number> {
     return 0;
   }
 
-  // The daemon runs rule scans; hook commands run once in this client.
+  // The daemon runs rule scans; command/test checks run once in this client.
   const checkArgs =
     options.command === "run-hook"
       ? ["check", ...argv.slice(2), "--staged"]
@@ -54,13 +55,15 @@ async function main(argv: string[]): Promise<number> {
   const remote = await requestDaemon(options.root, "check", checkArgs);
   if (remote?.error) throw new Error(remote.error);
   const result = remote?.result ?? (await executeCheck(options));
-  if (options.command === "run-hook") {
+  if (!options.rulesOnly) {
     const config = await loadConfig(options.root, options.config);
     result.diagnostics.push(
-      ...(await runPreCommitChecks(
-        options.root,
-        config?.hooks?.preCommit?.checks ?? [],
-      )),
+      ...(await runChecks(options.root, [
+        ...(config?.checks ?? []),
+        ...(options.command === "run-hook"
+          ? (config?.hooks?.preCommit?.checks ?? [])
+          : []),
+      ])),
     );
   }
   printResult(result, options.format);
@@ -204,6 +207,9 @@ function parseArgs(argv: string[]): CliOptions {
 
   for (let arg = args.shift(); arg !== undefined; arg = args.shift()) {
     switch (arg) {
+      case "--rules-only":
+        options.rulesOnly = true;
+        break;
       case "--changed":
         options.mode = "changed";
         options.staged = false;
@@ -251,6 +257,8 @@ function parseArgs(argv: string[]): CliOptions {
   }
 
   if (command === "run-hook") {
+    if (options.rulesOnly)
+      throw new Error("run-hook pre-commit does not support --rules-only");
     options.mode = "changed";
     options.staged = true;
     options.workingTree = false;
@@ -315,7 +323,7 @@ function printStylish(diagnostics: Diagnostic[]): void {
     console.log(
       `${diagnostic.severity.toUpperCase()} ${location}${diagnostic.message} (${diagnostic.ruleId})`,
     );
-    if (diagnostic.ruleId === "hooks/pre-commit") {
+    if (diagnostic.ruleId.startsWith("checks/")) {
       for (const key of ["stdout", "stderr", "error"]) {
         const detail = diagnostic.metadata?.[key];
         if (typeof detail === "string" && detail.trim())
@@ -331,16 +339,17 @@ function printHelp(): void {
   console.log(`qg
 
 Usage:
-  qg check [--changed|--full] [--base <ref>] [--format stylish|json]
+  qg check [--rules-only] [--changed|--full] [--base <ref>] [--format stylish|json]
   qg rules [--format stylish|json]
   qg hooks install [--root <path>] [--force]
   qg run-hook pre-commit [--format stylish|json]
   qg daemon <start|status|stop>
   qg cache clear --rule <rule-id>
 
-qg with no command is an alias for qg check.
+qg with no command is an alias for qg check. Both run rules and shared checks.
 
 Options:
+  --rules-only    Run rules without shared command/test checks.
   --changed       Scan Git affected paths.
   --full          Scan the full workspace.
   --base <ref>    Base ref for changed scans.

@@ -5,7 +5,7 @@ import { defineConfig, type UserConfig } from "tsdown";
 
 const packages = fileURLToPath(new URL("./packages/", import.meta.url));
 
-// Each package exposes src/index.ts; tsdown owns the generated export maps.
+// tsdown owns the generated export maps, including the CLI test reporter.
 export default defineConfig(
   readdirSync(packages, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
@@ -17,7 +17,10 @@ export default defineConfig(
       return {
         name: pkg.name,
         cwd,
-        entry: ["src/index.ts"],
+        entry:
+          pkg.name === "@slop-lab/qg"
+            ? ["src/index.ts", "src/node-test-reporter.ts"]
+            : ["src/index.ts"],
         format: "esm",
         platform: "node",
         target: "node24",

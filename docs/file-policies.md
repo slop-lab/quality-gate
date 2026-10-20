@@ -1,5 +1,8 @@
 # Required files and nearby-file detection
 
+For filename/path allowlists and code-based layout policies, see
+[file names, paths, and custom policies](file-paths.md).
+
 The recommended rules include two repository requirements, enabled as errors:
 
 - `repo/require-readme`: require a file named exactly `README.md` at the QG root.
