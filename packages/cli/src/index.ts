@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { cwd, exit } from "node:process";
 import { fileURLToPath } from "node:url";
+import { runChecks } from "@slop-lab/qg-checks";
 import {
   type Diagnostic,
   JsonFileRuleCacheStore,
@@ -10,7 +11,6 @@ import {
   runQualityGate,
   type ScanMode,
 } from "@slop-lab/qg-core";
-import { runChecks } from "./checks.js";
 import { loadConfig } from "./config.js";
 import { daemonDirectory, requestDaemon, startDaemon } from "./daemon.js";
 import { inspectPreCommitHook, installHooks } from "./hooks.js";

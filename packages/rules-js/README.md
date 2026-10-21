@@ -13,16 +13,17 @@ presets: [js]
 ```
 
 Once selected, JavaScript and package manager checks are enabled by default.
-Package-name restrictions and external adapters still require explicit opt-in.
+Package-name restrictions still require explicit opt-in.
 
 - `js/require-ts-check`: require an effective leading `// @ts-check` directive.
 - `package-manager/no-npm-lock-with-pnpm`: reject npm lockfiles in pnpm workspaces.
 - `package/allowed-name`: opt-in package name allowlist (see below).
 - `pnpm/lockfile-is-current`: check that pnpm would leave its lockfile unchanged.
-- `external/biome`, `external/prettier`, `external/eslint`: optional read-only
-  integrations with project-installed formatters and linters. See
-  [external tools](https://github.com/slop-lab/quality-gate/blob/main/docs/external-tools.md) for setup, snapshots, daemon
-  support, and cache behavior.
+
+External formatter/linter adapters are provided by the separate
+`@slop-lab/qg-rules-tools` package, loaded through tool-specific `ruleModules`.
+They do not require the JS preset. See
+[external tools](https://github.com/slop-lab/quality-gate/blob/main/docs/external-tools.md).
 
 The JavaScript check inspects `.js`, `.jsx`, `.mjs`, and `.cjs` files in changed
 or full scans. It accepts leading whitespace, copyright comments, a BOM, and
@@ -74,3 +75,9 @@ Changed scans check added, modified, copied, and renamed manifests; full scans
 check all manifests. `ignoredPaths`, `ignoredDirectories`, path overrides,
 generated artifact exclusions, and staged index contents work as for
 `js/require-ts-check`.
+
+The pnpm lockfile rule materializes a temporary workspace from the runner's
+filesystem snapshot. During staged checks, both manifests and the lockfile come
+from the index, so unstaged corrections cannot hide staged mismatches. Scripts
+are disabled during lockfile validation, and the temporary workspace is removed
+afterward.

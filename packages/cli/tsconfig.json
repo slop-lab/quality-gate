@@ -11,6 +11,9 @@
     },
     {
       "path": "../rules-recommended"
+    },
+    {
+      "path": "../checks"
     }
   ],
   "include": ["src/**/*.ts"]

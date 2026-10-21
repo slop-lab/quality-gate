@@ -9,3 +9,10 @@ Use `runQualityGate` with rules supplied by your application or by
 
 See the [architecture](https://github.com/slop-lab/quality-gate/blob/main/docs/architecture.md)
 and [rule contract](https://github.com/slop-lab/quality-gate/blob/main/docs/plugin-contract.md).
+
+
+Core also exports `createFilePathRule`, `FilePathOptions`, and
+`FilePathRuleDefinition` for custom file policies. These helpers use the runner's
+snapshot and path configuration without requiring any rule packages or Markdown
+parser dependencies. Command and Node test execution is provided separately by
+`@slop-lab/qg-checks`, which depends on core; the CLI uses the same public runner.

@@ -1,3 +1,4 @@
+import { posix } from "node:path";
 import {
   cacheKey,
   type Diagnostic,
@@ -6,10 +7,14 @@ import {
   type Rule,
 } from "@slop-lab/qg-core";
 
+import { markdownReferences } from "./markdown-links.js";
+
 export interface ValidDocumentReferenceOptions
   extends GeneratedArtifactRuleOptions {
   extensions?: string[];
   suppression?: string;
+  /** Markdown links by default; slash-delimited is the legacy strict prose policy. */
+  referenceStyle?: "markdown-links" | "slash-delimited";
 }
 
 interface ReferenceOccurrence {
@@ -22,16 +27,17 @@ const defaults: Required<ValidDocumentReferenceOptions> = {
   extensions: [".md", ".mdx", ".txt", ".adoc", ".rst"],
   suppression: "qg-suppress docs/valid-reference",
   includeGenerated: false,
+  referenceStyle: "markdown-links",
 };
 const referencePattern = /\b\w+(?:\/\w+)+\b/g;
-const parserVersion = "1";
+const parserVersion = "2";
 
 export const validDocumentReferenceRule: Rule<ValidDocumentReferenceOptions> = {
   metadata: {
     id: "docs/valid-reference",
     name: "Valid document reference",
     description:
-      "Reports slash-delimited document references whose target does not exist.",
+      "Validates local Markdown links and optionally strict slash-delimited references.",
     defaultSeverity: "error",
     supports: ["changed", "full"],
     scope: "file",
@@ -42,7 +48,10 @@ export const validDocumentReferenceRule: Rule<ValidDocumentReferenceOptions> = {
   },
   async check(context) {
     const candidates =
-      context.mode === "changed"
+      context.mode === "changed" &&
+      !context.changes.some((change) =>
+        ["deleted", "renamed"].includes(change.status),
+      )
         ? [
             ...new Set(
               context.changes
@@ -61,22 +70,59 @@ export const validDocumentReferenceRule: Rule<ValidDocumentReferenceOptions> = {
         !(await context.fs.isFile(path))
       )
         continue;
+      if (
+        !["markdown-links", "slash-delimited"].includes(options.referenceStyle)
+      )
+        throw new Error(
+          "docs/valid-reference: referenceStyle must be markdown-links or slash-delimited.",
+        );
       const bytes = await context.fs.readFileBytes(path);
-      const key = cacheKey(parserVersion, path, options.suppression, bytes);
+      const key = cacheKey(
+        parserVersion,
+        path,
+        options.suppression,
+        options.referenceStyle,
+        bytes,
+      );
       let occurrences = await context.cache.get<ReferenceOccurrence[]>(key);
       if (!occurrences) {
-        occurrences = parseOccurrences(
-          new TextDecoder().decode(bytes),
-          options.suppression,
-        );
+        const content = new TextDecoder().decode(bytes);
+        occurrences =
+          options.referenceStyle === "markdown-links"
+            ? markdownReferences(content)
+            : parseOccurrences(content, options.suppression);
         await context.cache.set(key, occurrences);
       }
       for (const { reference, line, column } of occurrences) {
-        if (await context.fs.isFile(reference)) continue;
+        let target = reference;
+        if (options.referenceStyle === "markdown-links") {
+          if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(reference)) continue;
+          const pathname = reference.split(/[?#]/)[0];
+          if (!pathname) continue;
+          try {
+            target = decodeURIComponent(pathname);
+          } catch {
+            target = pathname;
+          }
+          target = target.startsWith("/")
+            ? posix.normalize(target.slice(1))
+            : posix.join(posix.dirname(path), target);
+        }
+        const outside = target === ".." || target.startsWith("../");
+        if (
+          !outside &&
+          ((await context.fs.isFile(target)) ||
+            (options.referenceStyle === "markdown-links" &&
+              (await context.fs.isDirectory(target))))
+        )
+          continue;
         diagnostics.push({
           ruleId: validDocumentReferenceRule.metadata.id,
           severity: resolved.severity,
-          message: `Referenced file does not exist: ${reference}. If you meant ordinary text rather than a file, use a comma instead of '/'.`,
+          message:
+            options.referenceStyle === "markdown-links"
+              ? `Local Markdown target does not exist: ${reference} (resolved to ${target}).`
+              : `Referenced file does not exist: ${reference}. If you meant ordinary text rather than a file, use a comma instead of '/'.`,
           path,
           line,
           column,

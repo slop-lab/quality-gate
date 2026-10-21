@@ -447,7 +447,7 @@ test("Biome defaults to snapshot formatting and rejects unreliable stdin check/l
     const before = tool.calls.length;
     await assert.rejects(
       run({ "external/biome": ["error", { mode }] }),
-      /Run biome check or biome lint through hooks.preCommit.checks/,
+      /Run biome check or biome lint through shared checks/,
     );
     assert.equal(tool.calls.length, before);
   }

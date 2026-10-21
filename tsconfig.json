@@ -5,6 +5,9 @@
       "path": "packages/core"
     },
     {
+      "path": "packages/checks"
+    },
+    {
       "path": "packages/test-utils"
     },
     {
@@ -17,7 +20,10 @@
       "path": "packages/rules-js"
     },
     {
-      "path": "packages/rules-test"
+      "path": "packages/rules-js-test"
+    },
+    {
+      "path": "packages/rules-tools"
     },
     {
       "path": "packages/rules-cspell"
@@ -27,6 +33,9 @@
     },
     {
       "path": "packages/cli"
+    },
+    {
+      "path": "tsconfig.scripts.json"
     }
   ]
 }

@@ -29,7 +29,7 @@ test("default recommendations are independent of JS and test packages even when 
   const root = await project(t);
   assert.deepEqual(await loadRules(root), recommendedRules);
   await install(root, "qg-rules-js");
-  await install(root, "qg-rules-test");
+  await install(root, "qg-rules-js-test");
   assert.deepEqual(await loadRules(root), recommendedRules);
   const ids = recommendedRules.map((rule) => rule.metadata.id);
   assert.ok(
@@ -42,9 +42,9 @@ test("default recommendations are independent of JS and test packages even when 
 test("presets load separately installed project packages once and keep the recommendation list unchanged", async (t) => {
   const root = await project(t);
   await install(root, "qg-rules-js");
-  await install(root, "qg-rules-test");
+  await install(root, "qg-rules-js-test");
   const before = [...recommendedRules];
-  const loaded = await loadRules(root, { presets: ["js", "test", "js"] });
+  const loaded = await loadRules(root, { presets: ["js", "js-test", "js"] });
   const ids = loaded.map((rule) => rule.metadata.id);
   assert.ok(ids.includes("js/require-ts-check"));
   assert.ok(ids.includes("package/allowed-name"));
@@ -182,4 +182,26 @@ test("CLI modules can export named or default providers and execute their discov
     loadRules(root, { ruleModules: ["./invalid-provider.mjs"] }),
     /Invalid rule provider.*valid rule metadata/,
   );
+});
+
+test("tool-specific modules load without JS or JS test presets and only register the selected adapter", async (t) => {
+  const root = await project(t);
+  await install(root, "qg-rules-tools");
+  for (const tool of ["biome", "prettier", "eslint"]) {
+    const rules = await loadRules(root, {
+      ruleModules: [`@slop-lab/qg-rules-tools/${tool}`],
+      rules: { [`external/${tool}`]: "error" },
+    });
+    assert.deepEqual(
+      rules
+        .filter((rule) => rule.metadata.id.startsWith("external/"))
+        .map((rule) => rule.metadata.id),
+      [`external/${tool}`],
+    );
+    assert.ok(!rules.some((rule) => rule.metadata.id.startsWith("js/")));
+    assert.ok(!rules.some((rule) => rule.metadata.id.startsWith("test/")));
+  }
+  await install(root, "qg-rules-js");
+  const js = await loadRules(root, { presets: ["js"] });
+  assert.ok(!js.some((rule) => rule.metadata.id.startsWith("external/")));
 });

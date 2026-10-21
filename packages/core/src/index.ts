@@ -2,6 +2,7 @@ export * from "./artifacts.js";
 export * from "./cache.js";
 export * from "./config.js";
 export * from "./discovery.js";
+export * from "./file-rule.js";
 export * from "./fs.js";
 export * from "./git.js";
 export * from "./process.js";

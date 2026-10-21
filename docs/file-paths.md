@@ -53,13 +53,13 @@ Use a custom rule when naming depends on parent directories, neighboring files,
 or other project conventions. Install the helper package directly in the project:
 
 ```sh
-npm install --save-dev @slop-lab/qg-rules-files
+npm install --save-dev @slop-lab/qg-core
 ```
 
 Create `qg-rules.mjs`:
 
 ```js
-import { createFilePathRule } from "@slop-lab/qg-rules-files";
+import { createFilePathRule } from "@slop-lab/qg-core";
 
 export const rules = [
   createFilePathRule({
@@ -101,7 +101,11 @@ file. Return an error message for a violation, or `undefined` when valid.
 The callback may be async and use `context.fs` or `context.discovery` for
 neighbor-dependent policies. Declare additional required inputs with
 `requires`, for example `requires: ["fileContent"]` when reading file contents.
-The helper never renames or writes files. Custom options can be supplied through
+Set `recheckOnChanges` to root-relative input globs, such as `["package.json"]`,
+to recheck every selected file when shared metadata changes in changed mode.
+This supports policies comparing workspace manifests with a root release.
+The helper lives in dependency-free core, so custom path policies do not install
+the Markdown parser from the file-rule package. The helper never renames or writes files. Custom options can be supplied through
 `defaultOptions`, rule `options`, and normal overrides, alongside `files`,
 `ignoredPaths`, and `ignoredDirectories`.
 

@@ -1,7 +1,12 @@
-import { cp, mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { basename, join, relative, sep } from "node:path";
-import type { Diagnostic, Rule, RuleContext } from "@slop-lab/qg-core";
+import { basename, dirname, join } from "node:path";
+import type {
+  Diagnostic,
+  FileSystemProvider,
+  Rule,
+  RuleContext,
+} from "@slop-lab/qg-core";
 
 export interface PnpmLockfileIsCurrentOptions {
   pnpmCommand?: string;
@@ -10,7 +15,7 @@ export interface PnpmLockfileIsCurrentOptions {
 
 const defaultPnpmLockfileOptions: Required<PnpmLockfileIsCurrentOptions> = {
   pnpmCommand: "pnpm",
-  ignoredShadowDirectories: [".git", ".qg", "dist", "node_modules"],
+  ignoredShadowDirectories: [".git", ".local", ".qg", "dist", "node_modules"],
 };
 
 export const noNpmLockWithPnpmRule: Rule = {
@@ -80,7 +85,7 @@ export const pnpmLockfileIsCurrentRule: Rule<PnpmLockfileIsCurrentOptions> = {
     }
 
     const shadowRoot = await createShadowWorkspace(
-      context.root,
+      context.fs,
       options.ignoredShadowDirectories,
     );
     try {
@@ -177,28 +182,31 @@ function diagnostic(
 }
 
 async function createShadowWorkspace(
-  root: string,
+  fs: FileSystemProvider,
   ignoredDirectories: string[],
 ): Promise<string> {
   const shadowRoot = await mkdtemp(join(tmpdir(), "qg-pnpm-"));
-  await cp(root, shadowRoot, {
-    recursive: true,
-    filter: (sourcePath) =>
-      shouldCopyPath(root, sourcePath, ignoredDirectories),
-  });
-  return shadowRoot;
-}
-
-function shouldCopyPath(
-  root: string,
-  sourcePath: string,
-  ignoredDirectories: string[],
-): boolean {
-  const relativePath = relative(root, sourcePath);
-  if (!relativePath) {
-    return true;
+  try {
+    const pending = ["."];
+    while (pending.length) {
+      const directory = pending.shift();
+      if (!directory) continue;
+      for (const entry of await fs.readDirectory(directory)) {
+        if (
+          entry.type === "directory" &&
+          !ignoredDirectories.includes(entry.name)
+        )
+          pending.push(entry.path);
+        else if (entry.type === "file") {
+          const target = join(shadowRoot, entry.path);
+          await mkdir(dirname(target), { recursive: true });
+          await writeFile(target, await fs.readFileBytes(entry.path));
+        }
+      }
+    }
+    return shadowRoot;
+  } catch (error) {
+    await rm(shadowRoot, { recursive: true, force: true });
+    throw error;
   }
-
-  const segments = relativePath.split(sep);
-  return !segments.some((segment) => ignoredDirectories.includes(segment));
 }

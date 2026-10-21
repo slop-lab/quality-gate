@@ -4,6 +4,7 @@ import type {
   Rule,
   RuleContext,
 } from "@slop-lab/qg-core";
+import ts from "typescript";
 
 export interface NoDirectoryFixtureCopyOptions
   extends GeneratedArtifactRuleOptions {
@@ -49,7 +50,7 @@ export const noDirectoryFixtureCopyRule: Rule<NoDirectoryFixtureCopyOptions> = {
       )
         continue;
       const content = await context.fs.readFile(path);
-      for (const location of findCalls(content, "createFixtureFromDirectory")) {
+      for (const location of findCalls(content, path)) {
         diagnostics.push({
           ruleId: noDirectoryFixtureCopyRule.metadata.id,
           severity: context.severity,
@@ -71,7 +72,7 @@ export const noDirectoryFixtureCopyRule: Rule<NoDirectoryFixtureCopyOptions> = {
   },
 };
 
-export const testRules = [noDirectoryFixtureCopyRule];
+export const jsTestRules = [noDirectoryFixtureCopyRule];
 
 interface Location {
   line: number;
@@ -133,58 +134,52 @@ function shouldIgnoreDirectory(path: string, ignored: string[]): boolean {
   return ignored.some((ignore) => segments.includes(ignore));
 }
 
-function findCalls(content: string, name: string): Location[] {
+function findCalls(content: string, path: string): Location[] {
+  const source = ts.createSourceFile(
+    path,
+    content,
+    ts.ScriptTarget.Latest,
+    true,
+    path.endsWith("x") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+  );
   const locations: Location[] = [];
-  let line = 1;
-  let column = 1;
-  let index = 0;
-
-  while (index < content.length) {
+  const names = new Set(["createFixtureFromDirectory"]);
+  for (const statement of source.statements) {
     if (
-      content.startsWith(name, index) &&
-      hasIdentifierBoundaries(content, index, name)
-    ) {
-      const openParenIndex = findNextNonWhitespace(
-        content,
-        index + name.length,
-      );
-      if (content[openParenIndex] === "(") {
-        locations.push({ line, column });
+      !ts.isImportDeclaration(statement) ||
+      !ts.isStringLiteral(statement.moduleSpecifier) ||
+      statement.moduleSpecifier.text !== "@slop-lab/qg-test-utils"
+    )
+      continue;
+    const bindings = statement.importClause?.namedBindings;
+    if (bindings && ts.isNamedImports(bindings))
+      for (const element of bindings.elements)
+        if (
+          (element.propertyName ?? element.name).text ===
+          "createFixtureFromDirectory"
+        )
+          names.add(element.name.text);
+  }
+  function visit(node: ts.Node) {
+    if (ts.isCallExpression(node)) {
+      const callee = node.expression;
+      const name = ts.isIdentifier(callee)
+        ? callee
+        : ts.isPropertyAccessExpression(callee)
+          ? callee.name
+          : undefined;
+      if (name && names.has(name.text)) {
+        const position = source.getLineAndCharacterOfPosition(
+          name.getStart(source),
+        );
+        locations.push({
+          line: position.line + 1,
+          column: position.character + 1,
+        });
       }
     }
-
-    if (content[index] === "\n") {
-      line += 1;
-      column = 1;
-    } else {
-      column += 1;
-    }
-    index += 1;
+    ts.forEachChild(node, visit);
   }
-
+  visit(source);
   return locations;
-}
-
-function hasIdentifierBoundaries(
-  content: string,
-  index: number,
-  name: string,
-): boolean {
-  return (
-    !isIdentifierCharacter(content[index - 1]) &&
-    !isIdentifierCharacter(content[index + name.length])
-  );
-}
-
-function isIdentifierCharacter(character: string | undefined): boolean {
-  return character !== undefined && /[$\w]/.test(character);
-}
-
-function findNextNonWhitespace(content: string, start: number): number {
-  for (let index = start; index < content.length; index += 1) {
-    if (!/\s/.test(content[index] ?? "")) {
-      return index;
-    }
-  }
-  return -1;
 }

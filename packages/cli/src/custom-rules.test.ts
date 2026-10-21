@@ -32,15 +32,15 @@ test("CLI loads custom path rules from the project and shares staged behavior wi
         createRequire(import.meta.url).resolve(
           "@slop-lab/qg-rules-recommended/package.json",
         ),
-      ).resolve("@slop-lab/qg-rules-files/package.json"),
+      ).resolve("@slop-lab/qg-core/package.json"),
     ),
-    join(optional, "qg-rules-files"),
+    join(optional, "qg-core"),
     "junction",
   );
   await writeFile(
     join(root, "qg-rules.mjs"),
     `
-import { createFilePathRule } from '@slop-lab/qg-rules-files';
+import { createFilePathRule } from '@slop-lab/qg-core';
 export const rules = [createFilePathRule({
   id: 'project/feature-name', name: 'Feature name', description: 'Match the parent directory',
   defaultOptions: { files: ['features/**/*.ts'] },

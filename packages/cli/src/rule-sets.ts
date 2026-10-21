@@ -12,7 +12,10 @@ import { recommendedRules } from "@slop-lab/qg-rules-recommended";
 
 const optionalPresets = {
   js: { packageName: "@slop-lab/qg-rules-js", exportName: "jsRules" },
-  test: { packageName: "@slop-lab/qg-rules-test", exportName: "testRules" },
+  "js-test": {
+    packageName: "@slop-lab/qg-rules-js-test",
+    exportName: "jsTestRules",
+  },
 };
 
 export async function loadRules(
@@ -98,7 +101,7 @@ export async function loadRules(
             : setting.severity;
       if (severity !== "off" && !ids.has(id))
         throw new Error(
-          `Rule ${id} is not loaded. Select its preset in the root .qg.yaml (presets: [js] or [test]) and install the corresponding rule package, or add its module to ruleModules.`,
+          `Rule ${id} is not loaded. Select its preset in the root .qg.yaml (presets: [js] or [js-test]) and install the corresponding rule package, or add its module to ruleModules.`,
         );
     }
   }

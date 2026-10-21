@@ -12,8 +12,12 @@
     "tsdown": "0.23.1",
     "typescript": "^5.8.0",
     "@slop-lab/qg-rules-js": "0.1.0",
-    "@slop-lab/qg-rules-test": "0.1.0",
-    "@slop-lab/qg-rules-cspell": "0.1.0"
+    "@slop-lab/qg-rules-js-test": "0.1.0",
+    "@slop-lab/qg-rules-cspell": "0.1.0",
+    "@slop-lab/qg-core": "0.1.0",
+    "@slop-lab/qg-test-utils": "0.1.0",
+    "@slop-lab/qg-rules-tools": "0.1.0",
+    "@slop-lab/qg-checks": "0.1.0"
   },
   "engines": {
     "node": ">=24.0.0"

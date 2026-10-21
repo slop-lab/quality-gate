@@ -17,11 +17,13 @@
       "@slop-lab/qg-rules-git": ["packages/rules-git/src/index.ts"],
       "@slop-lab/qg-rules-files": ["packages/rules-files/src/index.ts"],
       "@slop-lab/qg-rules-js": ["packages/rules-js/src/index.ts"],
-      "@slop-lab/qg-rules-test": ["packages/rules-test/src/index.ts"],
+      "@slop-lab/qg-rules-js-test": ["packages/rules-js-test/src/index.ts"],
       "@slop-lab/qg-rules-recommended": [
         "packages/rules-recommended/src/index.ts"
       ],
-      "@slop-lab/qg-rules-cspell": ["packages/rules-cspell/src/index.ts"]
+      "@slop-lab/qg-rules-cspell": ["packages/rules-cspell/src/index.ts"],
+      "@slop-lab/qg-checks": ["packages/checks/src/index.ts"],
+      "@slop-lab/qg-rules-tools": ["packages/rules-tools/src/index.ts"]
     }
   }
 }

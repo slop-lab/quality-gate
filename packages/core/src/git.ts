@@ -14,7 +14,7 @@ const execFileAsync = promisify(execFile);
 export class GitIndexFileSystemProvider implements FileSystemProvider {
   constructor(private readonly root: string) {}
   async exists(path: string): Promise<boolean> {
-    return this.isFile(path) || this.isDirectory(path);
+    return (await this.isFile(path)) || this.isDirectory(path);
   }
   async isFile(path: string): Promise<boolean> {
     try {
@@ -74,19 +74,38 @@ export class GitChangedProvider implements ChangedProvider {
 
 export function buildDiffArgs(options: ChangedProviderOptions): string[] {
   if (options.staged) {
-    return ["diff", "--cached", "--name-status", "--find-renames"];
+    return ["diff", "--cached", "--name-status", "-z", "--find-renames"];
   }
 
   if (options.workingTree) {
-    return ["diff", "--name-status", "--find-renames"];
+    return ["diff", "--name-status", "-z", "--find-renames"];
   }
 
   const base = options.base ?? "HEAD";
   const head = options.head ?? "HEAD";
-  return ["diff", "--name-status", "--find-renames", `${base}...${head}`];
+  return ["diff", "--name-status", "-z", "--find-renames", `${base}...${head}`];
 }
 
 export function parseNameStatus(output: string): ChangeEntry[] {
+  if (output.includes("\0")) {
+    const fields = output.split("\0");
+    const changes: ChangeEntry[] = [];
+    for (let index = 0; index < fields.length - 1; ) {
+      const rawStatus = fields[index++];
+      const path = fields[index++];
+      const status = mapStatus(rawStatus[0] ?? "");
+      if (status === "renamed" || status === "copied") {
+        const destination = fields[index++];
+        changes.push({
+          status,
+          path: destination,
+          oldPath: path,
+          similarity: Number(rawStatus.slice(1)),
+        });
+      } else changes.push({ status, path });
+    }
+    return changes;
+  }
   return output
     .split(/\r?\n/)
     .filter(Boolean)

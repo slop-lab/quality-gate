@@ -280,7 +280,7 @@ function validateOptions(tool: Tool, options: ExternalToolOptions): void {
     options.mode !== "format"
   )
     throw new Error(
-      "external/biome: only format mode supports reliable stdin validation. Run biome check or biome lint through hooks.preCommit.checks instead.",
+      "external/biome: only format mode supports reliable stdin validation. Run biome check or biome lint through shared checks instead.",
     );
   for (const arg of options.args ?? []) {
     if (

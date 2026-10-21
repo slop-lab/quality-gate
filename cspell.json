@@ -1,0 +1,39 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "QG",
+    "Biome",
+    "pnpm",
+    "tsdown",
+    "adoc",
+    "codegen",
+    "lifecycles",
+    "lockfiles",
+    "SARIF",
+    "subtests",
+    "unconfigured",
+    "worktrees"
+  ],
+  "overrides": [
+    {
+      "filename": [
+        "packages/rules-cspell/src/cspell.test.ts",
+        "packages/cli/src/cspell.test.ts"
+      ],
+      "words": ["speling", "qgcustomword", "forbiddenword"]
+    },
+    {
+      "filename": "packages/rules-files/src/markdown-characters.ts",
+      "words": ["Bopo", "Hanb", "Hani", "Hira", "Hrkt", "Jpan", "Kore"]
+    },
+    {
+      "filename": "packages/rules-files/src/required-files.test.ts",
+      "words": ["nolf"]
+    },
+    {
+      "filename": "packages/rules-js/src/package-name.test.ts",
+      "words": ["qgother"]
+    }
+  ]
+}

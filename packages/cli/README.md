@@ -3,7 +3,7 @@
 `@slop-lab/qg` provides the `qg` CLI for repository quality checks.
 Requires Node.js 24 or later.
 
-The CLI uses `@slop-lab/qg-core` and `@slop-lab/qg-rules-recommended` as runtime
+The CLI uses core, `@slop-lab/qg-checks`, and recommended rules as runtime
 dependencies. The default set contains Git and file checks. JavaScript and
 TypeScript test rules are separate optional packages.
 
@@ -21,16 +21,16 @@ nested config files apply to their directory and descendants.
 ```yaml
 rules:
   git/no-tracked-local-files: error
-  docs/valid-reference: off
+  docs/valid-reference: error
   files/max-bytes:
     severity: error
     options: { limit: 1000000 }
 ```
 
 For JS/TS projects, install `@slop-lab/qg-rules-js` separately and select
-`presets: [js]` in the root config. Install `@slop-lab/qg-rules-test` and select
-`presets: [test]` for its TypeScript fixture policy. Combine both as
-`presets: [js, test]`. Installed packages are not activated automatically.
+`presets: [js]` in the root config. Install `@slop-lab/qg-rules-js-test` and select
+`presets: [js-test]` for its TypeScript fixture policy. Combine both as
+`presets: [js, js-test]`. Installed packages are not activated automatically.
 
 The CLI automatically warns on stderr if the local QG hook is missing or
 outdated. Set `hooks.preCommit.installation` to `auto` to install or update QG hooks
@@ -43,23 +43,23 @@ pnpm exec qg hooks install
 pnpm exec qg run-hook pre-commit  # run the complete hook manually
 ```
 
-The hook checks staged contents and runs extra commands configured in the root
-`.qg.yaml`:
+The CLI and hook share top-level `checks` from the root configuration. The hook
+selects staged rule inputs; external command and Node tests use the working tree:
 
 ```yaml
-hooks:
-  preCommit:
-    checks:
-      - name: tests
-        command: pnpm
-        args: [test]
-        message: "Fix tests before committing."
+checks:
+  - name: tests
+    type: node-test
+    files: ["test/**/*.test.mjs"]
+    message: "Fix tests before committing."
 ```
 
-Enable `external/biome`, `external/prettier`, or `external/eslint` rules to move
-existing formatter/linter hook checks into QG. Other commands belong in
-`hooks.preCommit.checks`. See [pre-commit setup](https://github.com/slop-lab/quality-gate/blob/main/docs/cli.md#run-hook-pre-commit-and-hooks-install)
-for installation, migration, and snapshot details.
+Load formatter/linter adapters through tool-specific modules such as
+`ruleModules: ["@slop-lab/qg-rules-tools/biome"]`, then enable `external/biome`.
+This does not require a JS preset. See
+[pre-commit setup](https://github.com/slop-lab/quality-gate/blob/main/docs/cli.md#run-hook-pre-commit-and-hooks-install).
+Library users can run the same checks through `runChecks` from
+`@slop-lab/qg-checks` without importing or running the CLI.
 
 An optional project daemon supports persistent rule caches:
 

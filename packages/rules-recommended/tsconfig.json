@@ -6,12 +6,27 @@
     "composite": true
   },
   "references": [
-    { "path": "../core" },
-    { "path": "../rules-git" },
-    { "path": "../rules-files" },
-    { "path": "../rules-js" },
-    { "path": "../rules-test" },
-    { "path": "../test-utils" }
+    {
+      "path": "../core"
+    },
+    {
+      "path": "../rules-git"
+    },
+    {
+      "path": "../rules-files"
+    },
+    {
+      "path": "../rules-js"
+    },
+    {
+      "path": "../rules-js-test"
+    },
+    {
+      "path": "../test-utils"
+    },
+    {
+      "path": "../rules-tools"
+    }
   ],
   "include": ["src/**/*.ts"]
 }

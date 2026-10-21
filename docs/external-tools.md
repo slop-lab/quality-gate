@@ -1,13 +1,14 @@
 # External formatters and linters
 
-The CLI includes `external/biome`, `external/prettier`, and `external/eslint`
-from the separately installed `@slop-lab/qg-rules-js` package, selected with
-`presets: [js]` in the root config. All three are **off by default**, even when their
-executables or configuration files exist. They never download tools or modify
-project configuration. Enable the adapters you want in `.qg.yaml`:
+Install `@slop-lab/qg-rules-tools` and load the desired entry points through
+`ruleModules`. These modules work independently of JS/test presets and do not
+install Biome, Prettier or ESLint themselves. All rules remain **off by default**:
 
 ```yaml
-presets: [js]
+ruleModules:
+  - "@slop-lab/qg-rules-tools/biome"
+  - "@slop-lab/qg-rules-tools/prettier"
+  - "@slop-lab/qg-rules-tools/eslint"
 rules:
   external/biome:
     severity: error

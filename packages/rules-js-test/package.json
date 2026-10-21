@@ -1,9 +1,10 @@
 {
-  "name": "@slop-lab/qg-rules-test",
+  "name": "@slop-lab/qg-rules-js-test",
   "version": "0.1.0",
   "type": "module",
   "dependencies": {
-    "@slop-lab/qg-core": "0.1.0"
+    "@slop-lab/qg-core": "0.1.0",
+    "typescript": "^5.8.0"
   },
   "devDependencies": {
     "@slop-lab/qg-test-utils": "0.1.0"
@@ -15,7 +16,7 @@
     "dist/*.d.mts.map"
   ],
   "scripts": {
-    "build": "tsc -b && tsdown --config ../../tsdown.config.ts --filter @slop-lab/qg-rules-test",
+    "build": "tsc -b && tsdown --config ../../tsdown.config.ts --filter @slop-lab/qg-rules-js-test",
     "prepack": "npm run build"
   },
   "publishConfig": {
@@ -24,9 +25,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/slop-lab/quality-gate.git",
-    "directory": "packages/rules-test"
+    "directory": "packages/rules-js-test"
   },
-  "description": "Test fixture hygiene rules for QG",
+  "description": "JavaScript and TypeScript test fixture hygiene rules for QG",
   "engines": {
     "node": ">=24.0.0"
   },

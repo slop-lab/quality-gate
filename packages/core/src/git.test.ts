@@ -7,6 +7,7 @@ import { test } from "node:test";
 import { promisify } from "node:util";
 import {
   buildDiffArgs,
+  GitChangedProvider,
   GitIndexFileSystemProvider,
   parseNameStatus,
 } from "./git.js";
@@ -40,16 +41,18 @@ test("buildDiffArgs supports staged, working tree, and ref scans", () => {
     "diff",
     "--cached",
     "--name-status",
+    "-z",
     "--find-renames",
   ]);
   assert.deepEqual(buildDiffArgs({ root: ".", workingTree: true }), [
     "diff",
     "--name-status",
+    "-z",
     "--find-renames",
   ]);
   assert.deepEqual(
     buildDiffArgs({ root: ".", base: "origin/main", head: "HEAD" }),
-    ["diff", "--name-status", "--find-renames", "origin/main...HEAD"],
+    ["diff", "--name-status", "-z", "--find-renames", "origin/main...HEAD"],
   );
 });
 
@@ -67,4 +70,37 @@ test("GitIndexFileSystemProvider reads staged content instead of working tree co
   assert.deepEqual(await fs.readDirectory("."), [
     { name: "doc.md", path: "doc.md", type: "file" },
   ]);
+});
+
+test("NUL status records preserve tabs, Unicode, newlines and rename endpoints", () => {
+  assert.deepEqual(
+    parseNameStatus("A\0한글.ts\0R100\0old\tname.ts\0new\nname.ts\0"),
+    [
+      { status: "added", path: "한글.ts" },
+      {
+        status: "renamed",
+        oldPath: "old\tname.ts",
+        path: "new\nname.ts",
+        similarity: 100,
+      },
+    ],
+  );
+});
+
+test("real staged paths are decoded without Git quoting and index directory existence works", async (t) => {
+  const root = await mkdtemp(join(tmpdir(), "qg-index-paths-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const { mkdir } = await import("node:fs/promises");
+  await mkdir(join(root, "docs"));
+  await writeFile(join(root, "docs", "한글.md"), "text");
+  await execFileAsync("git", ["init", "--quiet"], { cwd: root });
+  await execFileAsync("git", ["add", "."], { cwd: root });
+  assert.equal(
+    (await new GitChangedProvider().getChanged({ root, staged: true }))[0]
+      ?.path,
+    "docs/한글.md",
+  );
+  const fs = new GitIndexFileSystemProvider(root);
+  assert.equal(await fs.exists("docs"), true);
+  assert.equal(await fs.exists("missing"), false);
 });

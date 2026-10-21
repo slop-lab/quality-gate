@@ -2,12 +2,9 @@ import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import { test } from "node:test";
 import { promisify } from "node:util";
+import { createFilePathRule } from "@slop-lab/qg-core";
 import { createFixture, runRule } from "@slop-lab/qg-test-utils";
-import {
-  allowedFilenameRule,
-  allowedFilePathRule,
-  createFilePathRule,
-} from "./file-paths.js";
+import { allowedFilenameRule, allowedFilePathRule } from "./file-paths.js";
 
 for (const rule of [allowedFilenameRule, allowedFilePathRule]) {
   test(`${rule.metadata.id} is opt-in and matches entire names or paths`, async (t) => {
@@ -229,4 +226,31 @@ test("path rules do not skip or partially match filenames containing a newline",
       ["good.ts\n"],
     );
   }
+});
+
+test("custom path rules recheck selected files when shared dependency inputs change", async (t) => {
+  const fixture = await createFixture({
+    "package.json": "{}",
+    "packages/core/package.json": "{}",
+  });
+  t.after(() => fixture.cleanup());
+  const rule = createFilePathRule({
+    id: "project/shared",
+    name: "Shared",
+    description: "Shared metadata",
+    recheckOnChanges: ["package.json"],
+    defaultOptions: { files: ["packages/*/package.json"] },
+    validate: () => "Changed shared input",
+  });
+  const result = await runRule({
+    fixture,
+    rule,
+    severity: "error",
+    mode: "changed",
+    changes: [{ status: "modified", path: "package.json" }],
+  });
+  assert.deepEqual(
+    result.diagnostics.map((item) => item.path),
+    ["packages/core/package.json"],
+  );
 });

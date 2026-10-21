@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
-import { writeFile } from "node:fs/promises";
+import { execFile } from "node:child_process";
+import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { test } from "node:test";
+import { promisify } from "node:util";
 import type { ProcessProvider } from "@slop-lab/qg-core";
 import {
   assertDiagnostic,
@@ -144,3 +146,33 @@ function createPnpmFixture(files: Record<string, string> = {}) {
     ...files,
   });
 }
+
+test("pnpm validation materializes index manifests and lockfiles rather than unstaged corrections", async (t) => {
+  const fixture = await createPnpmFixture();
+  t.after(() => fixture.cleanup());
+  const exec = promisify(execFile);
+  await exec("git", ["init", "--quiet"], { cwd: fixture.root });
+  await exec("git", ["add", "."], { cwd: fixture.root });
+  await fixture.write("packages/app/package.json", '{"name":"unstaged"}');
+  let inspected = false;
+  const result = await runRule({
+    fixture,
+    rule: pnpmLockfileIsCurrentRule,
+    staged: true,
+    process: {
+      async exec(options) {
+        const manifest = JSON.parse(
+          await readFile(
+            join(options.cwd, "packages/app/package.json"),
+            "utf8",
+          ),
+        );
+        assert.equal(manifest.name, "app");
+        inspected = true;
+        return { exitCode: 0, stdout: "", stderr: "" };
+      },
+    },
+  });
+  assert.equal(inspected, true);
+  assert.deepEqual(result.diagnostics, []);
+});

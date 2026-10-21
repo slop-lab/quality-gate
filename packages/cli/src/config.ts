@@ -174,9 +174,9 @@ function normalizeConfig(value: unknown, path: string): QualityGateConfig {
   const config: QualityGateConfig = {};
   if (object.presets !== undefined) {
     const presets = requireStrings(object.presets, "presets");
-    if (presets.some((preset) => preset !== "js" && preset !== "test"))
-      throw new Error("presets may only contain js or test");
-    config.presets = presets as ("js" | "test")[];
+    if (presets.some((preset) => preset !== "js" && preset !== "js-test"))
+      throw new Error("presets may only contain js or js-test");
+    config.presets = presets as ("js" | "js-test")[];
   }
   if (object.ruleModules !== undefined) {
     config.ruleModules = requireStrings(object.ruleModules, "ruleModules");

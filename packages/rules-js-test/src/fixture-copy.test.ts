@@ -76,3 +76,34 @@ test("changed scan only reads changed test files", async (t) => {
   assert.equal(result.diagnostics.length, 1);
   assert.equal(result.diagnostics[0]?.path, "src/example.test.ts");
 });
+
+test("syntax-aware fixture checks ignore comments, strings and example source but inspect template expressions", async (t) => {
+  const fixture = await createFixture({
+    "example.test.ts": `
+// createFixtureFromDirectory('comment');
+const text = "createFixtureFromDirectory('literal')";
+const sample = \`createFixtureFromDirectory('example')\`;
+const interpolation = \`value: \${createFixtureFromDirectory('actual')}\`;
+`,
+  });
+  t.after(() => fixture.cleanup());
+  const result = await runRule({ fixture, rule: noDirectoryFixtureCopyRule });
+  assert.equal(result.diagnostics.length, 1);
+  assert.equal(result.diagnostics[0]?.line, 5);
+});
+
+test("fixture checks find aliased imports and namespace calls", async (t) => {
+  const fixture = await createFixture({
+    "example.test.ts": `
+import { createFixtureFromDirectory as broad } from '@slop-lab/qg-test-utils';
+broad('actual');
+fixtures.createFixtureFromDirectory('actual');
+`,
+  });
+  t.after(() => fixture.cleanup());
+  assert.equal(
+    (await runRule({ fixture, rule: noDirectoryFixtureCopyRule })).diagnostics
+      .length,
+    2,
+  );
+});

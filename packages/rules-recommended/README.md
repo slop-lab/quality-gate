@@ -27,7 +27,7 @@ const result = await runQualityGate({
   mode: "full",
   rules: recommendedRules,
   config: {
-    rules: { "docs/valid-reference": "off" },
+    rules: { "docs/valid-reference": "error" },
   },
 });
 ```
@@ -39,6 +39,6 @@ severity and options through `.qg.yaml` or `.qg.yml`.
 JavaScript and TypeScript projects can separately install
 `@slop-lab/qg-rules-js` and opt in with `presets: [js]` in the root `.qg.yaml`.
 The TypeScript fixture policy is separately available from
-`@slop-lab/qg-rules-test` with `presets: [test]`.
+`@slop-lab/qg-rules-js-test` with `presets: [js-test]`.
 Library callers compose these exports explicitly, for example
 `rules: [...recommendedRules, ...jsRules]`; core does not load CLI presets.

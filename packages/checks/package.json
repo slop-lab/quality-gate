@@ -1,0 +1,39 @@
+{
+  "name": "@slop-lab/qg-checks",
+  "version": "0.1.0",
+  "type": "module",
+  "dependencies": {
+    "@slop-lab/qg-core": "0.1.0"
+  },
+  "files": [
+    "dist/*.mjs",
+    "dist/*.mjs.map",
+    "dist/*.d.mts",
+    "dist/*.d.mts.map"
+  ],
+  "scripts": {
+    "build": "tsc -b && tsdown --config ../../tsdown.config.ts --filter @slop-lab/qg-checks",
+    "prepack": "npm run build"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/slop-lab/quality-gate.git",
+    "directory": "packages/checks"
+  },
+  "description": "Reusable QG command and Node.js test check runner",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./node-test-reporter": "./dist/node-test-reporter.mjs",
+    "./package.json": "./package.json"
+  },
+  "license": "MIT"
+}

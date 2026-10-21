@@ -115,8 +115,8 @@ paths and runs `node --test` with the same Node.js executable as QG. Each patter
 must match at least one path; a missing test suite fails the check. `command` and
 `args` are not supported on this check type. Build compiled tests in a preceding
 command check when needed. No test script, Just installation, or extra test
-package is required in a consuming project. The reporter ships with QG and can
-also be used directly: `node --test --test-reporter=@slop-lab/qg/node-test-reporter`.
+package is required in a consuming project. The reporter is provided by
+`@slop-lab/qg-checks`. Install that package explicitly to use it directly: `node --test --test-reporter=@slop-lab/qg-checks/node-test-reporter`.
 Passing test lists and counts are hidden; failures include names, locations,
 assertions, and captured output. QG prints one final `PASS` when the hook succeeds.
 
@@ -233,15 +233,15 @@ Optional language/tooling packages must be installed separately and explicitly
 selected in the **root** `.qg.yaml`:
 
 ```sh
-npm install --save-dev @slop-lab/qg-rules-js @slop-lab/qg-rules-test
+npm install --save-dev @slop-lab/qg-rules-js @slop-lab/qg-rules-js-test
 ```
 
 ```yaml
-presets: [js, test]
+presets: [js, js-test]
 ```
 
 `js` loads `jsRules` from the project's `@slop-lab/qg-rules-js` installation.
-`test` loads `testRules` from `@slop-lab/qg-rules-test`. Select either or both;
+`js-test` loads `jsTestRules` from `@slop-lab/qg-rules-js-test`. Select either or both;
 an installed package, `package.json`, or JS file alone does not activate a
 preset. Duplicate selections are loaded once. Missing packages and enabled
 rule IDs from unloaded presets fail with setup guidance. Nested configs can
@@ -264,18 +264,14 @@ namespaces, content hashing helpers, and atomic persistence.
 
 ## Document references
 
-`docs/valid-reference` finds occurrences matching
-`/\w+(?:\/\w+)+/`, checks that the matched repository-relative path is a
-file, and reports the exact occurrence. Suppress one occurrence by placing the
-marker immediately after it:
-
-```md
-not/a/file <!-- qg-suppress docs/valid-reference: illustrative missing path -->
-```
-
-The marker suppresses only the preceding word. Because the
-pattern also matches slash-separated prose, enable the rule in nested
-`.qg.yaml` files for document sets that use this reference convention.
+`docs/valid-reference` checks local Markdown links, images and reference-style
+links against the same filesystem snapshot as the scan. Relative targets resolve
+from their document, and root-relative targets resolve from the QG root. It
+ignores URLs, comments, code examples and ordinary slash-separated prose.
+Deleting or renaming targets also rechecks unchanged documents.
+The original strict prose policy is available with
+`options: { referenceStyle: slash-delimited }`.
+See [document references](document-references.md) for options and suppression.
 
 ## File length and generated artifacts
 

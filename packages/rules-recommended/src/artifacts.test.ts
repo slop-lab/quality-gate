@@ -2,11 +2,17 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { type QualityGateConfig, runQualityGate } from "@slop-lab/qg-core";
 import { jsRules } from "@slop-lab/qg-rules-js";
-import { testRules } from "@slop-lab/qg-rules-test";
+import { jsTestRules } from "@slop-lab/qg-rules-js-test";
+import { externalToolRules } from "@slop-lab/qg-rules-tools";
 import { createFixture } from "@slop-lab/qg-test-utils";
 import { recommendedRules } from "./index.js";
 
-const allRules = [...recommendedRules, ...jsRules, ...testRules];
+const allRules = [
+  ...recommendedRules,
+  ...jsRules,
+  ...jsTestRules,
+  ...externalToolRules,
+];
 
 const off = Object.fromEntries(
   allRules.map((rule) => [rule.metadata.id, "off" as const]),
@@ -54,7 +60,8 @@ test("project source exceptions and per-rule opt-in apply across JS and Markdown
   const fixture = await createFixture({
     "api/handwritten.js": "const x=1;",
     "api/generated.js": "const x=1;",
-    "api/doc.md": "\u201c missing/file <!-- qg-suppress unrelated/rule -->",
+    "api/doc.md":
+      "\u201c [example](missing/file) <!-- qg-suppress unrelated/rule -->",
   });
   t.after(() => fixture.cleanup());
   const ids = [
@@ -96,7 +103,7 @@ test("project source exceptions and per-rule opt-in apply across JS and Markdown
 test("generated targets remain visible to document references and package manager integrity checks", async (t) => {
   const fixture = await createFixture({
     "api/client": "generated",
-    "README.md": "api/client",
+    "README.md": "[client](api/client)",
     "pnpm-workspace.yaml": "packages: []\n",
     "package-lock.json": "x".repeat(2000),
   });

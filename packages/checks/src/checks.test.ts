@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import type { ProcessExecOptions } from "@slop-lab/qg-core";
-import { runChecks } from "./checks.js";
+import { runChecks } from "./index.js";
 
 test("shared checks run configured checks in order, collects all failures, and retains command output", async () => {
   const calls: ProcessExecOptions[] = [];
