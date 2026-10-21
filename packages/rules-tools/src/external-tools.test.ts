@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
+import { realpath } from "node:fs/promises";
 import { test } from "node:test";
 import { promisify } from "node:util";
 import {
@@ -309,8 +310,8 @@ test("local JS binaries run through Node on Windows without .cmd shims", async (
   });
   assert.equal(tool.checks()[0]?.command, process.execPath);
   assert.equal(
-    tool.checks()[0]?.args[0],
-    fixture.path("node_modules/prettier/bin/tool.cjs"),
+    await realpath(tool.checks()[0]?.args[0] ?? ""),
+    await realpath(fixture.path("node_modules/prettier/bin/tool.cjs")),
   );
 });
 

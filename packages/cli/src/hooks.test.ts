@@ -5,6 +5,7 @@ import {
   mkdir,
   mkdtemp,
   readFile,
+  realpath,
   rm,
   stat,
   symlink,
@@ -44,7 +45,7 @@ test("hook installation respects hooksPath, is idempotent, and backs up an expli
   await assert.rejects(installHooks(root, cli), /already exists/);
   assert.equal(await readFile(path, "utf8"), previous);
   const installed = await installHooks(root, cli, true);
-  assert.equal(installed.path, path);
+  assert.equal(await realpath(installed.path), await realpath(path));
   assert.equal(await inspectPreCommitHook(root, cli), undefined);
   assert.ok(installed.backup);
   assert.equal(await readFile(installed.backup, "utf8"), previous);

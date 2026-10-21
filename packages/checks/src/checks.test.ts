@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -50,6 +50,11 @@ test("node-test runs real tests with concise failure diagnostics and rejects unm
   const root = await mkdtemp(join(tmpdir(), "qg-node-test-"));
   t.after(() => rm(root, { recursive: true, force: true }));
   await mkdir(join(root, "tests with spaces"));
+  await symlink(
+    join(root, "tests with spaces"),
+    join(root, "linked tests"),
+    "junction",
+  );
   const file = join(root, "tests with spaces", "sample.test.mjs");
   await writeFile(
     file,
@@ -62,7 +67,7 @@ test('failing test', () => { console.log('failure context'); assert.equal(1, 2);
   const check = {
     name: "tests",
     type: "node-test" as const,
-    files: ["tests with spaces/*.test.mjs"],
+    files: ["linked tests/*.test.mjs"],
   };
   const failed = await runChecks(root, [check]);
   assert.equal(failed.length, 1);
