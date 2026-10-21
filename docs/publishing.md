@@ -1,8 +1,8 @@
 # Publishing QG 0.1.0
 
-This runbook publishes the eleven public packages from one reviewed Git commit.
+This runbook publishes the fourteen public packages from one reviewed Git commit.
 All use version `0.1.0`, MIT licensing, and Node.js `>=24.0.0`. The repository
-root is private. Internal dependencies use exact npm versions, so npm can
+root (`@this-project/qg-repo`) is private. Internal dependencies use exact npm versions, so npm can
 publish them directly. pnpm is used to reproduce the development installation
 from the checked-in lockfile.
 
@@ -45,7 +45,7 @@ git status --short
 Bootstrap installs from `pnpm-lock.yaml`, builds the packages, and installs this
 clone's QG pre-commit hook. `release-check` runs `qg check --full` for the full
 rule scan and shared checks, including the configured full Biome check,
-TypeScript build, and tests. It then previews all eleven public npm workspaces.
+TypeScript build, and tests. It then previews all fourteen public npm workspaces.
 
 Repository rules also verify package release metadata and required companion
 files. See [repository checks](repository-checks.md) for the policies exercised
@@ -100,27 +100,33 @@ public workspace and the public npm registry.
 
 | Order | Package | Purpose |
 | --- | --- | --- |
-| 1 | `@slop-lab/qg-core` | Shared runner, providers and file-policy helpers |
-| 2 | `@slop-lab/qg-checks` | Shared command/Node check execution |
-| 3 | `@slop-lab/qg-test-utils` | Custom rule testing helpers |
-| 4 | `@slop-lab/qg-rules-git` | Default Git rules |
-| 5 | `@slop-lab/qg-rules-files` | Default file and document rules |
-| 6 | `@slop-lab/qg-rules-js` | Optional js preset |
-| 7 | `@slop-lab/qg-rules-js-test` | Optional js-test preset |
-| 8 | `@slop-lab/qg-rules-tools` | Independent formatter/linter adapters |
-| 9 | `@slop-lab/qg-rules-cspell` | Optional CSpell plugin |
-| 10 | `@slop-lab/qg-rules-recommended` | Default Git/file composition |
-| 11 | `@slop-lab/qg` | CLI |
+| 1 | `@slop-lab/qg-core` | Shared runner and provider interfaces |
+| 2 | `@slop-lab/qg-checks` | Shared command/Node checks |
+| 3 | `@slop-lab/qg-test-utils` | Custom rule testing |
+| 4 | `@slop-lab/qg-rule-stdin` | Snapshot stdin rule factory |
+| 5 | `@slop-lab/qg-rules-git` | Git rules |
+| 6 | `@slop-lab/qg-rules-files` | File and document rules |
+| 7 | `@slop-lab/qg-rules-js` | Optional JS preset |
+| 8 | `@slop-lab/qg-rules-js-test` | Optional JS test preset |
+| 9 | `@slop-lab/qg-rules-biome` | Biome adapter |
+| 10 | `@slop-lab/qg-rules-prettier` | Prettier adapter |
+| 11 | `@slop-lab/qg-rules-eslint` | ESLint adapter |
+| 12 | `@slop-lab/qg-rules-cspell` | CSpell adapter |
+| 13 | `@slop-lab/qg-rules-recommended` | Default Git/file composition |
+| 14 | `@slop-lab/qg` | CLI |
 
 ```sh
 mise exec -- npm publish --workspace @slop-lab/qg-core --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-checks --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-test-utils --access public --registry=https://registry.npmjs.org/
+mise exec -- npm publish --workspace @slop-lab/qg-rule-stdin --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rules-git --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rules-files --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rules-js --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rules-js-test --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-rules-tools --access public --registry=https://registry.npmjs.org/
+mise exec -- npm publish --workspace @slop-lab/qg-rules-biome --access public --registry=https://registry.npmjs.org/
+mise exec -- npm publish --workspace @slop-lab/qg-rules-prettier --access public --registry=https://registry.npmjs.org/
+mise exec -- npm publish --workspace @slop-lab/qg-rules-eslint --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rules-cspell --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rules-recommended --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg --access public --registry=https://registry.npmjs.org/

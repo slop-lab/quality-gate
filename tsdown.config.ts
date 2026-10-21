@@ -5,7 +5,7 @@ import { defineConfig, type UserConfig } from "tsdown";
 
 const packages = fileURLToPath(new URL("./packages/", import.meta.url));
 
-// tsdown owns the generated export maps, including tool subpaths and the shared test reporter.
+// tsdown owns the generated export maps, including the shared test reporter.
 export default defineConfig(
   readdirSync(packages, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
@@ -20,14 +20,7 @@ export default defineConfig(
         entry:
           pkg.name === "@slop-lab/qg-checks"
             ? ["src/index.ts", "src/node-test-reporter.ts"]
-            : pkg.name === "@slop-lab/qg-rules-tools"
-              ? [
-                  "src/index.ts",
-                  "src/biome.ts",
-                  "src/prettier.ts",
-                  "src/eslint.ts",
-                ]
-              : ["src/index.ts"],
+            : ["src/index.ts"],
         format: "esm",
         platform: "node",
         target: "node24",

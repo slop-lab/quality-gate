@@ -1,6 +1,6 @@
 presets: [js, js-test]
 ruleModules:
-  - "@slop-lab/qg-rules-tools/biome"
+  - "@slop-lab/qg-rules-biome"
   - "@slop-lab/qg-rules-cspell"
   - "./scripts/qg-rules.mjs"
 

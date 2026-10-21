@@ -23,7 +23,10 @@
       ],
       "@slop-lab/qg-rules-cspell": ["packages/rules-cspell/src/index.ts"],
       "@slop-lab/qg-checks": ["packages/checks/src/index.ts"],
-      "@slop-lab/qg-rules-tools": ["packages/rules-tools/src/index.ts"]
+      "@slop-lab/qg-rule-stdin": ["packages/rule-stdin/src/index.ts"],
+      "@slop-lab/qg-rules-biome": ["packages/rules-biome/src/index.ts"],
+      "@slop-lab/qg-rules-prettier": ["packages/rules-prettier/src/index.ts"],
+      "@slop-lab/qg-rules-eslint": ["packages/rules-eslint/src/index.ts"]
     }
   }
 }

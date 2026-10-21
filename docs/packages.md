@@ -1,6 +1,6 @@
 # Package boundaries
 
-The repository publishes eleven packages with the same release version.
+The repository publishes fourteen packages with the same release version.
 Responsibilities and runtime dependencies follow execution and installation
 needs rather than individual rule count.
 
@@ -13,7 +13,10 @@ needs rather than individual rule count.
 | `qg-rules-files` | Files, directories and document policies | core, Markdown parser |
 | `qg-rules-js` | JS directives, package names and package-manager integrity | core |
 | `qg-rules-js-test` | JS/TS test fixture policy | core, TypeScript parser |
-| `qg-rules-tools` | Biome/Prettier/ESLint adapters with separate entry points | core |
+| `qg-rule-stdin` | Snapshot stdin rule factory, command discovery and caching | core |
+| `qg-rules-biome` | Biome format stdin protocol and diagnostics | core, rule-stdin |
+| `qg-rules-prettier` | Prettier check stdin protocol and diagnostics | core, rule-stdin |
+| `qg-rules-eslint` | ESLint JSON stdin protocol and diagnostics | core, rule-stdin |
 | `qg-rules-cspell` | Spelling and dictionaries | core, CSpell library |
 | `qg-rules-recommended` | Default language-independent composition | core, git/files rules |
 | `qg` | Config/module loading, hooks, daemon, output and exit status | core, checks, recommended, YAML parser |
@@ -28,15 +31,17 @@ in `scripts/qg-rules.mjs` and consume the same public APIs as external projects.
 ```yaml
 presets: [js, js-test]
 ruleModules:
-  - "@slop-lab/qg-rules-tools/biome"
+  - "@slop-lab/qg-rules-biome"
   - "@slop-lab/qg-rules-cspell"
 rules:
   external/biome: error
   external/cspell: error
 ```
 
-Tools use separate module entry points without duplicating a shared adapter
-implementation across three packages. Their executables are resolved from the
+Each tool adapter is a separately installed package with its own protocol
+implementation and tests. Only snapshot stdin execution is shared through
+`qg-rule-stdin`; it has no tool registry or tool-specific branches. New tool
+adapters belong in their own packages. Their executables are resolved from the
 consuming project or configured explicitly; selecting an adapter does not
 install its tool. JS/TS fixture checks use an explicit `js-test` preset so their
 parser dependency is clear. Rule IDs remain stable across package moves.
@@ -45,3 +50,7 @@ The check runner returns diagnostics and the CLI renders them. Library callers
 can reuse the runner independently; see [checks API](checks-api.md).
 The reporter belongs to the checks package and is exposed through its own
 package entry point. No code depends on a private CLI filesystem location.
+
+The private repository root is `@this-project/qg-repo`. It is never published.
+Public packages use `@slop-lab/qg` or `@slop-lab/qg-*`; local-only workspaces
+use `@this-project/...`.

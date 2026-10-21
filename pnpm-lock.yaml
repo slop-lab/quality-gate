@@ -17,18 +17,24 @@ importers:
       '@slop-lab/qg-core':
         specifier: 0.1.0
         version: link:packages/core
+      '@slop-lab/qg-rules-biome':
+        specifier: 0.1.0
+        version: link:packages/rules-biome
       '@slop-lab/qg-rules-cspell':
         specifier: 0.1.0
         version: link:packages/rules-cspell
+      '@slop-lab/qg-rules-eslint':
+        specifier: 0.1.0
+        version: link:packages/rules-eslint
       '@slop-lab/qg-rules-js':
         specifier: 0.1.0
         version: link:packages/rules-js
       '@slop-lab/qg-rules-js-test':
         specifier: 0.1.0
         version: link:packages/rules-js-test
-      '@slop-lab/qg-rules-tools':
+      '@slop-lab/qg-rules-prettier':
         specifier: 0.1.0
-        version: link:packages/rules-tools
+        version: link:packages/rules-prettier
       '@slop-lab/qg-test-utils':
         specifier: 0.1.0
         version: link:packages/test-utils
@@ -65,6 +71,29 @@ importers:
 
   packages/core: {}
 
+  packages/rule-stdin:
+    dependencies:
+      '@slop-lab/qg-core':
+        specifier: 0.1.0
+        version: link:../core
+    devDependencies:
+      '@slop-lab/qg-test-utils':
+        specifier: 0.1.0
+        version: link:../test-utils
+
+  packages/rules-biome:
+    dependencies:
+      '@slop-lab/qg-core':
+        specifier: 0.1.0
+        version: link:../core
+      '@slop-lab/qg-rule-stdin':
+        specifier: 0.1.0
+        version: link:../rule-stdin
+    devDependencies:
+      '@slop-lab/qg-test-utils':
+        specifier: 0.1.0
+        version: link:../test-utils
+
   packages/rules-cspell:
     dependencies:
       '@slop-lab/qg-core':
@@ -73,6 +102,19 @@ importers:
       cspell-lib:
         specifier: ^10.4.0
         version: 10.4.0
+    devDependencies:
+      '@slop-lab/qg-test-utils':
+        specifier: 0.1.0
+        version: link:../test-utils
+
+  packages/rules-eslint:
+    dependencies:
+      '@slop-lab/qg-core':
+        specifier: 0.1.0
+        version: link:../core
+      '@slop-lab/qg-rule-stdin':
+        specifier: 0.1.0
+        version: link:../rule-stdin
     devDependencies:
       '@slop-lab/qg-test-utils':
         specifier: 0.1.0
@@ -124,6 +166,19 @@ importers:
         specifier: 0.1.0
         version: link:../test-utils
 
+  packages/rules-prettier:
+    dependencies:
+      '@slop-lab/qg-core':
+        specifier: 0.1.0
+        version: link:../core
+      '@slop-lab/qg-rule-stdin':
+        specifier: 0.1.0
+        version: link:../rule-stdin
+    devDependencies:
+      '@slop-lab/qg-test-utils':
+        specifier: 0.1.0
+        version: link:../test-utils
+
   packages/rules-recommended:
     dependencies:
       '@slop-lab/qg-core':
@@ -136,25 +191,21 @@ importers:
         specifier: 0.1.0
         version: link:../rules-git
     devDependencies:
+      '@slop-lab/qg-rules-biome':
+        specifier: 0.1.0
+        version: link:../rules-biome
+      '@slop-lab/qg-rules-eslint':
+        specifier: 0.1.0
+        version: link:../rules-eslint
       '@slop-lab/qg-rules-js':
         specifier: 0.1.0
         version: link:../rules-js
       '@slop-lab/qg-rules-js-test':
         specifier: 0.1.0
         version: link:../rules-js-test
-      '@slop-lab/qg-rules-tools':
+      '@slop-lab/qg-rules-prettier':
         specifier: 0.1.0
-        version: link:../rules-tools
-      '@slop-lab/qg-test-utils':
-        specifier: 0.1.0
-        version: link:../test-utils
-
-  packages/rules-tools:
-    dependencies:
-      '@slop-lab/qg-core':
-        specifier: 0.1.0
-        version: link:../core
-    devDependencies:
+        version: link:../rules-prettier
       '@slop-lab/qg-test-utils':
         specifier: 0.1.0
         version: link:../test-utils

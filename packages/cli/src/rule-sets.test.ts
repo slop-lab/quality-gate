@@ -186,10 +186,10 @@ test("CLI modules can export named or default providers and execute their discov
 
 test("tool-specific modules load without JS or JS test presets and only register the selected adapter", async (t) => {
   const root = await project(t);
-  await install(root, "qg-rules-tools");
   for (const tool of ["biome", "prettier", "eslint"]) {
+    await install(root, `qg-rules-${tool}`);
     const rules = await loadRules(root, {
-      ruleModules: [`@slop-lab/qg-rules-tools/${tool}`],
+      ruleModules: [`@slop-lab/qg-rules-${tool}`],
       rules: { [`external/${tool}`]: "error" },
     });
     assert.deepEqual(

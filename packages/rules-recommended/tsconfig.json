@@ -25,7 +25,13 @@
       "path": "../test-utils"
     },
     {
-      "path": "../rules-tools"
+      "path": "../rules-biome"
+    },
+    {
+      "path": "../rules-prettier"
+    },
+    {
+      "path": "../rules-eslint"
     }
   ],
   "include": ["src/**/*.ts"]

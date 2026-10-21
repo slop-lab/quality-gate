@@ -1,9 +1,10 @@
 {
-  "name": "@slop-lab/qg-rules-tools",
+  "name": "@slop-lab/qg-rules-prettier",
   "version": "0.1.0",
   "type": "module",
   "dependencies": {
-    "@slop-lab/qg-core": "0.1.0"
+    "@slop-lab/qg-core": "0.1.0",
+    "@slop-lab/qg-rule-stdin": "0.1.0"
   },
   "devDependencies": {
     "@slop-lab/qg-test-utils": "0.1.0"
@@ -15,7 +16,7 @@
     "dist/*.d.mts.map"
   ],
   "scripts": {
-    "build": "tsc -b && tsdown --config ../../tsdown.config.ts --filter @slop-lab/qg-rules-tools",
+    "build": "tsc -b && tsdown --config ../../tsdown.config.ts --filter @slop-lab/qg-rules-prettier",
     "prepack": "npm run build"
   },
   "publishConfig": {
@@ -24,21 +25,18 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/slop-lab/quality-gate.git",
-    "directory": "packages/rules-tools"
+    "directory": "packages/rules-prettier"
   },
-  "description": "Project-local Biome, Prettier, and ESLint rule adapters independent of language presets",
+  "description": "Prettier snapshot stdin rule adapter for QG",
   "engines": {
     "node": ">=24.0.0"
   },
+  "license": "MIT",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
   "exports": {
     ".": "./dist/index.mjs",
-    "./biome": "./dist/biome.mjs",
-    "./eslint": "./dist/eslint.mjs",
-    "./prettier": "./dist/prettier.mjs",
     "./package.json": "./package.json"
-  },
-  "license": "MIT"
+  }
 }

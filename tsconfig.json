@@ -23,9 +23,6 @@
       "path": "packages/rules-js-test"
     },
     {
-      "path": "packages/rules-tools"
-    },
-    {
       "path": "packages/rules-cspell"
     },
     {
@@ -36,6 +33,18 @@
     },
     {
       "path": "tsconfig.scripts.json"
+    },
+    {
+      "path": "packages/rule-stdin"
+    },
+    {
+      "path": "packages/rules-biome"
+    },
+    {
+      "path": "packages/rules-prettier"
+    },
+    {
+      "path": "packages/rules-eslint"
     }
   ]
 }

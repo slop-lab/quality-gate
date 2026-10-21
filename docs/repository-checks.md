@@ -44,7 +44,7 @@ CSpell's own configuration and dictionaries are loaded from the working tree.
 ## Tool selection
 
 Biome is the repository's formatter and linter, loaded through the independent
-`@slop-lab/qg-rules-tools/biome` module. The stdin rule checks the
+`@slop-lab/qg-rules-biome` module. The stdin rule checks the
 staged snapshot; the shared `biome check` command performs complete working-tree
 validation. Prettier and ESLint adapters remain available to projects using
 those tools. This repository does not install redundant formatter/linter tools.
@@ -63,5 +63,5 @@ just release-check
 ```
 
 `just qg` builds the CLI before running it. Full checks validate untouched
-files too. Package previews include all eleven public packages. Successful checks
+files too. Package previews include all fourteen public packages. Successful checks
 print `PASS`, while failures retain their detailed diagnostics.

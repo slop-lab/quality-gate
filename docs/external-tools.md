@@ -1,14 +1,15 @@
 # External formatters and linters
 
-Install `@slop-lab/qg-rules-tools` and load the desired entry points through
-`ruleModules`. These modules work independently of JS/test presets and do not
+Install each adapter your project uses: `@slop-lab/qg-rules-biome`,
+`@slop-lab/qg-rules-prettier`, or `@slop-lab/qg-rules-eslint`. Load its package
+through `ruleModules`. These packages work independently of JS/test presets and do not
 install Biome, Prettier or ESLint themselves. All rules remain **off by default**:
 
 ```yaml
 ruleModules:
-  - "@slop-lab/qg-rules-tools/biome"
-  - "@slop-lab/qg-rules-tools/prettier"
-  - "@slop-lab/qg-rules-tools/eslint"
+  - "@slop-lab/qg-rules-biome"
+  - "@slop-lab/qg-rules-prettier"
+  - "@slop-lab/qg-rules-eslint"
 rules:
   external/biome:
     severity: error
@@ -155,3 +156,15 @@ CSpell is a separate, language-independent plugin: install
 `external/cspell`. It uses the CSpell library on QG snapshot text and honors
 project configuration and dictionaries. No `js` preset or CSpell CLI is required.
 See the [CSpell plugin guide](../packages/rules-cspell/README.md).
+
+## Adapter ownership
+
+Each adapter package exports its own rule, a single-rule `rules` array and its
+options type (`BiomeOptions`, `PrettierOptions`, or `ESLintOptions`). Arguments,
+tool-specific validation and output interpretation live in that adapter.
+
+`@slop-lab/qg-rule-stdin` supplies only the shared snapshot stdin factory,
+executable discovery and caching. It contains no tool registry. Projects can
+use its `createStdinRule` API for their own stdin command protocols; see the
+[factory guide](../packages/rule-stdin/README.md). Other custom rule transports,
+including daemons, use core's provider interface instead.

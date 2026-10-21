@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { type QualityGateConfig, runQualityGate } from "@slop-lab/qg-core";
+import { biomeRule } from "@slop-lab/qg-rules-biome";
+import { eslintRule } from "@slop-lab/qg-rules-eslint";
 import { jsRules } from "@slop-lab/qg-rules-js";
 import { jsTestRules } from "@slop-lab/qg-rules-js-test";
-import { externalToolRules } from "@slop-lab/qg-rules-tools";
+import { prettierRule } from "@slop-lab/qg-rules-prettier";
 import { createFixture } from "@slop-lab/qg-test-utils";
 import { recommendedRules } from "./index.js";
 
@@ -11,7 +13,9 @@ const allRules = [
   ...recommendedRules,
   ...jsRules,
   ...jsTestRules,
-  ...externalToolRules,
+  biomeRule,
+  prettierRule,
+  eslintRule,
 ];
 
 const off = Object.fromEntries(

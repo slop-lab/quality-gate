@@ -21,7 +21,8 @@ Package-name restrictions still require explicit opt-in.
 - `pnpm/lockfile-is-current`: check that pnpm would leave its lockfile unchanged.
 
 External formatter/linter adapters are provided by the separate
-`@slop-lab/qg-rules-tools` package, loaded through tool-specific `ruleModules`.
+`@slop-lab/qg-rules-biome`, `@slop-lab/qg-rules-prettier`, and
+`@slop-lab/qg-rules-eslint` packages, loaded through `ruleModules`.
 They do not require the JS preset. See
 [external tools](https://github.com/slop-lab/quality-gate/blob/main/docs/external-tools.md).
 
