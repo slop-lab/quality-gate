@@ -22,6 +22,7 @@ The implementation is TypeScript. The runtime includes:
 - `@slop-lab/qg-rules-files`: required root and companion files, filename/path policies, file limits, document references, Markdown character policies, and suppression-reason checks.
 - `@slop-lab/qg-rules-js`: JavaScript type-checking, package manager consistency, and opt-in external formatter/linter checks.
 - `@slop-lab/qg-rules-test`: test fixture checks.
+- `@slop-lab/qg-rules-cspell`: optional spelling checks with project dictionaries.
 - `@slop-lab/qg-test-utils`: fixtures, rule execution, and assertions for custom rule tests.
 - `@slop-lab/qg-rules-recommended`: the language-independent default Git and file rule set.
 - `@slop-lab/qg`: the `qg` CLI for `check`, `run-hook`, `hooks install`, `rules`, `daemon`, and `cache clear --rule`.
@@ -79,6 +80,10 @@ npm install --save-dev @slop-lab/qg-rules-js @slop-lab/qg-rules-test
 ```yaml
 presets: [js, test]
 ```
+
+CSpell is available separately through `@slop-lab/qg-rules-cspell`. Load it with
+`ruleModules: ["@slop-lab/qg-rules-cspell"]` and enable `external/cspell`.
+See the [CSpell plugin guide](packages/rules-cspell/README.md) for settings.
 
 Filename and path policies can use regular-expression allowlists or rules written
 in code. Load custom rule modules with `ruleModules: ["./qg-rules.mjs"]`; the
@@ -170,6 +175,6 @@ post-publish installation checks, follow the [publishing runbook](docs/publishin
 mise exec -- just release-check
 ```
 
-This runs CI and `npm pack --dry-run` for all eight public packages, including
+This runs CI and `npm pack --dry-run` for all nine public packages, including
 their prepack builds. It does not publish. Public access is set in each package's
 `publishConfig`; only the workspace root is private.

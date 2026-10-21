@@ -27,6 +27,6 @@ qg *args: build
 ci: build
   @node {{qg_cli}} check --full
 
-# Validate and preview all eight public npm packages without publishing.
+# Validate and preview all nine public npm packages without publishing.
 release-check: ci
   @node scripts/run-task.mjs pack

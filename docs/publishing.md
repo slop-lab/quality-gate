@@ -1,6 +1,6 @@
 # Publishing QG 0.1.0
 
-This runbook publishes the eight public packages from one reviewed Git commit.
+This runbook publishes the nine public packages from one reviewed Git commit.
 All use version `0.1.0`, MIT licensing, and Node.js `>=24.0.0`. The repository
 root is private. Internal dependencies use exact npm versions, so npm can
 publish them directly. pnpm is used to reproduce the development installation
@@ -43,9 +43,9 @@ git status --short
 
 `mise.toml` pins Node.js 24.21.0, pnpm 11.10.0, Just 1.47.0, and Biome 2.5.15.
 Bootstrap installs from `pnpm-lock.yaml`, builds the packages, and installs this
-clone's QG pre-commit hook. `release-check` runs the full QG rule scan and
-`qg run-hook pre-commit`, which performs the configured full Biome check,
-TypeScript build, and tests. It then previews all eight public npm workspaces.
+clone's QG pre-commit hook. `release-check` runs `qg check --full` for the full
+rule scan and shared checks, including the configured full Biome check,
+TypeScript build, and tests. It then previews all nine public npm workspaces.
 
 Successful checks and tests print `PASS` without individual passing test names
 or totals. Successful package previews also print `PASS`. Their detailed output
@@ -102,8 +102,9 @@ public workspace and the public npm registry.
 | 4 | `@slop-lab/qg-rules-files` | Default file rules |
 | 5 | `@slop-lab/qg-rules-js` | Optional `js` preset |
 | 6 | `@slop-lab/qg-rules-test` | Optional `test` preset |
-| 7 | `@slop-lab/qg-rules-recommended` | Default Git/file composition |
-| 8 | `@slop-lab/qg` | CLI |
+| 7 | `@slop-lab/qg-rules-cspell` | Optional CSpell plugin |
+| 8 | `@slop-lab/qg-rules-recommended` | Default Git/file composition |
+| 9 | `@slop-lab/qg` | CLI |
 
 ```sh
 mise exec -- npm publish --workspace @slop-lab/qg-core --access public --registry=https://registry.npmjs.org/
@@ -112,6 +113,7 @@ mise exec -- npm publish --workspace @slop-lab/qg-rules-git --access public --re
 mise exec -- npm publish --workspace @slop-lab/qg-rules-files --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rules-js --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rules-test --access public --registry=https://registry.npmjs.org/
+mise exec -- npm publish --workspace @slop-lab/qg-rules-cspell --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rules-recommended --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg --access public --registry=https://registry.npmjs.org/
 ```
@@ -198,3 +200,13 @@ internal exact dependency versions and the lockfile before continuing. See
 After registry and installation verification, record the released Git commit
 in your release notes. Git tags, remote pushes, and npm publishing are separate
 operations; the validation commands above do not perform them.
+
+To verify the optional CSpell plugin in a fresh consumer project:
+
+```sh
+npm install --save-dev @slop-lab/qg-rules-cspell@0.1.0 --registry=https://registry.npmjs.org/
+```
+
+Add `ruleModules: ["@slop-lab/qg-rules-cspell"]` to the root configuration and
+enable `external/cspell`. It does not require a `js` preset or a CSpell CLI
+installation. See the [CSpell plugin guide](../packages/rules-cspell/README.md).

@@ -1,0 +1,42 @@
+{
+  "name": "@slop-lab/qg-rules-cspell",
+  "version": "0.1.0",
+  "type": "module",
+  "dependencies": {
+    "@slop-lab/qg-core": "0.1.0",
+    "cspell-lib": "^10.4.0"
+  },
+  "devDependencies": {
+    "@slop-lab/qg-test-utils": "0.1.0"
+  },
+  "files": [
+    "dist/*.mjs",
+    "dist/*.mjs.map",
+    "dist/*.d.mts",
+    "dist/*.d.mts.map"
+  ],
+  "scripts": {
+    "build": "tsc -b && tsdown --config ../../tsdown.config.ts --filter @slop-lab/qg-rules-cspell",
+    "prepack": "npm run build"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/slop-lab/quality-gate.git",
+    "directory": "packages/rules-cspell"
+  },
+  "description": "Opt-in CSpell spelling checks for QG snapshot contents",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "license": "MIT"
+}

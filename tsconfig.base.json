@@ -20,7 +20,8 @@
       "@slop-lab/qg-rules-test": ["packages/rules-test/src/index.ts"],
       "@slop-lab/qg-rules-recommended": [
         "packages/rules-recommended/src/index.ts"
-      ]
+      ],
+      "@slop-lab/qg-rules-cspell": ["packages/rules-cspell/src/index.ts"]
     }
   }
 }

@@ -20,6 +20,9 @@
       "path": "packages/rules-test"
     },
     {
+      "path": "packages/rules-cspell"
+    },
+    {
       "path": "packages/rules-recommended"
     },
     {

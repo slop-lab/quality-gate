@@ -146,3 +146,11 @@ See the upstream [Biome CLI](https://biomejs.dev/reference/cli/),
 [Prettier CLI](https://prettier.io/docs/cli), and
 [ESLint CLI](https://eslint.org/docs/latest/use/command-line-interface)
 for their native configuration and command options.
+
+## CSpell
+
+CSpell is a separate, language-independent plugin: install
+`@slop-lab/qg-rules-cspell`, load it through `ruleModules`, and enable
+`external/cspell`. It uses the CSpell library on QG snapshot text and honors
+project configuration and dictionaries. No `js` preset or CSpell CLI is required.
+See the [CSpell plugin guide](../packages/rules-cspell/README.md).

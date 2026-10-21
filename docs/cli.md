@@ -26,6 +26,7 @@ The default scan mode is `changed`, unless the root config sets
 `scan.defaultMode`. By default, the CLI selects staged paths and reads rule
 filesystem inputs from the Git index. Configuration files are loaded from the
 working tree. Use `--full` for a repository-wide working tree scan.
+Staged selection checks each changed file in full, rather than only added or modified diff lines.
 
 Supported options:
 
