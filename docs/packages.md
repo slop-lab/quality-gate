@@ -1,40 +1,32 @@
 # Package boundaries
 
-The repository publishes nineteen packages with the same release version.
-Responsibilities and runtime dependencies follow execution and installation
-needs rather than individual rule count.
+The repository publishes thirteen packages with the same release version.
+Package boundaries follow coherent development domains, integrations and public
+library roles. Individual rules and selections share their domain package.
 
 | Package | Responsibility | Runtime dependencies |
 | --- | --- | --- |
-| `qg-core` | Rule execution, snapshots, providers and configuration types | Node.js only |
+| `qg-core` | Rule runner, snapshots, providers and configuration types | Node.js only |
+| `qg-checks` | Command/Node check execution and concise test reporter | core |
 | `qg-rule-test-utils` | Fixtures and assertions for rule authors | core |
-| `qg-check-node-test` | Node test command preparation and concise reporter | core |
-| `qg-check-runner` | Sequential command/test execution and failure diagnostics | core, check-node-test |
-| `qg-rule-stdin` | Snapshot stdin rule factory and command result caching | core |
+| `qg-rule-stdin` | Snapshot stdin rule factory and command caching | core |
 | `qg-rules-git` | Git hygiene policies | core |
-| `qg-rules-file-layout` | Allowed names/paths, required root and companion files | core |
-| `qg-rules-file-limits` | Bytes, lines, line length and file counts per directory | core |
-| `qg-rules-markdown` | Markdown references, characters and suppression reasons | core, Markdown parser |
-| `qg-rules-js-directives` | Effective JavaScript type-check directives | core |
-| `qg-rules-package-json` | package.json name policies | core |
-| `qg-rules-pnpm` | pnpm workspace and lockfile integrity | core |
-| `qg-rules-js-test-fixtures` | JS/TS test fixture construction policies | core, TypeScript parser |
-| `qg-rules-biome` | Biome stdin format arguments and diagnostics | core, rule-stdin |
-| `qg-rules-prettier` | Prettier stdin check arguments and diagnostics | core, rule-stdin |
-| `qg-rules-eslint` | ESLint stdin JSON arguments and diagnostics | core, rule-stdin |
+| `qg-rules-files` | File layout, content/directory limits and Markdown policies | core, Markdown parser |
+| `qg-rules-js` | JS/TS directives, fixture practices, package manifests and pnpm integrity | core, TypeScript parser |
+| `qg-rules-biome` | Biome stdin format adapter | core, rule-stdin |
+| `qg-rules-prettier` | Prettier stdin check adapter | core, rule-stdin |
+| `qg-rules-eslint` | ESLint stdin JSON adapter | core, rule-stdin |
 | `qg-rules-cspell` | Spelling and project dictionaries | core, CSpell library |
-| `qg-rules-recommended` | Default Git/layout/limits/Markdown composition | core, git/layout/limits/Markdown rules |
-| `qg` | CLI configuration, hooks, daemon, rendering and exit status | core, check-runner, recommended, YAML parser |
+| `qg-rules-recommended` | Default Git/file policy composition | core, git/files rules |
+| `qg` | CLI configuration, hooks, daemon, rendering and exit status | core, checks, recommended, YAML parser |
 
-Package names above use the `@slop-lab/` scope. The default CLI dependency graph
-excludes JS rules, TypeScript parser and CSpell. The generic core file-policy
-helper does not depend on Markdown parsing. Repository-only release rules live
-in `scripts/qg-rules.mjs` and consume the same public APIs as external projects.
+Public names use `@slop-lab/`. The private root is `@this-project/qg-repo` and
+is never published. Local-only workspaces use `@this-project/...`.
 
-## Selecting optional behavior
+## Selecting policies
 
 ```yaml
-presets: [js-directives, js-test-fixtures]
+presets: [js]
 ruleModules:
   - "@slop-lab/qg-rules-biome"
   - "@slop-lab/qg-rules-cspell"
@@ -43,35 +35,27 @@ rules:
   external/cspell: error
 ```
 
-Each tool adapter is a separately installed package with its own protocol
-implementation and tests. Only snapshot stdin execution is shared through
-`qg-rule-stdin`; it has no tool registry or tool-specific branches. New tool
-adapters belong in their own packages. Their executables are resolved from the
-consuming project or configured explicitly; selecting an adapter does not
-install its tool. JS/TS fixture checks use an explicit `js-test-fixtures` preset so their
-parser dependency is clear. Rule IDs remain stable across package moves.
+The default CLI graph contains Git/file policies, including Markdown, without
+the JS/TS package, TypeScript parser or CSpell. The optional `qg-rules-js`
+package groups source directives, test fixtures, package manifests and pnpm
+integrity. The `js` preset loads its collection; focused `js-directives` and
+`js-test-fixtures` presets select subsets from that same installed package.
+Per-rule settings control enablement, severity and options.
 
-The check runner returns diagnostics and the CLI renders them. Library callers
-can reuse the runner independently; see [checks API](checks-api.md).
-The reporter belongs to `qg-check-node-test` and is exposed through its own
-package entry point. No code depends on a private CLI filesystem location.
+`qg-rules-files` groups layout, limits and Markdown policies. It exposes
+individual rules and `layoutRules`, `fileLimitRules`, `markdownRules` collections
+for library callers. The recommended set keeps its existing rule order and
+default behavior. Core's generic custom-path helper has no parser dependency.
 
-The private repository root is `@this-project/qg-repo`. It is never published.
-Public packages use `@slop-lab/qg` or `@slop-lab/qg-*`; local-only workspaces
-use `@this-project/...`.
+Each external tool adapter owns its protocol and diagnostics. Shared snapshot
+stdin execution lives in `qg-rule-stdin`, without a tool registry. Tool binaries
+are supplied by the consuming project. These integrations remain separate from
+the JS source/manifest/fixture policy collection.
 
-## Explicit composition
+`qg-checks` contains command/test execution and the Node reporter. It exposes
+`runChecks`, `createNodeTestCommand` and the `node-test-reporter` subpath without
+a CLI dependency. See the [checks API](checks-api.md). `qg-rule-test-utils`
+provides fixtures/assertions for rule authors, independently of check execution.
 
-JavaScript directive and test-fixture presets are `js-directives` and
-`js-test-fixtures`. Neither loads manifest or package-manager policies. Load
-`@slop-lab/qg-rules-package-json` and `@slop-lab/qg-rules-pnpm` through
-`ruleModules` when those policies apply. Default recommendations continue to
-compose Git, file layout, file limits and Markdown rules in the same order.
-
-`qg-check-runner` runs shared command/test lists; `qg-check-node-test` owns the
-Node-specific command and reporter. `qg-rule-test-utils` provides fixtures and
-assertions for rule authors; it does not provide a general Node test runner.
-
-Before the initial publish, the old checks/files/JS aggregate package names and
-generic JS/test preset names were replaced with these names. No compatibility
-packages are published. Rule IDs and `checks` configuration remain unchanged.
+Repository-only policies use the same public provider and helper interfaces
+through `scripts/qg-rules.mjs`; they are not built into core or the CLI.

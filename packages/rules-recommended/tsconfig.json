@@ -13,10 +13,7 @@
       "path": "../rules-git"
     },
     {
-      "path": "../rules-js-directives"
-    },
-    {
-      "path": "../rules-js-test-fixtures"
+      "path": "../rules-js"
     },
     {
       "path": "../rule-test-utils"
@@ -31,19 +28,7 @@
       "path": "../rules-eslint"
     },
     {
-      "path": "../rules-file-layout"
-    },
-    {
-      "path": "../rules-file-limits"
-    },
-    {
-      "path": "../rules-markdown"
-    },
-    {
-      "path": "../rules-package-json"
-    },
-    {
-      "path": "../rules-pnpm"
+      "path": "../rules-files"
     }
   ],
   "include": ["src/**/*.ts"]

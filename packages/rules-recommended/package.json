@@ -27,19 +27,14 @@
   "dependencies": {
     "@slop-lab/qg-core": "0.1.0",
     "@slop-lab/qg-rules-git": "0.1.0",
-    "@slop-lab/qg-rules-file-layout": "0.1.0",
-    "@slop-lab/qg-rules-file-limits": "0.1.0",
-    "@slop-lab/qg-rules-markdown": "0.1.0"
+    "@slop-lab/qg-rules-files": "0.1.0"
   },
   "devDependencies": {
     "@slop-lab/qg-rule-test-utils": "0.1.0",
-    "@slop-lab/qg-rules-js-directives": "0.1.0",
-    "@slop-lab/qg-rules-js-test-fixtures": "0.1.0",
     "@slop-lab/qg-rules-biome": "0.1.0",
     "@slop-lab/qg-rules-prettier": "0.1.0",
     "@slop-lab/qg-rules-eslint": "0.1.0",
-    "@slop-lab/qg-rules-package-json": "0.1.0",
-    "@slop-lab/qg-rules-pnpm": "0.1.0"
+    "@slop-lab/qg-rules-js": "0.1.0"
   },
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",

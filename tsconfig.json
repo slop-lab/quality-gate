@@ -2,10 +2,7 @@
   "files": [],
   "references": [
     {
-      "path": "packages/check-node-test"
-    },
-    {
-      "path": "packages/check-runner"
+      "path": "packages/checks"
     },
     {
       "path": "packages/cli"
@@ -26,28 +23,13 @@
       "path": "packages/rules-eslint"
     },
     {
-      "path": "packages/rules-file-layout"
-    },
-    {
-      "path": "packages/rules-file-limits"
+      "path": "packages/rules-files"
     },
     {
       "path": "packages/rules-git"
     },
     {
-      "path": "packages/rules-js-directives"
-    },
-    {
-      "path": "packages/rules-js-test-fixtures"
-    },
-    {
-      "path": "packages/rules-markdown"
-    },
-    {
-      "path": "packages/rules-package-json"
-    },
-    {
-      "path": "packages/rules-pnpm"
+      "path": "packages/rules-js"
     },
     {
       "path": "packages/rules-prettier"

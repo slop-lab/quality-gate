@@ -37,7 +37,7 @@
     "@slop-lab/qg-core": "0.1.0",
     "@slop-lab/qg-rules-recommended": "0.1.0",
     "yaml": "^2.9.1",
-    "@slop-lab/qg-check-runner": "0.1.0"
+    "@slop-lab/qg-checks": "0.1.0"
   },
   "module": "./dist/index.mjs",
   "license": "MIT"

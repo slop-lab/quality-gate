@@ -11,9 +11,9 @@ importers:
       '@biomejs/biome':
         specifier: 2.5.15
         version: 2.5.15
-      '@slop-lab/qg-check-runner':
+      '@slop-lab/qg-checks':
         specifier: 0.1.0
-        version: link:packages/check-runner
+        version: link:packages/checks
       '@slop-lab/qg-core':
         specifier: 0.1.0
         version: link:packages/core
@@ -29,18 +29,9 @@ importers:
       '@slop-lab/qg-rules-eslint':
         specifier: 0.1.0
         version: link:packages/rules-eslint
-      '@slop-lab/qg-rules-js-directives':
+      '@slop-lab/qg-rules-js':
         specifier: 0.1.0
-        version: link:packages/rules-js-directives
-      '@slop-lab/qg-rules-js-test-fixtures':
-        specifier: 0.1.0
-        version: link:packages/rules-js-test-fixtures
-      '@slop-lab/qg-rules-package-json':
-        specifier: 0.1.0
-        version: link:packages/rules-package-json
-      '@slop-lab/qg-rules-pnpm':
-        specifier: 0.1.0
-        version: link:packages/rules-pnpm
+        version: link:packages/rules-js
       '@slop-lab/qg-rules-prettier':
         specifier: 0.1.0
         version: link:packages/rules-prettier
@@ -54,30 +45,17 @@ importers:
         specifier: ^5.8.0
         version: 5.9.3
 
-  packages/check-node-test:
+  packages/checks:
     dependencies:
-      '@slop-lab/qg-core':
-        specifier: 0.1.0
-        version: link:../core
-    devDependencies:
-      '@slop-lab/qg-rule-test-utils':
-        specifier: 0.1.0
-        version: link:../rule-test-utils
-
-  packages/check-runner:
-    dependencies:
-      '@slop-lab/qg-check-node-test':
-        specifier: 0.1.0
-        version: link:../check-node-test
       '@slop-lab/qg-core':
         specifier: 0.1.0
         version: link:../core
 
   packages/cli:
     dependencies:
-      '@slop-lab/qg-check-runner':
+      '@slop-lab/qg-checks':
         specifier: 0.1.0
-        version: link:../check-runner
+        version: link:../checks
       '@slop-lab/qg-core':
         specifier: 0.1.0
         version: link:../core
@@ -145,21 +123,14 @@ importers:
         specifier: 0.1.0
         version: link:../rule-test-utils
 
-  packages/rules-file-layout:
+  packages/rules-files:
     dependencies:
       '@slop-lab/qg-core':
         specifier: 0.1.0
         version: link:../core
-    devDependencies:
-      '@slop-lab/qg-rule-test-utils':
-        specifier: 0.1.0
-        version: link:../rule-test-utils
-
-  packages/rules-file-limits:
-    dependencies:
-      '@slop-lab/qg-core':
-        specifier: 0.1.0
-        version: link:../core
+      mdast-util-from-markdown:
+        specifier: ^2.0.2
+        version: 2.1.0
     devDependencies:
       '@slop-lab/qg-rule-test-utils':
         specifier: 0.1.0
@@ -175,17 +146,7 @@ importers:
         specifier: 0.1.0
         version: link:../rule-test-utils
 
-  packages/rules-js-directives:
-    dependencies:
-      '@slop-lab/qg-core':
-        specifier: 0.1.0
-        version: link:../core
-    devDependencies:
-      '@slop-lab/qg-rule-test-utils':
-        specifier: 0.1.0
-        version: link:../rule-test-utils
-
-  packages/rules-js-test-fixtures:
+  packages/rules-js:
     dependencies:
       '@slop-lab/qg-core':
         specifier: 0.1.0
@@ -193,39 +154,6 @@ importers:
       typescript:
         specifier: ^5.8.0
         version: 5.9.3
-    devDependencies:
-      '@slop-lab/qg-rule-test-utils':
-        specifier: 0.1.0
-        version: link:../rule-test-utils
-
-  packages/rules-markdown:
-    dependencies:
-      '@slop-lab/qg-core':
-        specifier: 0.1.0
-        version: link:../core
-      mdast-util-from-markdown:
-        specifier: ^2.0.2
-        version: 2.1.0
-    devDependencies:
-      '@slop-lab/qg-rule-test-utils':
-        specifier: 0.1.0
-        version: link:../rule-test-utils
-
-  packages/rules-package-json:
-    dependencies:
-      '@slop-lab/qg-core':
-        specifier: 0.1.0
-        version: link:../core
-    devDependencies:
-      '@slop-lab/qg-rule-test-utils':
-        specifier: 0.1.0
-        version: link:../rule-test-utils
-
-  packages/rules-pnpm:
-    dependencies:
-      '@slop-lab/qg-core':
-        specifier: 0.1.0
-        version: link:../core
     devDependencies:
       '@slop-lab/qg-rule-test-utils':
         specifier: 0.1.0
@@ -249,18 +177,12 @@ importers:
       '@slop-lab/qg-core':
         specifier: 0.1.0
         version: link:../core
-      '@slop-lab/qg-rules-file-layout':
+      '@slop-lab/qg-rules-files':
         specifier: 0.1.0
-        version: link:../rules-file-layout
-      '@slop-lab/qg-rules-file-limits':
-        specifier: 0.1.0
-        version: link:../rules-file-limits
+        version: link:../rules-files
       '@slop-lab/qg-rules-git':
         specifier: 0.1.0
         version: link:../rules-git
-      '@slop-lab/qg-rules-markdown':
-        specifier: 0.1.0
-        version: link:../rules-markdown
     devDependencies:
       '@slop-lab/qg-rule-test-utils':
         specifier: 0.1.0
@@ -271,18 +193,9 @@ importers:
       '@slop-lab/qg-rules-eslint':
         specifier: 0.1.0
         version: link:../rules-eslint
-      '@slop-lab/qg-rules-js-directives':
+      '@slop-lab/qg-rules-js':
         specifier: 0.1.0
-        version: link:../rules-js-directives
-      '@slop-lab/qg-rules-js-test-fixtures':
-        specifier: 0.1.0
-        version: link:../rules-js-test-fixtures
-      '@slop-lab/qg-rules-package-json':
-        specifier: 0.1.0
-        version: link:../rules-package-json
-      '@slop-lab/qg-rules-pnpm':
-        specifier: 0.1.0
-        version: link:../rules-pnpm
+        version: link:../rules-js
       '@slop-lab/qg-rules-prettier':
         specifier: 0.1.0
         version: link:../rules-prettier

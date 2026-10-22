@@ -385,11 +385,11 @@ test("custom ruleModules are restricted to non-empty module specifiers in root c
 test("the JS test preset is explicit and the old language-agnostic test label is rejected", async (t) => {
   const root = await mkdtemp(join(tmpdir(), "qg-config-"));
   t.after(() => rm(root, { recursive: true, force: true }));
-  for (const preset of ["test", "js", "js-test"]) {
+  for (const preset of ["test", "js-test", "unknown"]) {
     await write(root, ".qg.yaml", `presets: [${preset}]`);
     await assert.rejects(
       loadConfig(root),
-      /presets may only contain js-directives or js-test-fixtures/,
+      /presets may only contain js, js-directives, or js-test-fixtures/,
     );
   }
 });

@@ -9,13 +9,12 @@ checks use the working tree; staged rules use the index snapshot.
 | Component | Repository use |
 | --- | --- |
 | Recommended rules | Git hygiene, file/directory limits, Markdown characters, suppression reasons, root requirements and local documentation links. |
-| `presets: [js-directives, js-test-fixtures]` | JavaScript type-check directives and syntax-aware test fixture checks. |
-| Manifest and pnpm modules | Independent `qg-rules-package-json` and `qg-rules-pnpm` policies. |
+| `presets: [js]` | JS/TS directives, syntax-aware fixture checks, package names and pnpm integrity from one optional package. |
 | CSpell rule module | Spelling in documentation, source and repository scripts using project dictionaries. |
 | Filename/path rules | Kebab-case source names and TypeScript source under package `src` directories, matching the build layout. |
 | Companion requirements | Every workspace package includes its README, license and TypeScript project. |
 | Local rule provider | Package names follow directory names; version, license and Node.js engines match the root release; internal dependencies use publishable versions. |
-| Shared checks API | `@slop-lab/qg-check-runner` runs command/Node checks; `qg-check-node-test` owns Node command preparation and reporting. |
+| Shared checks API | `@slop-lab/qg-checks` runs command/Node checks; the same package owns Node command preparation and reporting. |
 | Shared command checks | Complete Biome validation and package builds/type checks. |
 | Built-in Node test check | Compiled package tests and repository script tests, with concise failure output. |
 
@@ -64,5 +63,5 @@ just release-check
 ```
 
 `just qg` builds the CLI before running it. Full checks validate untouched
-files too. Package previews include all nineteen public packages. Successful checks
+files too. Package previews include all thirteen public packages. Successful checks
 print `PASS`, while failures retain their detailed diagnostics.

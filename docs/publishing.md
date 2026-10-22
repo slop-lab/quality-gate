@@ -1,6 +1,6 @@
 # Publishing QG 0.1.0
 
-This runbook publishes the nineteen public packages from one reviewed Git commit.
+This runbook publishes the thirteen public packages from one reviewed Git commit.
 All use version `0.1.0`, MIT licensing, and Node.js `>=24.0.0`. The repository
 root (`@this-project/qg-repo`) is private. Internal dependencies use exact npm versions, so npm can
 publish them directly. pnpm is used to reproduce the development installation
@@ -45,7 +45,7 @@ git status --short
 Bootstrap installs from `pnpm-lock.yaml`, builds the packages, and installs this
 clone's QG pre-commit hook. `release-check` runs `qg check --full` for the full
 rule scan and shared checks, including the configured full Biome check,
-TypeScript build, and tests. It then previews all nineteen public npm workspaces.
+TypeScript build, and tests. It then previews all thirteen public npm workspaces.
 
 Repository rules also verify package release metadata and required companion
 files. See [repository checks](repository-checks.md) for the policies exercised
@@ -100,40 +100,28 @@ public workspace and the public npm registry.
 
 | Order | Package | Purpose |
 | --- | --- | --- |
-| 1 | `@slop-lab/qg-core` | Rule execution, snapshots, providers and configuration types |
-| 2 | `@slop-lab/qg-rule-test-utils` | Fixtures and assertions for rule authors |
-| 3 | `@slop-lab/qg-check-node-test` | Node test command preparation and concise reporter |
-| 4 | `@slop-lab/qg-check-runner` | Sequential command/test execution and failure diagnostics |
-| 5 | `@slop-lab/qg-rule-stdin` | Snapshot stdin rule factory and command result caching |
-| 6 | `@slop-lab/qg-rules-git` | Git hygiene policies |
-| 7 | `@slop-lab/qg-rules-file-layout` | Allowed names/paths, required root and companion files |
-| 8 | `@slop-lab/qg-rules-file-limits` | Bytes, lines, line length and file counts per directory |
-| 9 | `@slop-lab/qg-rules-markdown` | Markdown references, characters and suppression reasons |
-| 10 | `@slop-lab/qg-rules-js-directives` | Effective JavaScript type-check directives |
-| 11 | `@slop-lab/qg-rules-package-json` | package.json name policies |
-| 12 | `@slop-lab/qg-rules-pnpm` | pnpm workspace and lockfile integrity |
-| 13 | `@slop-lab/qg-rules-js-test-fixtures` | JS/TS test fixture construction policies |
-| 14 | `@slop-lab/qg-rules-biome` | Biome stdin format arguments and diagnostics |
-| 15 | `@slop-lab/qg-rules-prettier` | Prettier stdin check arguments and diagnostics |
-| 16 | `@slop-lab/qg-rules-eslint` | ESLint stdin JSON arguments and diagnostics |
-| 17 | `@slop-lab/qg-rules-cspell` | Spelling and project dictionaries |
-| 18 | `@slop-lab/qg-rules-recommended` | Default Git/layout/limits/Markdown composition |
-| 19 | `@slop-lab/qg` | CLI configuration, hooks, daemon, rendering and exit status |
+| 1 | `@slop-lab/qg-core` | Rule runner, snapshots, providers and configuration types |
+| 2 | `@slop-lab/qg-checks` | Command/Node check execution and concise test reporter |
+| 3 | `@slop-lab/qg-rule-test-utils` | Fixtures and assertions for rule authors |
+| 4 | `@slop-lab/qg-rule-stdin` | Snapshot stdin rule factory and command caching |
+| 5 | `@slop-lab/qg-rules-git` | Git hygiene policies |
+| 6 | `@slop-lab/qg-rules-files` | File layout, content/directory limits and Markdown policies |
+| 7 | `@slop-lab/qg-rules-js` | JS/TS directives, fixture practices, package manifests and pnpm integrity |
+| 8 | `@slop-lab/qg-rules-biome` | Biome stdin format adapter |
+| 9 | `@slop-lab/qg-rules-prettier` | Prettier stdin check adapter |
+| 10 | `@slop-lab/qg-rules-eslint` | ESLint stdin JSON adapter |
+| 11 | `@slop-lab/qg-rules-cspell` | Spelling and project dictionaries |
+| 12 | `@slop-lab/qg-rules-recommended` | Default Git/file policy composition |
+| 13 | `@slop-lab/qg` | CLI configuration, hooks, daemon, rendering and exit status |
 
 ```sh
 mise exec -- npm publish --workspace @slop-lab/qg-core --access public --registry=https://registry.npmjs.org/
+mise exec -- npm publish --workspace @slop-lab/qg-checks --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rule-test-utils --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-check-node-test --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-check-runner --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rule-stdin --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rules-git --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-rules-file-layout --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-rules-file-limits --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-rules-markdown --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-rules-js-directives --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-rules-package-json --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-rules-pnpm --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-rules-js-test-fixtures --access public --registry=https://registry.npmjs.org/
+mise exec -- npm publish --workspace @slop-lab/qg-rules-files --access public --registry=https://registry.npmjs.org/
+mise exec -- npm publish --workspace @slop-lab/qg-rules-js --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rules-biome --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rules-prettier --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rules-eslint --access public --registry=https://registry.npmjs.org/
@@ -189,8 +177,8 @@ installed as CLI runtime dependencies.
 Verify optional presets separately:
 
 ```sh
-npm install --save-dev @slop-lab/qg-rules-js-directives@0.1.0 @slop-lab/qg-rules-js-test-fixtures@0.1.0 --registry=https://registry.npmjs.org/
-printf 'presets: [js-directives, js-test-fixtures]\n' > .qg.yaml
+npm install --save-dev @slop-lab/qg-rules-js@0.1.0 --registry=https://registry.npmjs.org/
+printf 'presets: [js]\n' > .qg.yaml
 npx qg rules --format json
 printf 'export const value = 1;\n' > probe.js
 npx qg check --full

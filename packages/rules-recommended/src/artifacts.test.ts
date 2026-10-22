@@ -4,19 +4,13 @@ import { type QualityGateConfig, runQualityGate } from "@slop-lab/qg-core";
 import { createFixture } from "@slop-lab/qg-rule-test-utils";
 import { biomeRule } from "@slop-lab/qg-rules-biome";
 import { eslintRule } from "@slop-lab/qg-rules-eslint";
-import { jsDirectiveRules } from "@slop-lab/qg-rules-js-directives";
-import { jsTestFixtureRules } from "@slop-lab/qg-rules-js-test-fixtures";
-import { rules as packageJsonRules } from "@slop-lab/qg-rules-package-json";
-import { rules as pnpmRules } from "@slop-lab/qg-rules-pnpm";
+import { jsRules } from "@slop-lab/qg-rules-js";
 import { prettierRule } from "@slop-lab/qg-rules-prettier";
 import { recommendedRules } from "./index.js";
 
 const allRules = [
-  ...packageJsonRules,
-  ...pnpmRules,
   ...recommendedRules,
-  ...jsDirectiveRules,
-  ...jsTestFixtureRules,
+  ...jsRules,
   biomeRule,
   prettierRule,
   eslintRule,

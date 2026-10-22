@@ -13,7 +13,7 @@
       "path": "../rules-recommended"
     },
     {
-      "path": "../check-runner"
+      "path": "../checks"
     }
   ],
   "include": ["src/**/*.ts"]

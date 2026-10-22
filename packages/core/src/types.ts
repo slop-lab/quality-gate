@@ -240,7 +240,7 @@ export type PreCommitCheck = CheckConfig;
 
 export interface QualityGateConfig {
   /** Optional CLI rule sets, installed separately in the project. */
-  presets?: ("js-directives" | "js-test-fixtures")[];
+  presets?: ("js" | "js-directives" | "js-test-fixtures")[];
   /** Project-relative modules or installed packages exporting custom rules. */
   ruleModules?: string[];
   /** Shared command/test checks, executed after rules by the CLI and hooks. */

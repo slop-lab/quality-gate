@@ -3,7 +3,7 @@
 `@slop-lab/qg` provides the `qg` CLI for repository quality checks.
 Requires Node.js 24 or later.
 
-The CLI uses core, `@slop-lab/qg-check-runner`, and recommended rules as runtime
+The CLI uses core, `@slop-lab/qg-checks`, and recommended rules as runtime
 dependencies. The default set contains Git and file checks. JavaScript and
 TypeScript test rules are separate optional packages.
 
@@ -27,10 +27,10 @@ rules:
     options: { limit: 1000000 }
 ```
 
-For JS/TS projects, install `@slop-lab/qg-rules-js-directives` separately and select
-`presets: [js-directives]` in the root config. Install `@slop-lab/qg-rules-js-test-fixtures` and select
-`presets: [js-test-fixtures]` for its TypeScript fixture policy. Combine both as
-`presets: [js-directives, js-test-fixtures]`. Installed packages are not activated automatically.
+For JS/TS projects, install `@slop-lab/qg-rules-js` and select `presets: [js]`.
+It contains source directives, test fixture, package manifest and pnpm policies.
+Use per-rule settings or focused `js-directives` / `js-test-fixtures` presets
+from the same package. Installed packages are not activated automatically.
 
 The CLI automatically warns on stderr if the local QG hook is missing or
 outdated. Set `hooks.preCommit.installation` to `auto` to install or update QG hooks
@@ -59,7 +59,7 @@ Load formatter/linter adapters through tool-specific modules such as
 This does not require a JS preset. See
 [pre-commit setup](https://github.com/slop-lab/quality-gate/blob/main/docs/cli.md#run-hook-pre-commit-and-hooks-install).
 Library users can run the same checks through `runChecks` from
-`@slop-lab/qg-check-runner` without importing or running the CLI.
+`@slop-lab/qg-checks` without importing or running the CLI.
 
 An optional project daemon supports persistent rule caches:
 

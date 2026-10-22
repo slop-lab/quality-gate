@@ -6,8 +6,8 @@ This document combines the current rule interface with future plugin design
 requirements. Today, library callers pass `Rule` objects and injectable
 providers to `runQualityGate`; the CLI loads its default set from the separate
 `@slop-lab/qg-rules-recommended` package. Core does not depend on rule packages.
-The CLI can additionally load the separately installed `js-directives` and `js-test-fixtures` presets
-selected in the root configuration. Root `ruleModules` loads local modules and
+The CLI can additionally load `@slop-lab/qg-rules-js` through the `js` preset,
+or its focused `js-directives` and `js-test-fixtures` selections. Root `ruleModules` loads local modules and
 installed packages exporting rule arrays or execution providers. Public
 `RuleProvider` and `RuleExecutor` interfaces support subprocesses, external
 daemons, and other transports; see [rule execution providers](rule-providers.md).

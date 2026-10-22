@@ -11,12 +11,13 @@ import {
 import { recommendedRules } from "@slop-lab/qg-rules-recommended";
 
 const optionalPresets = {
+  js: { packageName: "@slop-lab/qg-rules-js", exportName: "jsRules" },
   "js-directives": {
-    packageName: "@slop-lab/qg-rules-js-directives",
+    packageName: "@slop-lab/qg-rules-js",
     exportName: "jsDirectiveRules",
   },
   "js-test-fixtures": {
-    packageName: "@slop-lab/qg-rules-js-test-fixtures",
+    packageName: "@slop-lab/qg-rules-js",
     exportName: "jsTestFixtureRules",
   },
 };
@@ -27,6 +28,7 @@ export async function loadRules(
 ): Promise<Rule[]> {
   const rules = [...recommendedRules];
   const require = createRequire(resolve(root, "package.json"));
+  const presetRules = new Set<Rule>();
   for (const preset of new Set(config?.presets ?? [])) {
     const definition = optionalPresets[preset];
     let entry: string;
@@ -51,7 +53,12 @@ export async function loadRules(
       throw new Error(
         `${definition.packageName} must export ${definition.exportName} as a rule array.`,
       );
-    rules.push(...extra);
+    for (const rule of extra) {
+      if (!presetRules.has(rule)) {
+        rules.push(rule);
+        presetRules.add(rule);
+      }
+    }
   }
   for (const specifier of new Set(config?.ruleModules ?? [])) {
     let loaded: Record<string, unknown>;
@@ -104,7 +111,7 @@ export async function loadRules(
             : setting.severity;
       if (severity !== "off" && !ids.has(id))
         throw new Error(
-          `Rule ${id} is not loaded. Select its preset in the root .qg.yaml (presets: [js-directives] or [js-test-fixtures]) and install the corresponding rule package, or add its module to ruleModules.`,
+          `Rule ${id} is not loaded. Select its preset in the root .qg.yaml (presets: [js], [js-directives], or [js-test-fixtures]) and install the corresponding rule package, or add its module to ruleModules.`,
         );
     }
   }

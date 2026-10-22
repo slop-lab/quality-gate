@@ -1,12 +1,12 @@
 # Checks as a library
 
-Use `@slop-lab/qg-core` for rules and `@slop-lab/qg-check-runner` for command and Node
+Use `@slop-lab/qg-core` for rules and `@slop-lab/qg-checks` for command and Node
 checks. The CLI composes these APIs and owns hook setup, configuration loading,
 text/JSON output and exit status. Both execution packages work without the CLI.
 
 ```ts
 import { runQualityGate } from "@slop-lab/qg-core";
-import { runChecks, type CheckConfig } from "@slop-lab/qg-check-runner";
+import { runChecks, type CheckConfig } from "@slop-lab/qg-checks";
 
 const checks: CheckConfig[] = [
   { name: "build", command: "node", args: ["scripts/build.mjs"] },
@@ -24,16 +24,16 @@ can inject execution in tests or other environments. Both built-in check types
 support timeout and recovery-message settings.
 
 Node tests expand and deduplicate globs, use the current Node executable, and
-use command preparation and reporting from `@slop-lab/qg-check-node-test`. Unmatched test patterns fail. The reporter
-is also exposed at `@slop-lab/qg-check-node-test/reporter` for direct `node --test`
-usage after installing the Node adapter in the consuming project.
+load this package's reporter. Unmatched patterns fail. Use
+`@slop-lab/qg-checks/node-test-reporter` for direct `node --test` reporter usage
+in a project where this package is installed.
 
-The shared `CheckConfig` schema is defined by core's `QualityGateConfig` and
-re-exported from the check runner. Core has no dependency on the check runner,
-CLI, rule packages, parsers or spelling dictionaries. Check execution uses the
-working tree; staged rules independently use the index snapshot.
+The package also exports `createNodeTestCommand(root, check)` and
+`NodeTestCheckConfig` for callers that want to prepare a Node command and own
+its execution. The helper returns command, arguments and environment fields;
+it does not execute tests or set an exit status.
 
-The runner owns execution order, process failures and diagnostic formatting data.
-The Node adapter owns file patterns, Node arguments and the reporter; it also
-exports `createNodeTestCommand` and `NodeTestCheckConfig` for independent use.
-Neither package depends on CLI output handling or the rule packages.
+The shared `CheckConfig` schema remains in core and is re-exported from checks.
+Core has no dependency on the check runner, CLI, rule packages, parsers or
+spelling dictionaries. Check execution uses the working tree; staged rules
+independently use the index snapshot. The CLI owns final rendering and status.

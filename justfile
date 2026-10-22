@@ -15,7 +15,7 @@ build:
   @node scripts/run-task.mjs build
 
 test: build
-  @node --test --test-reporter=./packages/check-node-test/dist/reporter.mjs packages/*/dist/**/*.test.js scripts/*.test.mjs
+  @node --test --test-reporter=./packages/checks/dist/node-test-reporter.mjs packages/*/dist/**/*.test.js scripts/*.test.mjs
 
 format:
   @node scripts/run-task.mjs format
@@ -27,6 +27,6 @@ qg *args: build
 ci: build
   @node {{qg_cli}} check --full
 
-# Validate and preview all nineteen public npm packages without publishing.
+# Validate and preview all thirteen public npm packages without publishing.
 release-check: ci
   @node scripts/run-task.mjs pack
