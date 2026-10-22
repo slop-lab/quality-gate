@@ -18,7 +18,7 @@ export default defineConfig(
         name: pkg.name,
         cwd,
         entry:
-          pkg.name === "@slop-lab/qg-checks"
+          pkg.name === "@slop-lab/qg-check-runner"
             ? ["src/index.ts", "src/node-test-reporter.ts"]
             : ["src/index.ts"],
         format: "esm",

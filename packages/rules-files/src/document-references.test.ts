@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { createFixture, runRule } from "@slop-lab/qg-rule-test-utils";
+import { createFixture, runRule } from "@slop-lab/qg-rule-testing";
 import { validDocumentReferenceRule } from "./document-references.js";
 
 test("reports each missing slash-delimited reference occurrence", async (t) => {

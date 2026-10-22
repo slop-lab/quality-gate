@@ -3,7 +3,7 @@ import { execFile } from "node:child_process";
 import { type TestContext, test } from "node:test";
 import { promisify } from "node:util";
 import { type QualityGateConfig, runQualityGate } from "@slop-lab/qg-core";
-import { createFixture } from "@slop-lab/qg-rule-test-utils";
+import { createFixture } from "@slop-lab/qg-rule-testing";
 import { allowedMarkdownCharactersRule } from "./markdown-characters.js";
 import { requireSuppressionReasonRule } from "./suppression-reason.js";
 

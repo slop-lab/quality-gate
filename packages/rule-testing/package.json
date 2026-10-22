@@ -1,5 +1,5 @@
 {
-  "name": "@slop-lab/qg-rule-test-utils",
+  "name": "@slop-lab/qg-rule-testing",
   "version": "0.1.0",
   "type": "module",
   "dependencies": {
@@ -12,13 +12,13 @@
     "dist/*.d.mts.map"
   ],
   "scripts": {
-    "build": "tsc -b && tsdown --config ../../tsdown.config.ts --filter @slop-lab/qg-rule-test-utils",
+    "build": "tsc -b && tsdown --config ../../tsdown.config.ts --filter @slop-lab/qg-rule-testing",
     "prepack": "npm run build"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/slop-lab/quality-gate.git",
-    "directory": "packages/rule-test-utils"
+    "directory": "packages/rule-testing"
   },
   "description": "Fixtures and assertions for QG rule authors",
   "engines": {

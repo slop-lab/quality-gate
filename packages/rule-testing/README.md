@@ -1,18 +1,18 @@
 # QG Test Utilities
 
-`@slop-lab/qg-rule-test-utils` provides fixtures, rule execution, and diagnostic
+`@slop-lab/qg-rule-testing` provides fixtures, rule execution, and diagnostic
 assertions for testing custom QG rules. Requires Node.js 24 or later. MIT licensed.
 It depends only on `@slop-lab/qg-core`, with no CLI or recommended rule dependency.
 
 ```sh
-npm install --save-dev @slop-lab/qg-core @slop-lab/qg-rule-test-utils
+npm install --save-dev @slop-lab/qg-core @slop-lab/qg-rule-testing
 ```
 
 Use your own rule with Node's test runner or another async test framework:
 
 ```ts
 import { test } from "node:test";
-import { assertDiagnostic, createFixture, runRule } from "@slop-lab/qg-rule-test-utils";
+import { assertDiagnostic, createFixture, runRule } from "@slop-lab/qg-rule-testing";
 import { limitRule } from "./limit-rule.js"; // Your Rule<{ limit: number }>
 
 test("reports long input", async (t) => {

@@ -3,7 +3,7 @@ import { execFile } from "node:child_process";
 import { test } from "node:test";
 import { promisify } from "node:util";
 import { runQualityGate } from "@slop-lab/qg-core";
-import { createFixture, runRule } from "@slop-lab/qg-rule-test-utils";
+import { createFixture, runRule } from "@slop-lab/qg-rule-testing";
 import { requireTsCheckRule } from "./require-ts-check.js";
 
 test("accepts effective TypeScript header directives after whitespace, licenses, and shebangs", async (t) => {

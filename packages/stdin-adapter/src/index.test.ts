@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { runQualityGate } from "@slop-lab/qg-core";
-import { createFixture } from "@slop-lab/qg-rule-test-utils";
+import { createFixture } from "@slop-lab/qg-rule-testing";
 import { createStdinRule, validateStdinArgs } from "./index.js";
 
 test("custom stdin protocols run without any built-in tool registration", async (t) => {

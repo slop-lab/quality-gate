@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { type QualityGateConfig, runQualityGate } from "@slop-lab/qg-core";
-import { createFixture } from "@slop-lab/qg-rule-test-utils";
+import { createFixture } from "@slop-lab/qg-rule-testing";
 import { biomeRule } from "@slop-lab/qg-rules-biome";
 import { eslintRule } from "@slop-lab/qg-rules-eslint";
 import { jsRules } from "@slop-lab/qg-rules-js";

@@ -15,7 +15,7 @@ build:
   @node scripts/run-task.mjs build
 
 test: build
-  @node --test --test-reporter=./packages/checks/dist/node-test-reporter.mjs packages/*/dist/**/*.test.js scripts/*.test.mjs
+  @node --test --test-reporter=./packages/check-runner/dist/node-test-reporter.mjs packages/*/dist/**/*.test.js scripts/*.test.mjs
 
 format:
   @node scripts/run-task.mjs format

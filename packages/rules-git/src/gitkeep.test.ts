@@ -4,7 +4,7 @@ import {
   assertDiagnostic,
   createFixture,
   runRule,
-} from "@slop-lab/qg-rule-test-utils";
+} from "@slop-lab/qg-rule-testing";
 import { collectAffectedDirectories, noLoneGitkeepRule } from "./gitkeep.js";
 
 test("collectAffectedDirectories includes old and new rename endpoints", () => {

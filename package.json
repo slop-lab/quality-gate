@@ -13,12 +13,12 @@
     "typescript": "^5.8.0",
     "@slop-lab/qg-rules-cspell": "0.1.0",
     "@slop-lab/qg-core": "0.1.0",
-    "@slop-lab/qg-rule-test-utils": "0.1.0",
+    "@slop-lab/qg-rule-testing": "0.1.0",
     "@slop-lab/qg-rules-biome": "0.1.0",
     "@slop-lab/qg-rules-prettier": "0.1.0",
     "@slop-lab/qg-rules-eslint": "0.1.0",
     "@slop-lab/qg-rules-js": "0.1.0",
-    "@slop-lab/qg-checks": "0.1.0"
+    "@slop-lab/qg-check-runner": "0.1.0"
   },
   "engines": {
     "node": ">=24.0.0"

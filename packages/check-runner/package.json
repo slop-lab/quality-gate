@@ -1,5 +1,5 @@
 {
-  "name": "@slop-lab/qg-checks",
+  "name": "@slop-lab/qg-check-runner",
   "version": "0.1.0",
   "type": "module",
   "dependencies": {
@@ -12,7 +12,7 @@
     "dist/*.d.mts.map"
   ],
   "scripts": {
-    "build": "tsc -b && tsdown --config ../../tsdown.config.ts --filter @slop-lab/qg-checks",
+    "build": "tsc -b && tsdown --config ../../tsdown.config.ts --filter @slop-lab/qg-check-runner",
     "prepack": "npm run build"
   },
   "publishConfig": {
@@ -21,7 +21,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/slop-lab/quality-gate.git",
-    "directory": "packages/checks"
+    "directory": "packages/check-runner"
   },
   "description": "Shared command and Node test execution, diagnostics and concise reporter for QG",
   "engines": {

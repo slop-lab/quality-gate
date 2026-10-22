@@ -8,7 +8,7 @@ import {
   type QualityGateConfig,
   runQualityGate,
 } from "@slop-lab/qg-core";
-import { createFixture } from "@slop-lab/qg-rule-test-utils";
+import { createFixture } from "@slop-lab/qg-rule-testing";
 import { biomeRule } from "./index.js";
 
 function mockTool(

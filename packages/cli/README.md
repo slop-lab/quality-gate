@@ -3,7 +3,7 @@
 `@slop-lab/qg` provides the `qg` CLI for repository quality checks.
 Requires Node.js 24 or later.
 
-The CLI uses core, `@slop-lab/qg-checks`, and recommended rules as runtime
+The CLI uses core, `@slop-lab/qg-check-runner`, and recommended rules as runtime
 dependencies. The default set contains Git and file checks. JavaScript and
 TypeScript test rules are separate optional packages.
 
@@ -59,7 +59,7 @@ Load formatter/linter adapters through tool-specific modules such as
 This does not require a JS preset. See
 [pre-commit setup](https://github.com/slop-lab/quality-gate/blob/main/docs/cli.md#run-hook-pre-commit-and-hooks-install).
 Library users can run the same checks through `runChecks` from
-`@slop-lab/qg-checks` without importing or running the CLI.
+`@slop-lab/qg-check-runner` without importing or running the CLI.
 
 An optional project daemon supports persistent rule caches:
 

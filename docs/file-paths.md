@@ -120,5 +120,5 @@ the same module specifier loads it once. Modules load from the working tree,
 like configuration files. With a persistent daemon, restart it after changing
 custom rule implementation code or its imports.
 
-Use `@slop-lab/qg-rule-test-utils` to test custom rules. See the
-[test utility guide](../packages/rule-test-utils/README.md).
+Use `@slop-lab/qg-rule-testing` to test custom rules. See the
+[test utility guide](../packages/rule-testing/README.md).

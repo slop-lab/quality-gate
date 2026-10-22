@@ -1,12 +1,12 @@
 # Checks as a library
 
-Use `@slop-lab/qg-core` for rules and `@slop-lab/qg-checks` for command and Node
+Use `@slop-lab/qg-core` for rules and `@slop-lab/qg-check-runner` for command and Node
 checks. The CLI composes these APIs and owns hook setup, configuration loading,
 text/JSON output and exit status. Both execution packages work without the CLI.
 
 ```ts
 import { runQualityGate } from "@slop-lab/qg-core";
-import { runChecks, type CheckConfig } from "@slop-lab/qg-checks";
+import { runChecks, type CheckConfig } from "@slop-lab/qg-check-runner";
 
 const checks: CheckConfig[] = [
   { name: "build", command: "node", args: ["scripts/build.mjs"] },
@@ -25,7 +25,7 @@ support timeout and recovery-message settings.
 
 Node tests expand and deduplicate globs, use the current Node executable, and
 load this package's reporter. Unmatched patterns fail. Use
-`@slop-lab/qg-checks/node-test-reporter` for direct `node --test` reporter usage
+`@slop-lab/qg-check-runner/node-test-reporter` for direct `node --test` reporter usage
 in a project where this package is installed.
 
 The package also exports `createNodeTestCommand(root, check)` and

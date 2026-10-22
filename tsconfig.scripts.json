@@ -12,7 +12,7 @@
       "path": "packages/core"
     },
     {
-      "path": "packages/rule-test-utils"
+      "path": "packages/rule-testing"
     }
   ],
   "include": ["scripts/*.mjs", "tsdown.config.ts"]

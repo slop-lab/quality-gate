@@ -14,7 +14,7 @@
     "paths": {
       "@slop-lab/qg": ["packages/cli/src/index.ts"],
       "@slop-lab/qg-core": ["packages/core/src/index.ts"],
-      "@slop-lab/qg-rule-stdin": ["packages/rule-stdin/src/index.ts"],
+      "@slop-lab/qg-stdin-adapter": ["packages/stdin-adapter/src/index.ts"],
       "@slop-lab/qg-rules-biome": ["packages/rules-biome/src/index.ts"],
       "@slop-lab/qg-rules-cspell": ["packages/rules-cspell/src/index.ts"],
       "@slop-lab/qg-rules-eslint": ["packages/rules-eslint/src/index.ts"],
@@ -23,10 +23,10 @@
       "@slop-lab/qg-rules-recommended": [
         "packages/rules-recommended/src/index.ts"
       ],
-      "@slop-lab/qg-rule-test-utils": ["packages/rule-test-utils/src/index.ts"],
+      "@slop-lab/qg-rule-testing": ["packages/rule-testing/src/index.ts"],
       "@slop-lab/qg-rules-js": ["packages/rules-js/src/index.ts"],
       "@slop-lab/qg-rules-files": ["packages/rules-files/src/index.ts"],
-      "@slop-lab/qg-checks": ["packages/checks/src/index.ts"]
+      "@slop-lab/qg-check-runner": ["packages/check-runner/src/index.ts"]
     }
   }
 }

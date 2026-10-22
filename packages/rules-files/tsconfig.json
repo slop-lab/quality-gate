@@ -10,7 +10,7 @@
       "path": "../core"
     },
     {
-      "path": "../rule-test-utils"
+      "path": "../rule-testing"
     }
   ],
   "include": ["src/**/*.ts"]

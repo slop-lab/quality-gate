@@ -3,7 +3,7 @@ import {
   createStdinRule,
   type StdinRuleOptions,
   validateStdinArgs,
-} from "@slop-lab/qg-rule-stdin";
+} from "@slop-lab/qg-stdin-adapter";
 export interface ESLintOptions extends StdinRuleOptions {}
 
 export const eslintRule = createStdinRule<ESLintOptions>({

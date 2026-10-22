@@ -14,7 +14,7 @@ checks use the working tree; staged rules use the index snapshot.
 | Filename/path rules | Kebab-case source names and TypeScript source under package `src` directories, matching the build layout. |
 | Companion requirements | Every workspace package includes its README, license and TypeScript project. |
 | Local rule provider | Package names follow directory names; version, license and Node.js engines match the root release; internal dependencies use publishable versions. |
-| Shared checks API | `@slop-lab/qg-checks` runs command/Node checks; the same package owns Node command preparation and reporting. |
+| Shared checks API | `@slop-lab/qg-check-runner` runs command/Node checks; the same package owns Node command preparation and reporting. |
 | Shared command checks | Complete Biome validation and package builds/type checks. |
 | Built-in Node test check | Compiled package tests and repository script tests, with concise failure output. |
 
@@ -28,7 +28,7 @@ index snapshots during pre-commit. A shared root `package.json` change triggers
 revalidation of all package manifests through `recheckOnChanges`.
 
 The provider is tested next to its implementation in `scripts/qg-rules.test.mjs`
-using the public `@slop-lab/qg-rule-test-utils` fixture and rule helpers. Both
+using the public `@slop-lab/qg-rule-testing` fixture and rule helpers. Both
 `just test` and QG's Node test check include these source tests.
 `tsconfig.scripts.json` also checks the repository scripts and build configuration
 as part of the regular TypeScript build.

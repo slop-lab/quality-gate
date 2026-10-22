@@ -1,4 +1,4 @@
-# @slop-lab/qg-checks
+# @slop-lab/qg-check-runner
 
 Shared command and Node test checks for QG, independent of the CLI. This
 package owns sequential execution, failure diagnostics, Node file-pattern
@@ -6,11 +6,11 @@ expansion and the concise test reporter. Its only runtime dependency is core.
 Requires Node.js 24 or later.
 
 ```sh
-npm install --save-dev @slop-lab/qg-checks
+npm install --save-dev @slop-lab/qg-check-runner
 ```
 
 ```ts
-import { runChecks, type CheckConfig } from "@slop-lab/qg-checks";
+import { runChecks, type CheckConfig } from "@slop-lab/qg-check-runner";
 
 const checks: CheckConfig[] = [
   { name: "build", command: "node", args: ["scripts/build.mjs"] },
@@ -39,7 +39,7 @@ to isolate nested test runners. Callers own execution, timeout and output.
 The reporter has a public subpath in the same package:
 
 ```sh
-node --test --test-reporter=@slop-lab/qg-checks/node-test-reporter
+node --test --test-reporter=@slop-lab/qg-check-runner/node-test-reporter
 ```
 
 It prints `PASS` for successful runs and details for failed tests, omitting

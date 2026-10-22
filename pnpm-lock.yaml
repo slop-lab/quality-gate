@@ -11,15 +11,15 @@ importers:
       '@biomejs/biome':
         specifier: 2.5.15
         version: 2.5.15
-      '@slop-lab/qg-checks':
+      '@slop-lab/qg-check-runner':
         specifier: 0.1.0
-        version: link:packages/checks
+        version: link:packages/check-runner
       '@slop-lab/qg-core':
         specifier: 0.1.0
         version: link:packages/core
-      '@slop-lab/qg-rule-test-utils':
+      '@slop-lab/qg-rule-testing':
         specifier: 0.1.0
-        version: link:packages/rule-test-utils
+        version: link:packages/rule-testing
       '@slop-lab/qg-rules-biome':
         specifier: 0.1.0
         version: link:packages/rules-biome
@@ -45,7 +45,7 @@ importers:
         specifier: ^5.8.0
         version: 5.9.3
 
-  packages/checks:
+  packages/check-runner:
     dependencies:
       '@slop-lab/qg-core':
         specifier: 0.1.0
@@ -53,9 +53,9 @@ importers:
 
   packages/cli:
     dependencies:
-      '@slop-lab/qg-checks':
+      '@slop-lab/qg-check-runner':
         specifier: 0.1.0
-        version: link:../checks
+        version: link:../check-runner
       '@slop-lab/qg-core':
         specifier: 0.1.0
         version: link:../core
@@ -68,17 +68,7 @@ importers:
 
   packages/core: {}
 
-  packages/rule-stdin:
-    dependencies:
-      '@slop-lab/qg-core':
-        specifier: 0.1.0
-        version: link:../core
-    devDependencies:
-      '@slop-lab/qg-rule-test-utils':
-        specifier: 0.1.0
-        version: link:../rule-test-utils
-
-  packages/rule-test-utils:
+  packages/rule-testing:
     dependencies:
       '@slop-lab/qg-core':
         specifier: 0.1.0
@@ -89,13 +79,13 @@ importers:
       '@slop-lab/qg-core':
         specifier: 0.1.0
         version: link:../core
-      '@slop-lab/qg-rule-stdin':
+      '@slop-lab/qg-stdin-adapter':
         specifier: 0.1.0
-        version: link:../rule-stdin
+        version: link:../stdin-adapter
     devDependencies:
-      '@slop-lab/qg-rule-test-utils':
+      '@slop-lab/qg-rule-testing':
         specifier: 0.1.0
-        version: link:../rule-test-utils
+        version: link:../rule-testing
 
   packages/rules-cspell:
     dependencies:
@@ -106,22 +96,22 @@ importers:
         specifier: ^10.4.0
         version: 10.4.0
     devDependencies:
-      '@slop-lab/qg-rule-test-utils':
+      '@slop-lab/qg-rule-testing':
         specifier: 0.1.0
-        version: link:../rule-test-utils
+        version: link:../rule-testing
 
   packages/rules-eslint:
     dependencies:
       '@slop-lab/qg-core':
         specifier: 0.1.0
         version: link:../core
-      '@slop-lab/qg-rule-stdin':
+      '@slop-lab/qg-stdin-adapter':
         specifier: 0.1.0
-        version: link:../rule-stdin
+        version: link:../stdin-adapter
     devDependencies:
-      '@slop-lab/qg-rule-test-utils':
+      '@slop-lab/qg-rule-testing':
         specifier: 0.1.0
-        version: link:../rule-test-utils
+        version: link:../rule-testing
 
   packages/rules-files:
     dependencies:
@@ -132,9 +122,9 @@ importers:
         specifier: ^2.0.2
         version: 2.1.0
     devDependencies:
-      '@slop-lab/qg-rule-test-utils':
+      '@slop-lab/qg-rule-testing':
         specifier: 0.1.0
-        version: link:../rule-test-utils
+        version: link:../rule-testing
 
   packages/rules-git:
     dependencies:
@@ -142,9 +132,9 @@ importers:
         specifier: 0.1.0
         version: link:../core
     devDependencies:
-      '@slop-lab/qg-rule-test-utils':
+      '@slop-lab/qg-rule-testing':
         specifier: 0.1.0
-        version: link:../rule-test-utils
+        version: link:../rule-testing
 
   packages/rules-js:
     dependencies:
@@ -155,22 +145,22 @@ importers:
         specifier: ^5.8.0
         version: 5.9.3
     devDependencies:
-      '@slop-lab/qg-rule-test-utils':
+      '@slop-lab/qg-rule-testing':
         specifier: 0.1.0
-        version: link:../rule-test-utils
+        version: link:../rule-testing
 
   packages/rules-prettier:
     dependencies:
       '@slop-lab/qg-core':
         specifier: 0.1.0
         version: link:../core
-      '@slop-lab/qg-rule-stdin':
+      '@slop-lab/qg-stdin-adapter':
         specifier: 0.1.0
-        version: link:../rule-stdin
+        version: link:../stdin-adapter
     devDependencies:
-      '@slop-lab/qg-rule-test-utils':
+      '@slop-lab/qg-rule-testing':
         specifier: 0.1.0
-        version: link:../rule-test-utils
+        version: link:../rule-testing
 
   packages/rules-recommended:
     dependencies:
@@ -184,9 +174,9 @@ importers:
         specifier: 0.1.0
         version: link:../rules-git
     devDependencies:
-      '@slop-lab/qg-rule-test-utils':
+      '@slop-lab/qg-rule-testing':
         specifier: 0.1.0
-        version: link:../rule-test-utils
+        version: link:../rule-testing
       '@slop-lab/qg-rules-biome':
         specifier: 0.1.0
         version: link:../rules-biome
@@ -199,6 +189,16 @@ importers:
       '@slop-lab/qg-rules-prettier':
         specifier: 0.1.0
         version: link:../rules-prettier
+
+  packages/stdin-adapter:
+    dependencies:
+      '@slop-lab/qg-core':
+        specifier: 0.1.0
+        version: link:../core
+    devDependencies:
+      '@slop-lab/qg-rule-testing':
+        specifier: 0.1.0
+        version: link:../rule-testing
 
 packages:
 

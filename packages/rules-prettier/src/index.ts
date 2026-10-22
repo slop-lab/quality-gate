@@ -3,7 +3,7 @@ import {
   createStdinRule,
   type StdinRuleOptions,
   validateStdinArgs,
-} from "@slop-lab/qg-rule-stdin";
+} from "@slop-lab/qg-stdin-adapter";
 export interface PrettierOptions extends StdinRuleOptions {}
 
 export const prettierRule = createStdinRule<PrettierOptions>({

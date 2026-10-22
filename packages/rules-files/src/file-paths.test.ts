@@ -3,7 +3,7 @@ import { execFile } from "node:child_process";
 import { test } from "node:test";
 import { promisify } from "node:util";
 import { createFilePathRule } from "@slop-lab/qg-core";
-import { createFixture, runRule } from "@slop-lab/qg-rule-test-utils";
+import { createFixture, runRule } from "@slop-lab/qg-rule-testing";
 import { allowedFilenameRule, allowedFilePathRule } from "./file-paths.js";
 
 for (const rule of [allowedFilenameRule, allowedFilePathRule]) {

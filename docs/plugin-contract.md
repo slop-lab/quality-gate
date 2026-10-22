@@ -73,12 +73,12 @@ See [directory limits and configuration scopes](directory-limits.md).
 
 ## Testing custom rules
 
-Use `@slop-lab/qg-rule-test-utils` as a development dependency alongside core.
+Use `@slop-lab/qg-rule-testing` as a development dependency alongside core.
 `createFixture` creates temporary projects, `runRule` executes one rule with
 typed options or full configuration, and `assertDiagnostic` checks selected
 fields. The helper supports synthetic changed paths, real staged Git input,
 process/filesystem mocks, cache stores, generated artifacts, and path overrides.
-See the [test utility guide](../packages/rule-test-utils/README.md) for examples,
+See the [test utility guide](../packages/rule-testing/README.md) for examples,
 configuration precedence, and fixture cleanup.
 
 ## Useful Inputs

@@ -9,7 +9,7 @@ import {
   assertDiagnostic,
   createFixture,
   runRule,
-} from "@slop-lab/qg-rule-test-utils";
+} from "@slop-lab/qg-rule-testing";
 import { noNpmLockWithPnpmRule, pnpmLockfileIsCurrentRule } from "./pnpm.js";
 
 test("reports package-lock.json when pnpm workspace is present", async (t) => {

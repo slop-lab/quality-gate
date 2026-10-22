@@ -1,4 +1,4 @@
-# @slop-lab/qg-rule-stdin
+# @slop-lab/qg-stdin-adapter
 
 Factory for QG rules that validate a file snapshot through a command's stdin.
 It handles changed/full selection, generated-file exclusions, per-file settings,
@@ -10,11 +10,11 @@ output formats. Each adapter owns its protocol. The Biome, Prettier and ESLint
 packages consume this same public API independently.
 
 ```sh
-npm install --save-dev @slop-lab/qg-rule-stdin
+npm install --save-dev @slop-lab/qg-stdin-adapter
 ```
 
 ```ts
-import { createStdinRule, type StdinRuleOptions } from "@slop-lab/qg-rule-stdin";
+import { createStdinRule, type StdinRuleOptions } from "@slop-lab/qg-stdin-adapter";
 
 export const rules = [createStdinRule<StdinRuleOptions>({
   id: "project/validator",

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { type TestContext, test } from "node:test";
 import { type QualityGateConfig, runQualityGate } from "@slop-lab/qg-core";
-import { createFixture } from "@slop-lab/qg-rule-test-utils";
+import { createFixture } from "@slop-lab/qg-rule-testing";
 import { rules } from "./index.js";
 import { allowedPackageNameRule } from "./package-name.js";
 

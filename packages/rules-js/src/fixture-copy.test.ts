@@ -4,7 +4,7 @@ import {
   assertDiagnostic,
   createFixture,
   runRule,
-} from "@slop-lab/qg-rule-test-utils";
+} from "@slop-lab/qg-rule-testing";
 import { noDirectoryFixtureCopyRule } from "./fixture-copy.js";
 
 const directoryFixtureCopyCall = "createFixtureFrom" + "Directory";
@@ -12,7 +12,7 @@ const directoryFixtureCopyCall = "createFixtureFrom" + "Directory";
 test("reports tests that copy fixture directories", async (t) => {
   const fixture = await createFixture({
     "src/example.test.ts": `
-      import { ${directoryFixtureCopyCall} } from "@slop-lab/qg-rule-test-utils";
+      import { ${directoryFixtureCopyCall} } from "@slop-lab/qg-rule-testing";
 
       test("uses a broad fixture", async () => {
         await ${directoryFixtureCopyCall}(new URL("../fixtures/app", import.meta.url));
@@ -38,7 +38,7 @@ test("reports tests that copy fixture directories", async (t) => {
 test("ignores focused inline fixtures", async (t) => {
   const fixture = await createFixture({
     "src/example.test.ts": `
-      import { createFixture } from "@slop-lab/qg-rule-test-utils";
+      import { createFixture } from "@slop-lab/qg-rule-testing";
 
       test("uses a focused fixture", async () => {
         await createFixture({ "package.json": "{}" });
@@ -95,7 +95,7 @@ const interpolation = \`value: \${createFixtureFromDirectory('actual')}\`;
 test("fixture checks find aliased imports and namespace calls", async (t) => {
   const fixture = await createFixture({
     "example.test.ts": `
-import { createFixtureFromDirectory as broad } from '@slop-lab/qg-rule-test-utils';
+import { createFixtureFromDirectory as broad } from '@slop-lab/qg-rule-testing';
 broad('actual');
 fixtures.createFixtureFromDirectory('actual');
 `,

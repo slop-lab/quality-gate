@@ -148,7 +148,7 @@ function findCalls(content: string, path: string): Location[] {
     if (
       !ts.isImportDeclaration(statement) ||
       !ts.isStringLiteral(statement.moduleSpecifier) ||
-      statement.moduleSpecifier.text !== "@slop-lab/qg-rule-test-utils"
+      statement.moduleSpecifier.text !== "@slop-lab/qg-rule-testing"
     )
       continue;
     const bindings = statement.importClause?.namedBindings;

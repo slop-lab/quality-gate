@@ -10,10 +10,10 @@
       "path": "../core"
     },
     {
-      "path": "../rule-test-utils"
+      "path": "../rule-testing"
     },
     {
-      "path": "../rule-stdin"
+      "path": "../stdin-adapter"
     }
   ],
   "include": ["src/**/*.ts"]

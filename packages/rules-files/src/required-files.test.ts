@@ -4,7 +4,7 @@ import { mkdir } from "node:fs/promises";
 import { test } from "node:test";
 import { promisify } from "node:util";
 import { type QualityGateConfig, runQualityGate } from "@slop-lab/qg-core";
-import { createFixture, runRule } from "@slop-lab/qg-rule-test-utils";
+import { createFixture, runRule } from "@slop-lab/qg-rule-testing";
 import {
   repositoryFileRules,
   requiredCompanionsRule,

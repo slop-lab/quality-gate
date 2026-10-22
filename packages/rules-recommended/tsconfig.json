@@ -16,7 +16,7 @@
       "path": "../rules-js"
     },
     {
-      "path": "../rule-test-utils"
+      "path": "../rule-testing"
     },
     {
       "path": "../rules-biome"

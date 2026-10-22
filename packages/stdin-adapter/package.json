@@ -1,12 +1,12 @@
 {
-  "name": "@slop-lab/qg-rule-stdin",
+  "name": "@slop-lab/qg-stdin-adapter",
   "version": "0.1.0",
   "type": "module",
   "dependencies": {
     "@slop-lab/qg-core": "0.1.0"
   },
   "devDependencies": {
-    "@slop-lab/qg-rule-test-utils": "0.1.0"
+    "@slop-lab/qg-rule-testing": "0.1.0"
   },
   "files": [
     "dist/*.mjs",
@@ -15,7 +15,7 @@
     "dist/*.d.mts.map"
   ],
   "scripts": {
-    "build": "tsc -b && tsdown --config ../../tsdown.config.ts --filter @slop-lab/qg-rule-stdin",
+    "build": "tsc -b && tsdown --config ../../tsdown.config.ts --filter @slop-lab/qg-stdin-adapter",
     "prepack": "npm run build"
   },
   "publishConfig": {
@@ -24,7 +24,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/slop-lab/quality-gate.git",
-    "directory": "packages/rule-stdin"
+    "directory": "packages/stdin-adapter"
   },
   "description": "Snapshot stdin command rule factory, executable discovery and result caching",
   "engines": {

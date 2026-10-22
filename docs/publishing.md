@@ -101,9 +101,9 @@ public workspace and the public npm registry.
 | Order | Package | Purpose |
 | --- | --- | --- |
 | 1 | `@slop-lab/qg-core` | Rule runner, snapshots, providers and configuration types |
-| 2 | `@slop-lab/qg-checks` | Command/Node check execution and concise test reporter |
-| 3 | `@slop-lab/qg-rule-test-utils` | Fixtures and assertions for rule authors |
-| 4 | `@slop-lab/qg-rule-stdin` | Snapshot stdin rule factory and command caching |
+| 2 | `@slop-lab/qg-check-runner` | Command/Node check execution and concise test reporter |
+| 3 | `@slop-lab/qg-rule-testing` | Fixtures and assertions for rule authors |
+| 4 | `@slop-lab/qg-stdin-adapter` | Snapshot stdin rule factory and command caching |
 | 5 | `@slop-lab/qg-rules-git` | Git hygiene policies |
 | 6 | `@slop-lab/qg-rules-files` | File layout, content/directory limits and Markdown policies |
 | 7 | `@slop-lab/qg-rules-js` | JS/TS directives, fixture practices, package manifests and pnpm integrity |
@@ -116,9 +116,9 @@ public workspace and the public npm registry.
 
 ```sh
 mise exec -- npm publish --workspace @slop-lab/qg-core --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-checks --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-rule-test-utils --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-rule-stdin --access public --registry=https://registry.npmjs.org/
+mise exec -- npm publish --workspace @slop-lab/qg-check-runner --access public --registry=https://registry.npmjs.org/
+mise exec -- npm publish --workspace @slop-lab/qg-rule-testing --access public --registry=https://registry.npmjs.org/
+mise exec -- npm publish --workspace @slop-lab/qg-stdin-adapter --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rules-git --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rules-files --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rules-js --access public --registry=https://registry.npmjs.org/
@@ -190,12 +190,12 @@ optional JS preset is active. Add its required directive and check again:
 ```sh
 printf '// @ts-check\nexport const value = 1;\n' > probe.js
 npx qg check --full
-npm install --save-dev @slop-lab/qg-core@0.1.0 @slop-lab/qg-rule-test-utils@0.1.0 --registry=https://registry.npmjs.org/
-node --input-type=module -e 'import {createFixture, runRule, assertDiagnostic} from "@slop-lab/qg-rule-test-utils"; console.log(typeof createFixture, typeof runRule, typeof assertDiagnostic)'
+npm install --save-dev @slop-lab/qg-core@0.1.0 @slop-lab/qg-rule-testing@0.1.0 --registry=https://registry.npmjs.org/
+node --input-type=module -e 'import {createFixture, runRule, assertDiagnostic} from "@slop-lab/qg-rule-testing"; console.log(typeof createFixture, typeof runRule, typeof assertDiagnostic)'
 ```
 
 The utility export check should print `function function function`. See the
-[test utility guide](../packages/rule-test-utils/README.md) for custom-rule test
+[test utility guide](../packages/rule-testing/README.md) for custom-rule test
 examples, and the [CLI guide](cli.md) for hook commands and preset configuration.
 
 ## Resume a partially completed release

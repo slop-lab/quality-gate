@@ -6,7 +6,7 @@
     "@slop-lab/qg-core": "0.1.0"
   },
   "devDependencies": {
-    "@slop-lab/qg-rule-test-utils": "0.1.0"
+    "@slop-lab/qg-rule-testing": "0.1.0"
   },
   "files": [
     "dist/*.mjs",

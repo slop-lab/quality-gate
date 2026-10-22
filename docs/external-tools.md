@@ -163,8 +163,8 @@ Each adapter package exports its own rule, a single-rule `rules` array and its
 options type (`BiomeOptions`, `PrettierOptions`, or `ESLintOptions`). Arguments,
 tool-specific validation and output interpretation live in that adapter.
 
-`@slop-lab/qg-rule-stdin` supplies only the shared snapshot stdin factory,
+`@slop-lab/qg-stdin-adapter` supplies only the shared snapshot stdin factory,
 executable discovery and caching. It contains no tool registry. Projects can
 use its `createStdinRule` API for their own stdin command protocols; see the
-[factory guide](../packages/rule-stdin/README.md). Other custom rule transports,
+[factory guide](../packages/stdin-adapter/README.md). Other custom rule transports,
 including daemons, use core's provider interface instead.

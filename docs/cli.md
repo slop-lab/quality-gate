@@ -116,7 +116,7 @@ must match at least one path; a missing test suite fails the check. `command` an
 `args` are not supported on this check type. Build compiled tests in a preceding
 command check when needed. No test script, Just installation, or extra test
 package is required in a consuming project. The reporter is provided by
-`@slop-lab/qg-checks`. Install that package explicitly to use it directly: `node --test --test-reporter=@slop-lab/qg-checks/node-test-reporter`.
+`@slop-lab/qg-check-runner`. Install that package explicitly to use it directly: `node --test --test-reporter=@slop-lab/qg-check-runner/node-test-reporter`.
 Passing test lists and counts are hidden; failures include names, locations,
 assertions, and captured output. QG prints one final `PASS` when the hook succeeds.
 

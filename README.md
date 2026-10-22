@@ -23,9 +23,9 @@ The implementation is TypeScript. The runtime includes:
 - `@slop-lab/qg-rules-js`: JS/TS source directives, test fixtures, package manifests and pnpm integrity.
 - `@slop-lab/qg-rules-cspell`: optional spelling checks with project dictionaries.
 - `@slop-lab/qg-rules-biome`, `@slop-lab/qg-rules-prettier`, `@slop-lab/qg-rules-eslint`: independent adapters for each tool.
-- `@slop-lab/qg-rule-stdin`: factory for snapshot stdin command rules, without a tool registry.
-- `@slop-lab/qg-checks`: command/Node test execution and concise test reporter.
-- `@slop-lab/qg-rule-test-utils`: fixtures, rule execution, and assertions for custom rule tests.
+- `@slop-lab/qg-stdin-adapter`: factory for snapshot stdin command rules, without a tool registry.
+- `@slop-lab/qg-check-runner`: command/Node test execution and concise test reporter.
+- `@slop-lab/qg-rule-testing`: fixtures, rule execution, and assertions for custom rule tests.
 - `@slop-lab/qg-rules-recommended`: the language-independent default Git and file rule set.
 - `@slop-lab/qg`: the `qg` CLI for `check`, `run-hook`, `hooks install`, `rules`, `daemon`, and `cache clear --rule`.
 

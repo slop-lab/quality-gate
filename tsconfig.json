@@ -2,7 +2,7 @@
   "files": [],
   "references": [
     {
-      "path": "packages/checks"
+      "path": "packages/check-runner"
     },
     {
       "path": "packages/cli"
@@ -11,7 +11,7 @@
       "path": "packages/core"
     },
     {
-      "path": "packages/rule-stdin"
+      "path": "packages/stdin-adapter"
     },
     {
       "path": "packages/rules-biome"
@@ -38,7 +38,7 @@
       "path": "packages/rules-recommended"
     },
     {
-      "path": "packages/rule-test-utils"
+      "path": "packages/rule-testing"
     },
     {
       "path": "tsconfig.scripts.json"

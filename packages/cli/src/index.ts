@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { cwd, exit } from "node:process";
 import { fileURLToPath } from "node:url";
-import { runChecks } from "@slop-lab/qg-checks";
+import { runChecks } from "@slop-lab/qg-check-runner";
 import {
   type Diagnostic,
   JsonFileRuleCacheStore,
