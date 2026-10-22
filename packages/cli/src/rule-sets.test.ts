@@ -28,8 +28,8 @@ async function install(root: string, name: string) {
 test("default recommendations are independent of JS and test packages even when they are installed", async (t) => {
   const root = await project(t);
   assert.deepEqual(await loadRules(root), recommendedRules);
-  await install(root, "qg-rules-js");
-  await install(root, "qg-rules-js-test");
+  await install(root, "qg-rules-js-directives");
+  await install(root, "qg-rules-js-test-fixtures");
   assert.deepEqual(await loadRules(root), recommendedRules);
   const ids = recommendedRules.map((rule) => rule.metadata.id);
   assert.ok(
@@ -41,13 +41,16 @@ test("default recommendations are independent of JS and test packages even when 
 
 test("presets load separately installed project packages once and keep the recommendation list unchanged", async (t) => {
   const root = await project(t);
-  await install(root, "qg-rules-js");
-  await install(root, "qg-rules-js-test");
+  await install(root, "qg-rules-js-directives");
+  await install(root, "qg-rules-js-test-fixtures");
   const before = [...recommendedRules];
-  const loaded = await loadRules(root, { presets: ["js", "js-test", "js"] });
+  const loaded = await loadRules(root, {
+    presets: ["js-directives", "js-test-fixtures", "js-directives"],
+  });
   const ids = loaded.map((rule) => rule.metadata.id);
   assert.ok(ids.includes("js/require-ts-check"));
-  assert.ok(ids.includes("package/allowed-name"));
+  assert.ok(!ids.includes("package/allowed-name"));
+  assert.ok(!ids.includes("pnpm/lockfile-is-current"));
   assert.ok(ids.includes("test/no-directory-fixture-copy"));
   assert.equal(new Set(ids).size, ids.length);
   assert.deepEqual(recommendedRules, before);
@@ -56,8 +59,8 @@ test("presets load separately installed project packages once and keep the recom
 test("missing preset packages and enabled rules from unloaded presets fail with installation guidance", async (t) => {
   const root = await project(t);
   await assert.rejects(
-    loadRules(root, { presets: ["js"] }),
-    /npm install --save-dev @slop-lab\/qg-rules-js/,
+    loadRules(root, { presets: ["js-directives"] }),
+    /npm install --save-dev @slop-lab\/qg-rules-js-directives/,
   );
   await assert.rejects(
     loadRules(root, { rules: { "js/require-ts-check": "error" } }),
@@ -201,7 +204,23 @@ test("tool-specific modules load without JS or JS test presets and only register
     assert.ok(!rules.some((rule) => rule.metadata.id.startsWith("js/")));
     assert.ok(!rules.some((rule) => rule.metadata.id.startsWith("test/")));
   }
-  await install(root, "qg-rules-js");
-  const js = await loadRules(root, { presets: ["js"] });
+  await install(root, "qg-rules-js-directives");
+  const js = await loadRules(root, { presets: ["js-directives"] });
   assert.ok(!js.some((rule) => rule.metadata.id.startsWith("external/")));
+});
+
+test("manifest and pnpm modules load independently of JavaScript presets", async (t) => {
+  const root = await project(t);
+  for (const [module, id] of [
+    ["qg-rules-package-json", "package/allowed-name"],
+    ["qg-rules-pnpm", "pnpm/lockfile-is-current"],
+  ]) {
+    await install(root, module);
+    const rules = await loadRules(root, {
+      ruleModules: [`@slop-lab/${module}`],
+      rules: { [id]: "error" },
+    });
+    assert.ok(rules.some((rule) => rule.metadata.id === id));
+    assert.ok(!rules.some((rule) => /^(js|test)\//.test(rule.metadata.id)));
+  }
 });

@@ -154,7 +154,7 @@ for their native configuration and command options.
 CSpell is a separate, language-independent plugin: install
 `@slop-lab/qg-rules-cspell`, load it through `ruleModules`, and enable
 `external/cspell`. It uses the CSpell library on QG snapshot text and honors
-project configuration and dictionaries. No `js` preset or CSpell CLI is required.
+project configuration and dictionaries. No `js-directives` preset or CSpell CLI is required.
 See the [CSpell plugin guide](../packages/rules-cspell/README.md).
 
 ## Adapter ownership

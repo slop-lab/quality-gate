@@ -37,8 +37,8 @@ individual rule packages, or their own `Rule` objects. CLI users configure
 severity and options through `.qg.yaml` or `.qg.yml`.
 
 JavaScript and TypeScript projects can separately install
-`@slop-lab/qg-rules-js` and opt in with `presets: [js]` in the root `.qg.yaml`.
+`@slop-lab/qg-rules-js-directives` and opt in with `presets: [js-directives]` in the root `.qg.yaml`.
 The TypeScript fixture policy is separately available from
-`@slop-lab/qg-rules-js-test` with `presets: [js-test]`.
+`@slop-lab/qg-rules-js-test-fixtures` with `presets: [js-test-fixtures]`.
 Library callers compose these exports explicitly, for example
-`rules: [...recommendedRules, ...jsRules]`; core does not load CLI presets.
+`rules: [...recommendedRules, ...jsDirectiveRules]`; core does not load CLI presets.

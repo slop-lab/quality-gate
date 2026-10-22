@@ -71,14 +71,14 @@ test("installed pre-commit checks index contents and runs configured additional 
   await symlink(
     dirname(
       createRequire(import.meta.url).resolve(
-        "@slop-lab/qg-rules-js/package.json",
+        "@slop-lab/qg-rules-package-json/package.json",
       ),
     ),
-    join(optional, "qg-rules-js"),
+    join(optional, "qg-rules-package-json"),
     "junction",
   );
   const config = {
-    presets: ["js"],
+    ruleModules: ["@slop-lab/qg-rules-package-json"],
     scan: { defaultMode: "full" },
     rules: {
       ...Object.fromEntries(

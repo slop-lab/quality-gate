@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { createFixture, runRule } from "@slop-lab/qg-test-utils";
+import { createFixture, runRule } from "@slop-lab/qg-rule-test-utils";
 import { noTrackedLocalFilesRule } from "./tracked-local.js";
 
 test("reports tracked files in any .local directory", async (t) => {

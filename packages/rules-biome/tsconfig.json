@@ -10,7 +10,7 @@
       "path": "../core"
     },
     {
-      "path": "../test-utils"
+      "path": "../rule-test-utils"
     },
     {
       "path": "../rule-stdin"

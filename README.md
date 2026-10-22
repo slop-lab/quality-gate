@@ -19,14 +19,19 @@ The implementation is TypeScript. The runtime includes:
 
 - `@slop-lab/qg-core`: runner, Git change parsing, injectable input providers, and rule cache storage.
 - `@slop-lab/qg-rules-git`: Git hygiene checks, including `gitkeep/no-lone-gitkeep`.
-- `@slop-lab/qg-rules-files`: required root and companion files, filename/path policies, file limits, document references, Markdown character policies, and suppression-reason checks.
-- `@slop-lab/qg-rules-js`: JavaScript type-checking and package manager consistency.
-- `@slop-lab/qg-rules-js-test`: syntax-aware JavaScript/TypeScript test fixture checks.
+- `@slop-lab/qg-rules-file-layout`: filename/path and required-file policies.
+- `@slop-lab/qg-rules-file-limits`: byte, line and directory file-count limits.
+- `@slop-lab/qg-rules-markdown`: references, characters and suppression-reason policies.
+- `@slop-lab/qg-rules-js-directives`: JavaScript type-check directive policies.
+- `@slop-lab/qg-rules-package-json`: package manifest naming policies.
+- `@slop-lab/qg-rules-pnpm`: pnpm workspace and lockfile integrity.
+- `@slop-lab/qg-rules-js-test-fixtures`: syntax-aware JavaScript/TypeScript test fixture checks.
 - `@slop-lab/qg-rules-cspell`: optional spelling checks with project dictionaries.
 - `@slop-lab/qg-rules-biome`, `@slop-lab/qg-rules-prettier`, `@slop-lab/qg-rules-eslint`: independent adapters for each tool.
 - `@slop-lab/qg-rule-stdin`: factory for snapshot stdin command rules, without a tool registry.
-- `@slop-lab/qg-checks`: shared command/Node test runner and concise test reporter.
-- `@slop-lab/qg-test-utils`: fixtures, rule execution, and assertions for custom rule tests.
+- `@slop-lab/qg-check-runner`: sequential command and test check execution.
+- `@slop-lab/qg-check-node-test`: Node test command preparation and concise reporter.
+- `@slop-lab/qg-rule-test-utils`: fixtures, rule execution, and assertions for custom rule tests.
 - `@slop-lab/qg-rules-recommended`: the language-independent default Git and file rule set.
 - `@slop-lab/qg`: the `qg` CLI for `check`, `run-hook`, `hooks install`, `rules`, `daemon`, and `cache clear --rule`.
 
@@ -79,16 +84,20 @@ dependency on the CLI or rule packages and can be embedded with custom rules.
 JavaScript and TypeScript rules are separate opt-in packages:
 
 ```sh
-npm install --save-dev @slop-lab/qg-rules-js @slop-lab/qg-rules-js-test
+npm install --save-dev @slop-lab/qg-rules-js-directives @slop-lab/qg-rules-js-test-fixtures
 ```
 
 ```yaml
-presets: [js, js-test]
+presets: [js-directives, js-test-fixtures]
 ```
 
 External formatters and linters use `@slop-lab/qg-rules-biome`,
 `@slop-lab/qg-rules-prettier`, or `@slop-lab/qg-rules-eslint` in `ruleModules`, independently of language presets.
 See [external tools](docs/external-tools.md).
+
+Package names and pnpm integrity are independent: install
+`@slop-lab/qg-rules-package-json` or `@slop-lab/qg-rules-pnpm` and add the
+selected packages to `ruleModules`. Neither is loaded by the JS presets.
 
 CSpell is available separately through `@slop-lab/qg-rules-cspell`. Load it with
 `ruleModules: ["@slop-lab/qg-rules-cspell"]` and enable `external/cspell`.
@@ -187,6 +196,6 @@ post-publish installation checks, follow the [publishing runbook](docs/publishin
 mise exec -- just release-check
 ```
 
-This runs CI and `npm pack --dry-run` for all fourteen public packages, including
+This runs CI and `npm pack --dry-run` for all nineteen public packages, including
 their prepack builds. It does not publish. Public access is set in each package's
 `publishConfig`; only the workspace root is private.

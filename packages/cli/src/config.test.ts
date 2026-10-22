@@ -278,14 +278,17 @@ test("hook installation policy is a single validated setting", async (t) => {
 test("optional presets are explicitly selected in root configuration", async (t) => {
   const root = await mkdtemp(join(tmpdir(), "qg-config-"));
   t.after(() => rm(root, { recursive: true, force: true }));
-  await write(root, ".qg.yaml", "presets: [js, js-test]\n");
-  assert.deepEqual((await loadConfig(root))?.presets, ["js", "js-test"]);
-  for (const presets of ["js", ["unknown"], [42]]) {
+  await write(root, ".qg.yaml", "presets: [js-directives, js-test-fixtures]\n");
+  assert.deepEqual((await loadConfig(root))?.presets, [
+    "js-directives",
+    "js-test-fixtures",
+  ]);
+  for (const presets of ["js-directives", ["unknown"], [42]]) {
     await write(root, ".qg.yaml", JSON.stringify({ presets }));
     await assert.rejects(loadConfig(root), /presets/);
   }
   await write(root, ".qg.yaml", "{}");
-  await write(root, "nested/.qg.yaml", "presets: [js]\n");
+  await write(root, "nested/.qg.yaml", "presets: [js-directives]\n");
   await assert.rejects(
     loadConfig(root),
     /presets is only allowed in the root config/,
@@ -382,9 +385,11 @@ test("custom ruleModules are restricted to non-empty module specifiers in root c
 test("the JS test preset is explicit and the old language-agnostic test label is rejected", async (t) => {
   const root = await mkdtemp(join(tmpdir(), "qg-config-"));
   t.after(() => rm(root, { recursive: true, force: true }));
-  await write(root, ".qg.yaml", "presets: [test]");
-  await assert.rejects(
-    loadConfig(root),
-    /presets may only contain js or js-test/,
-  );
+  for (const preset of ["test", "js", "js-test"]) {
+    await write(root, ".qg.yaml", `presets: [${preset}]`);
+    await assert.rejects(
+      loadConfig(root),
+      /presets may only contain js-directives or js-test-fixtures/,
+    );
+  }
 });

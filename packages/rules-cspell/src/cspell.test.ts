@@ -3,7 +3,7 @@ import { execFile } from "node:child_process";
 import { test } from "node:test";
 import { promisify } from "node:util";
 import { createRulesFromProvider } from "@slop-lab/qg-core";
-import { createFixture, runRule } from "@slop-lab/qg-test-utils";
+import { createFixture, runRule } from "@slop-lab/qg-rule-test-utils";
 import { cspellRule, ruleProvider, rules } from "./index.js";
 
 const options = { files: ["**/*.md"] };

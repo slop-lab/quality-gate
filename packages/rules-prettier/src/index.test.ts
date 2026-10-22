@@ -10,7 +10,7 @@ import {
   type ProcessResult,
   runQualityGate,
 } from "@slop-lab/qg-core";
-import { createFixture } from "@slop-lab/qg-test-utils";
+import { createFixture } from "@slop-lab/qg-rule-test-utils";
 import { prettierRule } from "./index.js";
 
 function mockTool(

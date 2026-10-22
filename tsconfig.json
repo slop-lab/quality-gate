@@ -2,37 +2,16 @@
   "files": [],
   "references": [
     {
-      "path": "packages/core"
+      "path": "packages/check-node-test"
     },
     {
-      "path": "packages/checks"
-    },
-    {
-      "path": "packages/test-utils"
-    },
-    {
-      "path": "packages/rules-git"
-    },
-    {
-      "path": "packages/rules-files"
-    },
-    {
-      "path": "packages/rules-js"
-    },
-    {
-      "path": "packages/rules-js-test"
-    },
-    {
-      "path": "packages/rules-cspell"
-    },
-    {
-      "path": "packages/rules-recommended"
+      "path": "packages/check-runner"
     },
     {
       "path": "packages/cli"
     },
     {
-      "path": "tsconfig.scripts.json"
+      "path": "packages/core"
     },
     {
       "path": "packages/rule-stdin"
@@ -41,10 +20,46 @@
       "path": "packages/rules-biome"
     },
     {
-      "path": "packages/rules-prettier"
+      "path": "packages/rules-cspell"
     },
     {
       "path": "packages/rules-eslint"
+    },
+    {
+      "path": "packages/rules-file-layout"
+    },
+    {
+      "path": "packages/rules-file-limits"
+    },
+    {
+      "path": "packages/rules-git"
+    },
+    {
+      "path": "packages/rules-js-directives"
+    },
+    {
+      "path": "packages/rules-js-test-fixtures"
+    },
+    {
+      "path": "packages/rules-markdown"
+    },
+    {
+      "path": "packages/rules-package-json"
+    },
+    {
+      "path": "packages/rules-pnpm"
+    },
+    {
+      "path": "packages/rules-prettier"
+    },
+    {
+      "path": "packages/rules-recommended"
+    },
+    {
+      "path": "packages/rule-test-utils"
+    },
+    {
+      "path": "tsconfig.scripts.json"
     }
   ]
 }

@@ -116,7 +116,7 @@ must match at least one path; a missing test suite fails the check. `command` an
 `args` are not supported on this check type. Build compiled tests in a preceding
 command check when needed. No test script, Just installation, or extra test
 package is required in a consuming project. The reporter is provided by
-`@slop-lab/qg-checks`. Install that package explicitly to use it directly: `node --test --test-reporter=@slop-lab/qg-checks/node-test-reporter`.
+`@slop-lab/qg-check-node-test`. Install that package explicitly to use it directly: `node --test --test-reporter=@slop-lab/qg-check-node-test/reporter`.
 Passing test lists and counts are hidden; failures include names, locations,
 assertions, and captured output. QG prints one final `PASS` when the hook succeeds.
 
@@ -233,22 +233,28 @@ Optional language/tooling packages must be installed separately and explicitly
 selected in the **root** `.qg.yaml`:
 
 ```sh
-npm install --save-dev @slop-lab/qg-rules-js @slop-lab/qg-rules-js-test
+npm install --save-dev @slop-lab/qg-rules-js-directives @slop-lab/qg-rules-js-test-fixtures
 ```
 
 ```yaml
-presets: [js, js-test]
+presets: [js-directives, js-test-fixtures]
 ```
 
-`js` loads `jsRules` from the project's `@slop-lab/qg-rules-js` installation.
-`js-test` loads `jsTestRules` from `@slop-lab/qg-rules-js-test`. Select either or both;
+`js-directives` loads `jsDirectiveRules` from the project's `@slop-lab/qg-rules-js-directives` installation.
+`js-test-fixtures` loads `jsTestFixtureRules` from `@slop-lab/qg-rules-js-test-fixtures`. Select either or both;
 an installed package, `package.json`, or JS file alone does not activate a
 preset. Duplicate selections are loaded once. Missing packages and enabled
 rule IDs from unloaded presets fail with setup guidance. Nested configs can
 configure loaded rules, but cannot select presets.
 
-Custom plugin package loading is not currently supported. Library callers can
-pass any composed `Rule[]` directly to `runQualityGate`.
+Independent manifest and package-manager modules are selected through
+`ruleModules`, without a JavaScript preset:
+
+```yaml
+ruleModules: ["@slop-lab/qg-rules-package-json", "@slop-lab/qg-rules-pnpm"]
+```
+
+Library callers can pass any composed `Rule[]` directly to `runQualityGate`.
 
 ### `cache`
 
@@ -299,7 +305,7 @@ See [file policies](file-policies.md) for configuration and discovery semantics.
 ## JavaScript type checking
 
 `js/require-ts-check`, provided by the separately installed
-`@slop-lab/qg-rules-js`, is enabled after selecting `presets: [js]`. JavaScript files must have an effective `// @ts-check`
+`@slop-lab/qg-rules-js-directives`, is enabled after selecting `presets: [js-directives]`. JavaScript files must have an effective `// @ts-check`
 directive before executable code. It checks `.js`, `.jsx`, `.mjs`, and `.cjs`
 files in full or changed scans, using index contents for staged checks.
 
@@ -472,6 +478,7 @@ overrides can replace the message; severity-only and options-only overrides
 inherit it. Without `message`, the rule's original diagnostic text is used.
 
 ```yaml
+ruleModules: ["@slop-lab/qg-rules-package-json"]
 rules:
   package/allowed-name:
     severity: error
@@ -490,5 +497,4 @@ and daemon/cache support.
 General workspace servers, MCP/HTTP transports, workspace registration,
 `init`, `explain`, dynamic plugin loading, automatic fixes, SARIF/GitHub
 output, output file flags, and warning thresholds are future design goals.
-They are not commands or options in the current CLI. See
-[Architecture](architecture.md) and [Plugin Contract](plugin-contract.md).
+See [Architecture](architecture.md) and [Plugin Contract](plugin-contract.md) for future commands and options.

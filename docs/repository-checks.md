@@ -9,12 +9,13 @@ checks use the working tree; staged rules use the index snapshot.
 | Component | Repository use |
 | --- | --- |
 | Recommended rules | Git hygiene, file/directory limits, Markdown characters, suppression reasons, root requirements and local documentation links. |
-| `presets: [js, js-test]` | pnpm integrity, JavaScript type-check directives, package names and syntax-aware fixture checks. |
+| `presets: [js-directives, js-test-fixtures]` | JavaScript type-check directives and syntax-aware test fixture checks. |
+| Manifest and pnpm modules | Independent `qg-rules-package-json` and `qg-rules-pnpm` policies. |
 | CSpell rule module | Spelling in documentation, source and repository scripts using project dictionaries. |
 | Filename/path rules | Kebab-case source names and TypeScript source under package `src` directories, matching the build layout. |
 | Companion requirements | Every workspace package includes its README, license and TypeScript project. |
 | Local rule provider | Package names follow directory names; version, license and Node.js engines match the root release; internal dependencies use publishable versions. |
-| Shared checks API | `@slop-lab/qg-checks` runs command/Node checks and ships the reusable test reporter, independently of CLI rendering. |
+| Shared checks API | `@slop-lab/qg-check-runner` runs command/Node checks; `qg-check-node-test` owns Node command preparation and reporting. |
 | Shared command checks | Complete Biome validation and package builds/type checks. |
 | Built-in Node test check | Compiled package tests and repository script tests, with concise failure output. |
 
@@ -28,7 +29,7 @@ index snapshots during pre-commit. A shared root `package.json` change triggers
 revalidation of all package manifests through `recheckOnChanges`.
 
 The provider is tested next to its implementation in `scripts/qg-rules.test.mjs`
-using the public `@slop-lab/qg-test-utils` fixture and rule helpers. Both
+using the public `@slop-lab/qg-rule-test-utils` fixture and rule helpers. Both
 `just test` and QG's Node test check include these source tests.
 `tsconfig.scripts.json` also checks the repository scripts and build configuration
 as part of the regular TypeScript build.
@@ -63,5 +64,5 @@ just release-check
 ```
 
 `just qg` builds the CLI before running it. Full checks validate untouched
-files too. Package previews include all fourteen public packages. Successful checks
+files too. Package previews include all nineteen public packages. Successful checks
 print `PASS`, while failures retain their detailed diagnostics.

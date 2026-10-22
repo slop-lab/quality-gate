@@ -1,6 +1,6 @@
 # Publishing QG 0.1.0
 
-This runbook publishes the fourteen public packages from one reviewed Git commit.
+This runbook publishes the nineteen public packages from one reviewed Git commit.
 All use version `0.1.0`, MIT licensing, and Node.js `>=24.0.0`. The repository
 root (`@this-project/qg-repo`) is private. Internal dependencies use exact npm versions, so npm can
 publish them directly. pnpm is used to reproduce the development installation
@@ -45,7 +45,7 @@ git status --short
 Bootstrap installs from `pnpm-lock.yaml`, builds the packages, and installs this
 clone's QG pre-commit hook. `release-check` runs `qg check --full` for the full
 rule scan and shared checks, including the configured full Biome check,
-TypeScript build, and tests. It then previews all fourteen public npm workspaces.
+TypeScript build, and tests. It then previews all nineteen public npm workspaces.
 
 Repository rules also verify package release metadata and required companion
 files. See [repository checks](repository-checks.md) for the policies exercised
@@ -100,30 +100,40 @@ public workspace and the public npm registry.
 
 | Order | Package | Purpose |
 | --- | --- | --- |
-| 1 | `@slop-lab/qg-core` | Shared runner and provider interfaces |
-| 2 | `@slop-lab/qg-checks` | Shared command/Node checks |
-| 3 | `@slop-lab/qg-test-utils` | Custom rule testing |
-| 4 | `@slop-lab/qg-rule-stdin` | Snapshot stdin rule factory |
-| 5 | `@slop-lab/qg-rules-git` | Git rules |
-| 6 | `@slop-lab/qg-rules-files` | File and document rules |
-| 7 | `@slop-lab/qg-rules-js` | Optional JS preset |
-| 8 | `@slop-lab/qg-rules-js-test` | Optional JS test preset |
-| 9 | `@slop-lab/qg-rules-biome` | Biome adapter |
-| 10 | `@slop-lab/qg-rules-prettier` | Prettier adapter |
-| 11 | `@slop-lab/qg-rules-eslint` | ESLint adapter |
-| 12 | `@slop-lab/qg-rules-cspell` | CSpell adapter |
-| 13 | `@slop-lab/qg-rules-recommended` | Default Git/file composition |
-| 14 | `@slop-lab/qg` | CLI |
+| 1 | `@slop-lab/qg-core` | Rule execution, snapshots, providers and configuration types |
+| 2 | `@slop-lab/qg-rule-test-utils` | Fixtures and assertions for rule authors |
+| 3 | `@slop-lab/qg-check-node-test` | Node test command preparation and concise reporter |
+| 4 | `@slop-lab/qg-check-runner` | Sequential command/test execution and failure diagnostics |
+| 5 | `@slop-lab/qg-rule-stdin` | Snapshot stdin rule factory and command result caching |
+| 6 | `@slop-lab/qg-rules-git` | Git hygiene policies |
+| 7 | `@slop-lab/qg-rules-file-layout` | Allowed names/paths, required root and companion files |
+| 8 | `@slop-lab/qg-rules-file-limits` | Bytes, lines, line length and file counts per directory |
+| 9 | `@slop-lab/qg-rules-markdown` | Markdown references, characters and suppression reasons |
+| 10 | `@slop-lab/qg-rules-js-directives` | Effective JavaScript type-check directives |
+| 11 | `@slop-lab/qg-rules-package-json` | package.json name policies |
+| 12 | `@slop-lab/qg-rules-pnpm` | pnpm workspace and lockfile integrity |
+| 13 | `@slop-lab/qg-rules-js-test-fixtures` | JS/TS test fixture construction policies |
+| 14 | `@slop-lab/qg-rules-biome` | Biome stdin format arguments and diagnostics |
+| 15 | `@slop-lab/qg-rules-prettier` | Prettier stdin check arguments and diagnostics |
+| 16 | `@slop-lab/qg-rules-eslint` | ESLint stdin JSON arguments and diagnostics |
+| 17 | `@slop-lab/qg-rules-cspell` | Spelling and project dictionaries |
+| 18 | `@slop-lab/qg-rules-recommended` | Default Git/layout/limits/Markdown composition |
+| 19 | `@slop-lab/qg` | CLI configuration, hooks, daemon, rendering and exit status |
 
 ```sh
 mise exec -- npm publish --workspace @slop-lab/qg-core --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-checks --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-test-utils --access public --registry=https://registry.npmjs.org/
+mise exec -- npm publish --workspace @slop-lab/qg-rule-test-utils --access public --registry=https://registry.npmjs.org/
+mise exec -- npm publish --workspace @slop-lab/qg-check-node-test --access public --registry=https://registry.npmjs.org/
+mise exec -- npm publish --workspace @slop-lab/qg-check-runner --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rule-stdin --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rules-git --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-rules-files --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-rules-js --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-rules-js-test --access public --registry=https://registry.npmjs.org/
+mise exec -- npm publish --workspace @slop-lab/qg-rules-file-layout --access public --registry=https://registry.npmjs.org/
+mise exec -- npm publish --workspace @slop-lab/qg-rules-file-limits --access public --registry=https://registry.npmjs.org/
+mise exec -- npm publish --workspace @slop-lab/qg-rules-markdown --access public --registry=https://registry.npmjs.org/
+mise exec -- npm publish --workspace @slop-lab/qg-rules-js-directives --access public --registry=https://registry.npmjs.org/
+mise exec -- npm publish --workspace @slop-lab/qg-rules-package-json --access public --registry=https://registry.npmjs.org/
+mise exec -- npm publish --workspace @slop-lab/qg-rules-pnpm --access public --registry=https://registry.npmjs.org/
+mise exec -- npm publish --workspace @slop-lab/qg-rules-js-test-fixtures --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rules-biome --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rules-prettier --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rules-eslint --access public --registry=https://registry.npmjs.org/
@@ -179,8 +189,8 @@ installed as CLI runtime dependencies.
 Verify optional presets separately:
 
 ```sh
-npm install --save-dev @slop-lab/qg-rules-js@0.1.0 @slop-lab/qg-rules-js-test@0.1.0 --registry=https://registry.npmjs.org/
-printf 'presets: [js, js-test]\n' > .qg.yaml
+npm install --save-dev @slop-lab/qg-rules-js-directives@0.1.0 @slop-lab/qg-rules-js-test-fixtures@0.1.0 --registry=https://registry.npmjs.org/
+printf 'presets: [js-directives, js-test-fixtures]\n' > .qg.yaml
 npx qg rules --format json
 printf 'export const value = 1;\n' > probe.js
 npx qg check --full
@@ -192,12 +202,12 @@ optional JS preset is active. Add its required directive and check again:
 ```sh
 printf '// @ts-check\nexport const value = 1;\n' > probe.js
 npx qg check --full
-npm install --save-dev @slop-lab/qg-core@0.1.0 @slop-lab/qg-test-utils@0.1.0 --registry=https://registry.npmjs.org/
-node --input-type=module -e 'import {createFixture, runRule, assertDiagnostic} from "@slop-lab/qg-test-utils"; console.log(typeof createFixture, typeof runRule, typeof assertDiagnostic)'
+npm install --save-dev @slop-lab/qg-core@0.1.0 @slop-lab/qg-rule-test-utils@0.1.0 --registry=https://registry.npmjs.org/
+node --input-type=module -e 'import {createFixture, runRule, assertDiagnostic} from "@slop-lab/qg-rule-test-utils"; console.log(typeof createFixture, typeof runRule, typeof assertDiagnostic)'
 ```
 
 The utility export check should print `function function function`. See the
-[test utility guide](../packages/test-utils/README.md) for custom-rule test
+[test utility guide](../packages/rule-test-utils/README.md) for custom-rule test
 examples, and the [CLI guide](cli.md) for hook commands and preset configuration.
 
 ## Resume a partially completed release
@@ -222,5 +232,5 @@ npm install --save-dev @slop-lab/qg-rules-cspell@0.1.0 --registry=https://regist
 ```
 
 Add `ruleModules: ["@slop-lab/qg-rules-cspell"]` to the root configuration and
-enable `external/cspell`. It does not require a `js` preset or a CSpell CLI
+enable `external/cspell`. It does not require a `js-directives` preset or a CSpell CLI
 installation. See the [CSpell plugin guide](../packages/rules-cspell/README.md).

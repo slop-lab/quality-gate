@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createRulesFromProvider } from "@slop-lab/qg-core";
-import { createFixture, runRule } from "@slop-lab/qg-test-utils";
+import { createFixture, runRule } from "@slop-lab/qg-rule-test-utils";
 import { ruleProvider } from "./qg-rules.mjs";
 
 const [rule] = await createRulesFromProvider(ruleProvider);

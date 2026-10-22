@@ -1,18 +1,22 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { type QualityGateConfig, runQualityGate } from "@slop-lab/qg-core";
+import { createFixture } from "@slop-lab/qg-rule-test-utils";
 import { biomeRule } from "@slop-lab/qg-rules-biome";
 import { eslintRule } from "@slop-lab/qg-rules-eslint";
-import { jsRules } from "@slop-lab/qg-rules-js";
-import { jsTestRules } from "@slop-lab/qg-rules-js-test";
+import { jsDirectiveRules } from "@slop-lab/qg-rules-js-directives";
+import { jsTestFixtureRules } from "@slop-lab/qg-rules-js-test-fixtures";
+import { rules as packageJsonRules } from "@slop-lab/qg-rules-package-json";
+import { rules as pnpmRules } from "@slop-lab/qg-rules-pnpm";
 import { prettierRule } from "@slop-lab/qg-rules-prettier";
-import { createFixture } from "@slop-lab/qg-test-utils";
 import { recommendedRules } from "./index.js";
 
 const allRules = [
+  ...packageJsonRules,
+  ...pnpmRules,
   ...recommendedRules,
-  ...jsRules,
-  ...jsTestRules,
+  ...jsDirectiveRules,
+  ...jsTestFixtureRules,
   biomeRule,
   prettierRule,
   eslintRule,

@@ -13,16 +13,13 @@
       "path": "../rules-git"
     },
     {
-      "path": "../rules-files"
+      "path": "../rules-js-directives"
     },
     {
-      "path": "../rules-js"
+      "path": "../rules-js-test-fixtures"
     },
     {
-      "path": "../rules-js-test"
-    },
-    {
-      "path": "../test-utils"
+      "path": "../rule-test-utils"
     },
     {
       "path": "../rules-biome"
@@ -32,6 +29,21 @@
     },
     {
       "path": "../rules-eslint"
+    },
+    {
+      "path": "../rules-file-layout"
+    },
+    {
+      "path": "../rules-file-limits"
+    },
+    {
+      "path": "../rules-markdown"
+    },
+    {
+      "path": "../rules-package-json"
+    },
+    {
+      "path": "../rules-pnpm"
     }
   ],
   "include": ["src/**/*.ts"]

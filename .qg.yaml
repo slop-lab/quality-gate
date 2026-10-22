@@ -1,5 +1,7 @@
-presets: [js, js-test]
+presets: [js-directives, js-test-fixtures]
 ruleModules:
+  - "@slop-lab/qg-rules-package-json"
+  - "@slop-lab/qg-rules-pnpm"
   - "@slop-lab/qg-rules-biome"
   - "@slop-lab/qg-rules-cspell"
   - "./scripts/qg-rules.mjs"

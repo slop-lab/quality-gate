@@ -12,21 +12,37 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "paths": {
+      "@slop-lab/qg-check-node-test": ["packages/check-node-test/src/index.ts"],
+      "@slop-lab/qg-check-runner": ["packages/check-runner/src/index.ts"],
+      "@slop-lab/qg": ["packages/cli/src/index.ts"],
       "@slop-lab/qg-core": ["packages/core/src/index.ts"],
-      "@slop-lab/qg-test-utils": ["packages/test-utils/src/index.ts"],
+      "@slop-lab/qg-rule-stdin": ["packages/rule-stdin/src/index.ts"],
+      "@slop-lab/qg-rules-biome": ["packages/rules-biome/src/index.ts"],
+      "@slop-lab/qg-rules-cspell": ["packages/rules-cspell/src/index.ts"],
+      "@slop-lab/qg-rules-eslint": ["packages/rules-eslint/src/index.ts"],
+      "@slop-lab/qg-rules-file-layout": [
+        "packages/rules-file-layout/src/index.ts"
+      ],
+      "@slop-lab/qg-rules-file-limits": [
+        "packages/rules-file-limits/src/index.ts"
+      ],
       "@slop-lab/qg-rules-git": ["packages/rules-git/src/index.ts"],
-      "@slop-lab/qg-rules-files": ["packages/rules-files/src/index.ts"],
-      "@slop-lab/qg-rules-js": ["packages/rules-js/src/index.ts"],
-      "@slop-lab/qg-rules-js-test": ["packages/rules-js-test/src/index.ts"],
+      "@slop-lab/qg-rules-js-directives": [
+        "packages/rules-js-directives/src/index.ts"
+      ],
+      "@slop-lab/qg-rules-js-test-fixtures": [
+        "packages/rules-js-test-fixtures/src/index.ts"
+      ],
+      "@slop-lab/qg-rules-markdown": ["packages/rules-markdown/src/index.ts"],
+      "@slop-lab/qg-rules-package-json": [
+        "packages/rules-package-json/src/index.ts"
+      ],
+      "@slop-lab/qg-rules-pnpm": ["packages/rules-pnpm/src/index.ts"],
+      "@slop-lab/qg-rules-prettier": ["packages/rules-prettier/src/index.ts"],
       "@slop-lab/qg-rules-recommended": [
         "packages/rules-recommended/src/index.ts"
       ],
-      "@slop-lab/qg-rules-cspell": ["packages/rules-cspell/src/index.ts"],
-      "@slop-lab/qg-checks": ["packages/checks/src/index.ts"],
-      "@slop-lab/qg-rule-stdin": ["packages/rule-stdin/src/index.ts"],
-      "@slop-lab/qg-rules-biome": ["packages/rules-biome/src/index.ts"],
-      "@slop-lab/qg-rules-prettier": ["packages/rules-prettier/src/index.ts"],
-      "@slop-lab/qg-rules-eslint": ["packages/rules-eslint/src/index.ts"]
+      "@slop-lab/qg-rule-test-utils": ["packages/rule-test-utils/src/index.ts"]
     }
   }
 }

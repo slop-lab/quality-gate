@@ -11,10 +11,13 @@ import {
 import { recommendedRules } from "@slop-lab/qg-rules-recommended";
 
 const optionalPresets = {
-  js: { packageName: "@slop-lab/qg-rules-js", exportName: "jsRules" },
-  "js-test": {
-    packageName: "@slop-lab/qg-rules-js-test",
-    exportName: "jsTestRules",
+  "js-directives": {
+    packageName: "@slop-lab/qg-rules-js-directives",
+    exportName: "jsDirectiveRules",
+  },
+  "js-test-fixtures": {
+    packageName: "@slop-lab/qg-rules-js-test-fixtures",
+    exportName: "jsTestFixtureRules",
   },
 };
 
@@ -101,7 +104,7 @@ export async function loadRules(
             : setting.severity;
       if (severity !== "off" && !ids.has(id))
         throw new Error(
-          `Rule ${id} is not loaded. Select its preset in the root .qg.yaml (presets: [js] or [js-test]) and install the corresponding rule package, or add its module to ruleModules.`,
+          `Rule ${id} is not loaded. Select its preset in the root .qg.yaml (presets: [js-directives] or [js-test-fixtures]) and install the corresponding rule package, or add its module to ruleModules.`,
         );
     }
   }
