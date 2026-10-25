@@ -15,12 +15,10 @@ export function createNodeTestCommand(
     if (!matches.length) throw new Error(`No test files matched: ${pattern}`);
     for (const match of matches) files.add(resolve(root, match));
   }
-  const reporter = fileURLToPath(
-    new URL(
-      `./node-test-reporter${extname(fileURLToPath(import.meta.url))}`,
-      import.meta.url,
-    ),
-  );
+  const reporter = new URL(
+    `./node-test-reporter${extname(fileURLToPath(import.meta.url))}`,
+    import.meta.url,
+  ).href;
   return {
     command: execPath,
     args: ["--test", `--test-reporter=${reporter}`, ...[...files].sort()],

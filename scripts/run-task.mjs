@@ -1,12 +1,13 @@
 // @ts-check
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { cleanWorkspaceBuildOutputs } from "./workspace-packages.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 /** @type {Record<string, string[][]>} */
 const tasks = {
   build: [
-    ["pnpm", "exec", "tsc", "-b"],
+    ["pnpm", "exec", "tsc", "-b", "--force"],
     ["pnpm", "exec", "tsdown"],
   ],
   install: [["pnpm", "install", "--frozen-lockfile"]],
@@ -25,6 +26,11 @@ const task = process.argv[2] ?? "build";
 if (!Object.hasOwn(tasks, task) || process.argv.length > 3) {
   console.error("Usage: node scripts/run-task.mjs <build|install|format|pack>");
   process.exit(1);
+}
+if (task === "build") {
+  cleanWorkspaceBuildOutputs(
+    fileURLToPath(new URL("../packages/", import.meta.url)),
+  );
 }
 for (const [executable, ...args] of tasks[task]) {
   // All commands and arguments above are fixed, including the Windows shell form.

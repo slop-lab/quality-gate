@@ -25,7 +25,7 @@ test("Node test commands expand and deduplicate paths and run with the packaged 
   assert.deepEqual(command.args.slice(2), [file]);
   assert.match(
     command.args[1] ?? "",
-    /--test-reporter=.*node-test-reporter\.m?js$/,
+    /^--test-reporter=file:\/\/.*node-test-reporter\.m?js$/,
   );
   const result = await new NodeProcessProvider().exec({
     ...command,
