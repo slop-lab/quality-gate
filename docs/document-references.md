@@ -50,5 +50,9 @@ rules:
 This mode finds slash-delimited tokens such as `docs/example`, resolves them
 from the repository root, and requires file targets. It also interprets slash
 prose as references, so use it only for documents adopting that convention.
+Deleting or moving a target rechecks unchanged documents in this mode too,
+including when Git represents the move as a deletion and an addition. Cached
+references are checked against the current scan's filesystem on every run.
+For staged scans, an untracked copy at the old path does not satisfy a reference.
 The legacy `suppression` marker option applies to this mode. Default
 `referenceStyle` is `markdown-links`; `extensions` can select document suffixes.
