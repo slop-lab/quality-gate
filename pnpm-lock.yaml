@@ -60,7 +60,7 @@ importers:
         specifier: 0.1.0
         version: link:../core
       '@slop-lab/qg-rules-recommended':
-        specifier: 0.1.0
+        specifier: 0.1.1
         version: link:../rules-recommended
       yaml:
         specifier: ^2.9.1
@@ -168,7 +168,7 @@ importers:
         specifier: 0.1.0
         version: link:../core
       '@slop-lab/qg-rules-files':
-        specifier: 0.1.0
+        specifier: 0.1.1
         version: link:../rules-files
       '@slop-lab/qg-rules-git':
         specifier: 0.1.0

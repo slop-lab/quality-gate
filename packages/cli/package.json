@@ -1,6 +1,6 @@
 {
   "name": "@slop-lab/qg",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "files": [
     "dist/*.mjs",
@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@slop-lab/qg-core": "0.1.0",
-    "@slop-lab/qg-rules-recommended": "0.1.0",
+    "@slop-lab/qg-rules-recommended": "0.1.1",
     "yaml": "^2.9.1",
     "@slop-lab/qg-check-runner": "0.1.0"
   },

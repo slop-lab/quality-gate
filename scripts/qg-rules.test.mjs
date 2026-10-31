@@ -13,6 +13,7 @@ const release = {
 };
 const manifest = {
   ...release,
+  version: "0.1.1",
   name: "@slop-lab/qg-core",
   publishConfig: { access: "public" },
 };
@@ -25,7 +26,7 @@ function files(changes = {}) {
   };
 }
 
-test("repository provider accepts public packages matching the root release contract", async (t) => {
+test("repository provider accepts independently versioned public packages", async (t) => {
   const fixture = await createFixture(files());
   t.after(() => fixture.cleanup());
   assert.deepEqual(
@@ -35,27 +36,31 @@ test("repository provider accepts public packages matching the root release cont
 });
 
 test("repository provider reports manifest mismatches and unpublished dependency protocols", async (t) => {
-  const fixture = await createFixture(
-    files({
+  const fixture = await createFixture({
+    ...files({
       name: "@slop-lab/qg-other",
-      version: "0.0.0",
-      dependencies: { "@slop-lab/qg-core": "workspace:*" },
+      dependencies: { "@slop-lab/qg-rules-files": "workspace:*" },
     }),
-  );
+    "packages/rules-files/package.json": JSON.stringify({
+      ...manifest,
+      name: "@slop-lab/qg-rules-files",
+      version: "0.1.1",
+    }),
+  });
   t.after(() => fixture.cleanup());
   const result = await runRule({ fixture, rule, severity: "error" });
   const message = result.diagnostics[0]?.message ?? "";
   assert.match(message, /name must be @slop-lab\/qg-core/);
-  assert.match(message, /version must match root/);
   assert.match(message, /npm-publishable version/);
+  assert.match(message, /must match packages\/rules-files\/package.json/);
 });
 
-test("a root release change rechecks unchanged workspace manifests", async (t) => {
+test("a root metadata change rechecks unchanged workspace manifests", async (t) => {
   const fixture = await createFixture(files());
   t.after(() => fixture.cleanup());
   await fixture.write(
     "package.json",
-    JSON.stringify({ ...release, version: "0.2.0" }),
+    JSON.stringify({ ...release, license: "UNLICENSED" }),
   );
   const result = await runRule({
     fixture,
@@ -65,5 +70,36 @@ test("a root release change rechecks unchanged workspace manifests", async (t) =
     mode: "changed",
   });
   assert.equal(result.diagnostics[0]?.path, "packages/core/package.json");
-  assert.match(result.diagnostics[0]?.message ?? "", /0\.2\.0/);
+  assert.match(result.diagnostics[0]?.message ?? "", /UNLICENSED/);
+});
+
+test("a dependency release rechecks unchanged dependent manifests", async (t) => {
+  const fixture = await createFixture({
+    ...files({ dependencies: { "@slop-lab/qg-rules-files": "0.1.0" } }),
+    "packages/rules-files/package.json": JSON.stringify({
+      ...manifest,
+      name: "@slop-lab/qg-rules-files",
+      version: "0.1.0",
+    }),
+  });
+  t.after(() => fixture.cleanup());
+  await fixture.write(
+    "packages/rules-files/package.json",
+    JSON.stringify({
+      ...manifest,
+      name: "@slop-lab/qg-rules-files",
+      version: "0.1.1",
+    }),
+  );
+  const result = await runRule({
+    fixture,
+    rule,
+    severity: "error",
+    changes: [
+      { status: "modified", path: "packages/rules-files/package.json" },
+    ],
+    mode: "changed",
+  });
+  assert.equal(result.diagnostics[0]?.path, "packages/core/package.json");
+  assert.match(result.diagnostics[0]?.message ?? "", /0\.1\.1/);
 });

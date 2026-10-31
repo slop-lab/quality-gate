@@ -1,10 +1,10 @@
-# Publishing QG 0.1.0
+# Publishing QG packages
 
-This runbook publishes the thirteen public packages from one reviewed Git commit.
-All use version `0.1.0`, MIT licensing, and Node.js `>=24.0.0`. The repository
-root (`@this-project/qg-repo`) is private. Internal dependencies use exact npm versions, so npm can
-publish them directly. pnpm is used to reproduce the development installation
-from the checked-in lockfile.
+This runbook publishes changed public packages and their dependents from one
+reviewed Git commit. Packages are versioned independently; internal dependencies
+use exact npm versions so npm can publish them directly. The repository root
+(`@this-project/qg-repo`) is private. pnpm is used to reproduce the development
+installation from the checked-in lockfile.
 
 ## Transfer the release commit
 
@@ -81,16 +81,18 @@ credentials in the publishing machine's user configuration. See
 [npm login](https://docs.npmjs.com/cli/v11/commands/npm-login/) and
 [scoped public packages](https://docs.npmjs.com/creating-and-publishing-scoped-public-packages/).
 
-Before publishing a package, check whether its target version already exists:
+Before publishing each changed package, check whether its target version already
+exists. For the file-reference fix release, check all three packages:
 
 ```sh
-mise exec -- npm view @slop-lab/qg-core@0.1.0 version --registry=https://registry.npmjs.org/
+mise exec -- npm view @slop-lab/qg-rules-files@0.1.1 version --registry=https://registry.npmjs.org/
+mise exec -- npm view @slop-lab/qg-rules-recommended@0.1.1 version --registry=https://registry.npmjs.org/
+mise exec -- npm view @slop-lab/qg@0.1.1 version --registry=https://registry.npmjs.org/
 ```
 
-Repeat this for each package in the table below. A registry 404 is expected for
-a version not yet published. Authentication, permission, and network errors
-need to be resolved separately. If a version already exists, follow the partial
-release guidance below before proceeding.
+A registry 404 is expected for a version not yet published. Authentication,
+permission, and network errors need to be resolved separately. If a version
+already exists, follow the partial release guidance below before proceeding.
 
 ## Publish in dependency order
 
@@ -100,32 +102,12 @@ public workspace and the public npm registry.
 
 | Order | Package | Purpose |
 | --- | --- | --- |
-| 1 | `@slop-lab/qg-core` | Rule runner, snapshots, providers and configuration types |
-| 2 | `@slop-lab/qg-check-runner` | Command/Node check execution and concise test reporter |
-| 3 | `@slop-lab/qg-rule-testing` | Fixtures and assertions for rule authors |
-| 4 | `@slop-lab/qg-stdin-adapter` | Snapshot stdin rule factory and command caching |
-| 5 | `@slop-lab/qg-rules-git` | Git hygiene policies |
-| 6 | `@slop-lab/qg-rules-files` | File layout, content/directory limits and Markdown policies |
-| 7 | `@slop-lab/qg-rules-js` | JS/TS directives, fixture practices, package manifests and pnpm integrity |
-| 8 | `@slop-lab/qg-rules-biome` | Biome stdin format adapter |
-| 9 | `@slop-lab/qg-rules-prettier` | Prettier stdin check adapter |
-| 10 | `@slop-lab/qg-rules-eslint` | ESLint stdin JSON adapter |
-| 11 | `@slop-lab/qg-rules-cspell` | Spelling and project dictionaries |
-| 12 | `@slop-lab/qg-rules-recommended` | Default Git/file policy composition |
-| 13 | `@slop-lab/qg` | CLI configuration, hooks, daemon, rendering and exit status |
+| 1 | `@slop-lab/qg-rules-files@0.1.1` | Contains the file-reference fix |
+| 2 | `@slop-lab/qg-rules-recommended@0.1.1` | Pins `qg-rules-files@0.1.1` |
+| 3 | `@slop-lab/qg@0.1.1` | Pins `qg-rules-recommended@0.1.1` |
 
 ```sh
-mise exec -- npm publish --workspace @slop-lab/qg-core --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-check-runner --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-rule-testing --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-stdin-adapter --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-rules-git --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rules-files --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-rules-js --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-rules-biome --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-rules-prettier --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-rules-eslint --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-rules-cspell --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rules-recommended --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg --access public --registry=https://registry.npmjs.org/
 ```
@@ -138,14 +120,14 @@ After each successful publish, confirm that version is visible before publishing
 packages that depend on it:
 
 ```sh
-mise exec -- npm view @slop-lab/qg-core@0.1.0 version --registry=https://registry.npmjs.org/
+mise exec -- npm view @slop-lab/qg-rules-files@0.1.1 version --registry=https://registry.npmjs.org/
 ```
 
-Use the package just published in place of `qg-core`. After completing the list,
+Use the package just published in subsequent checks. After completing the list,
 verify the CLI's version, dist-tag, and runtime dependencies:
 
 ```sh
-mise exec -- npm view @slop-lab/qg@0.1.0 version dependencies engines license --json --registry=https://registry.npmjs.org/
+mise exec -- npm view @slop-lab/qg@0.1.1 version dependencies engines license --json --registry=https://registry.npmjs.org/
 mise exec -- npm view @slop-lab/qg dist-tags --json --registry=https://registry.npmjs.org/
 ```
 
@@ -161,7 +143,7 @@ npm init -y
 git init
 printf '# Smoke\n' > README.md
 printf '* text=auto eol=lf\n' > .gitattributes
-npm install --save-dev @slop-lab/qg@0.1.0 --registry=https://registry.npmjs.org/
+npm install --save-dev @slop-lab/qg@0.1.1 --registry=https://registry.npmjs.org/
 npx qg --help
 npx qg hooks install
 npx qg rules --format json
@@ -200,9 +182,9 @@ examples, and the [CLI guide](cli.md) for hook commands and preset configuration
 
 ## Resume a partially completed release
 
-Record which packages succeeded. Query their `0.1.0` metadata and compare with
-the intended release. Continue from the first unpublished package only if all
-already-published packages came from the same release content.
+Record which packages succeeded. Query their target-version metadata and compare
+with the intended release. Continue from the first unpublished package only if
+all already-published packages came from the same release content.
 
 A published name/version cannot be overwritten or reused, even after unpublish.
 If incorrect content was published, prepare a new release version and update

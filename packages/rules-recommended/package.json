@@ -1,6 +1,6 @@
 {
   "name": "@slop-lab/qg-rules-recommended",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Default recommended rule set for QG",
   "type": "module",
   "files": [
@@ -27,7 +27,7 @@
   "dependencies": {
     "@slop-lab/qg-core": "0.1.0",
     "@slop-lab/qg-rules-git": "0.1.0",
-    "@slop-lab/qg-rules-files": "0.1.0"
+    "@slop-lab/qg-rules-files": "0.1.1"
   },
   "devDependencies": {
     "@slop-lab/qg-rule-testing": "0.1.0",

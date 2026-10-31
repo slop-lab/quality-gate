@@ -29,8 +29,12 @@ const defaults: Required<ValidDocumentReferenceOptions> = {
   includeGenerated: false,
   referenceStyle: "markdown-links",
 };
-const referencePattern = /\b\w+(?:\/\w+)+\b/g;
-const parserVersion = "2";
+const pathSegment = String.raw`[\w-]+(?:\.[\w-]+)*`;
+const referencePattern = new RegExp(
+  String.raw`(?<![\w./-])(?:\.\.?\/)*${pathSegment}(?:\/${pathSegment})+(?![\w/-])`,
+  "g",
+);
+const parserVersion = "3";
 
 export const validDocumentReferenceRule: Rule<ValidDocumentReferenceOptions> = {
   metadata: {

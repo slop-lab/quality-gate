@@ -13,7 +13,7 @@ checks use the working tree; staged rules use the index snapshot.
 | CSpell rule module | Spelling in documentation, source and repository scripts using project dictionaries. |
 | Filename/path rules | Kebab-case source names and TypeScript source under package `src` directories, matching the build layout. |
 | Companion requirements | Every workspace package includes its README, license and TypeScript project. |
-| Local rule provider | Package names follow directory names; version, license and Node.js engines match the root release; internal dependencies use publishable versions. |
+| Local rule provider | Package names follow directory names; license and Node.js engines match the root; internal dependencies use each package's exact publishable version. |
 | Shared checks API | `@slop-lab/qg-check-runner` runs command/Node checks; the same package owns Node command preparation and reporting. |
 | Shared command checks | Complete Biome validation and package builds/type checks. |
 | Built-in Node test check | Compiled package tests and repository script tests, with concise failure output. |

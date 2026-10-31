@@ -116,6 +116,25 @@ test("reports each missing slash-delimited reference occurrence", async (t) => {
   assert.match(result.diagnostics[0]?.message ?? "", /use a comma instead/);
 });
 
+test("slash-delimited references preserve relative prefixes and file extensions", async (t) => {
+  const fixture = await createFixture({
+    "docs/check.md": "See ../some/dir/README.md.\n",
+  });
+  t.after(() => fixture.cleanup());
+  const result = await runRule({
+    fixture,
+    rule: validDocumentReferenceRule,
+    options: { referenceStyle: "slash-delimited" },
+  });
+  assert.equal(result.diagnostics.length, 1);
+  assert.equal(result.diagnostics[0]?.column, 5);
+  assert.equal(result.diagnostics[0]?.endColumn, 26);
+  assert.match(
+    result.diagnostics[0]?.message ?? "",
+    /Referenced file does not exist: \.\.\/some\/dir\/README\.md\./,
+  );
+});
+
 test("suppression applies only to the immediately preceding occurrence", async (t) => {
   const fixture = await createFixture({
     "docs/check.md":
