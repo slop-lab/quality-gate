@@ -366,6 +366,11 @@ repository-relative globs; nested configs and path overrides work as for other
 rules. `.git`, `.local`, `.qg`, `node_modules`, and `dist` are excluded from
 document discovery.
 
+The recommended set also rejects extra table padding and redundant row numbers;
+see [Markdown table style](markdown-tables.md). Its
+`git/no-ignored-tracked-files` rule checks the complete index. Remove reported
+files from the index, narrow the ignore, or configure `ignoredPaths`.
+
 ## Suppressions
 
 The runner applies HTML-comment directives to diagnostics with a file path and

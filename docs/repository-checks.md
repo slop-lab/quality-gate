@@ -8,12 +8,12 @@ checks use the working tree; staged rules use the index snapshot.
 
 | Component | Repository use |
 | --- | --- |
-| Recommended rules | Git hygiene, file/directory limits, Markdown characters, suppression reasons, root requirements and local documentation links. |
+| Recommended rules | Git hygiene, file/directory limits, Markdown characters and tables, suppression reasons, root requirements and local documentation links. |
 | `presets: [js]` | JS/TS directives, syntax-aware fixture checks, package names and pnpm integrity from one optional package. |
 | CSpell rule module | Spelling in documentation, source and repository scripts using project dictionaries. |
 | Filename/path rules | Kebab-case source names and TypeScript source under package `src` directories, matching the build layout. |
 | Companion requirements | Every workspace package includes its README, license and TypeScript project. |
-| Local rule provider | Package names follow directory names; license and Node.js engines match the root; internal dependencies use each package's exact publishable version. |
+| Local rule provider | Package names follow directory names; license and Node.js engines match the root; internal dependencies use exact publishable versions and resolve to workspace manifests. |
 | Shared checks API | `@slop-lab/qg-check-runner` runs command/Node checks; the same package owns Node command preparation and reporting. |
 | Shared command checks | Complete Biome validation and package builds/type checks. |
 | Built-in Node test check | Compiled package tests and repository script tests, with concise failure output. |

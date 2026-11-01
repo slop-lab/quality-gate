@@ -20,6 +20,7 @@ nested config files apply to their directory and descendants.
 
 ```yaml
 rules:
+  git/no-ignored-tracked-files: error
   git/no-tracked-local-files: error
   docs/valid-reference: error
   files/max-bytes:
@@ -75,8 +76,8 @@ The daemon runs in the foreground and uses named pipes on Windows or Unix-domain
 sockets on other platforms. Add `.local/` to the project's `.gitignore` for
 runtime data under `.local/cache/qg/`.
 
-Recommended checks include `markdown/allowed-characters` (ASCII by default)
-and `qg/require-suppression-reason`. Add `allowedLanguages` or
+Recommended checks include `markdown/allowed-characters` (ASCII by default),
+Markdown table-style rules, and `qg/require-suppression-reason`. Add `allowedLanguages` or
 `allowedCharacters` through rule options for multilingual documents. Inline
 suppression comments require a reason and support word, line, next-line,
 and paired start/end scopes.

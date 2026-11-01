@@ -1,3 +1,8 @@
+import {
+  createGlobRecheckTrigger,
+  type RecheckTriggerPlugin,
+  shouldRecheckAllFiles,
+} from "./changes.js";
 import { matchesAnyGlob } from "./config.js";
 import type { Diagnostic, Rule, RuleContext } from "./types.js";
 
@@ -17,6 +22,8 @@ export interface FilePathRuleDefinition<TOptions extends FilePathOptions> {
   requires?: string[];
   /** Recheck all selected files when these root-relative inputs change. */
   recheckOnChanges?: string[];
+  /** Additional reusable trigger plugins for non-glob invalidation logic. */
+  recheckTriggers?: RecheckTriggerPlugin[];
   /** Return a failure message, or undefined when valid. Options are resolved per file. */
   validate(
     path: string,
@@ -51,23 +58,18 @@ export function createFilePathRule<
       } as TOptions,
     },
     async check(context) {
-      const paths =
-        context.mode === "changed" &&
-        !context.changes.some((change) =>
-          [change.path, change.oldPath].some(
-            (path) =>
-              path !== undefined &&
-              matchesAnyGlob(path, definition.recheckOnChanges ?? []),
-          ),
-        )
-          ? [
-              ...new Set(
-                context.changes
-                  .filter((change) => change.status !== "deleted")
-                  .map((change) => change.path),
-              ),
-            ].sort()
-          : await allFiles(context);
+      const triggers = [...(definition.recheckTriggers ?? [])];
+      if (definition.recheckOnChanges?.length)
+        triggers.unshift(createGlobRecheckTrigger(definition.recheckOnChanges));
+      const paths = !(await shouldRecheckAllFiles(context, triggers))
+        ? [
+            ...new Set(
+              context.changes
+                .filter((change) => change.status !== "deleted")
+                .map((change) => change.path),
+            ),
+          ].sort()
+        : await allFiles(context);
       const diagnostics: Diagnostic[] = [];
       for (const path of paths) {
         const resolved = context.resolveConfig(path);

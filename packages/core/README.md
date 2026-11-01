@@ -10,6 +10,12 @@ Use `runQualityGate` with rules supplied by your application or by
 See the [architecture](https://github.com/slop-lab/quality-gate/blob/main/docs/architecture.md)
 and [rule contract](https://github.com/slop-lab/quality-gate/blob/main/docs/plugin-contract.md).
 
+Custom rules can use `shouldRecheckAllFiles` with versioned
+`RecheckTriggerPlugin` objects to turn dependency changes into a scan of
+existing files. `createGlobRecheckTrigger` supplies the common glob behavior;
+`createFilePathRule` accepts plugins through `recheckTriggers` and retains
+`recheckOnChanges` as shorthand. `VersionedPlugin` and `pluginFingerprint`
+provide the matching cache-invalidation foundation for plugin-owned data.
 
 Core also exports `createFilePathRule`, `FilePathOptions`, and
 `FilePathRuleDefinition` for custom file policies. These helpers use the runner's

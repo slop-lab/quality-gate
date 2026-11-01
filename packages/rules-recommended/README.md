@@ -2,8 +2,12 @@
 
 `@slop-lab/qg-rules-recommended` exports `recommendedRules`, the default rule
 set used by the `qg` CLI. It contains language-independent Git and file rules.
-It has no runtime dependency on the JS or test rule packages. Markdown character
-checks and suppression-reason checks are enabled by default.
+It has no runtime dependency on the JS or test rule packages. Markdown character,
+table-style and suppression-reason checks are enabled by default. Git checks
+also reject ignored files that remain tracked.
+`source/valid-reference` checks local Markdown links in whole-line slash
+comments; custom source syntaxes can use the public extractor factory from the
+files rule package.
 Root `README.md` and LF `.gitattributes` requirements are also enabled by
 default through `repo/require-readme` and `repo/require-gitattributes`.
 `files/required-companions` is available for configurable nearby-file policies

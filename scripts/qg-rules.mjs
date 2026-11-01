@@ -45,6 +45,8 @@ const publicPackage = createFilePathRule({
           name.startsWith(`${context.options.packagePrefix}-`) ||
           name === context.options.packagePrefix
         ) {
+          if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(version))
+            issues.push(`${field}.${name} must use an exact semantic version`);
           const dependencyDirectory =
             name === context.options.packagePrefix
               ? "cli"
@@ -54,9 +56,9 @@ const publicPackage = createFilePathRule({
             const dependency = JSON.parse(
               await context.fs.readFile(dependencyPath),
             );
-            if (version !== dependency.version)
+            if (dependency.name !== name)
               issues.push(
-                `${field}.${name} must match ${dependencyPath} (${dependency.version})`,
+                `${field}.${name} must reference its matching workspace manifest`,
               );
           } catch {
             issues.push(`${field}.${name} has no workspace manifest`);

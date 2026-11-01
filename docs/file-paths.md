@@ -104,6 +104,13 @@ neighbor-dependent policies. Declare additional required inputs with
 Set `recheckOnChanges` to root-relative input globs, such as `["package.json"]`,
 to recheck every selected file when shared metadata changes in changed mode.
 This supports policies comparing workspace manifests with a root release.
+Core also exports `createGlobRecheckTrigger` and
+`shouldRecheckAllFiles({ mode, changes }, triggerPlugins)` for custom rules that
+implement their own discovery. The latter accepts versioned async
+`RecheckTriggerPlugin` objects, so triggers can inspect statuses or other change
+relationships rather than only adding more globs. Pass the same plugins through
+`createFilePathRule`'s `recheckTriggers` option. The legacy `recheckOnChanges`
+option creates a glob trigger internally and remains supported.
 The helper lives in dependency-free core, so custom path policies do not install
 the Markdown parser from the file-rule package. The helper never renames or writes files. Custom options can be supplied through
 `defaultOptions`, rule `options`, and normal overrides, alongside `files`,

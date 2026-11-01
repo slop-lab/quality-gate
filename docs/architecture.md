@@ -146,6 +146,12 @@ Depending on the rule and future server capabilities, these may include:
 - relevant file content hashes or Git object IDs;
 - relevant environment fingerprints when a plugin depends on external tools.
 
+Core exposes `VersionedPlugin` and `pluginFingerprint` for stable, validated
+plugin-set keys. The file-reference rule factory includes the complete ordered
+extractor set and each extractor's `id`, `version`, and optional `cacheKey` in
+its cache key. Plugin additions and behavior changes therefore invalidate
+parsed references even when source bytes and rule options are unchanged.
+
 Cache invalidation is rule-owned. The runner supplies a cache namespace but
 does not decide whether individual values are stale. Rules must validate
 relevant content, options, and dependencies before reusing cached values.

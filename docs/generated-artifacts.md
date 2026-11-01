@@ -65,7 +65,7 @@ configuration no longer repeats those exclusions for each rule.
 The following built-in content checks skip generated files:
 
 - byte, line-length, and line-count limits;
-- document-reference, Markdown-character, and suppression-reason checks;
+- document-reference, Markdown-character, table-style, and suppression-reason checks;
 - the JavaScript `@ts-check` requirement;
 - test fixture-copy checks;
 - opt-in Biome, Prettier, and ESLint integrations.

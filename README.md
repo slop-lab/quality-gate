@@ -17,9 +17,9 @@ The project is intended for AI-assisted implementation workflows where fast, det
 
 The implementation is TypeScript. The runtime includes:
 
-- `@slop-lab/qg-core`: runner, Git change parsing, injectable input providers, and rule cache storage.
-- `@slop-lab/qg-rules-git`: Git hygiene checks, including `gitkeep/no-lone-gitkeep`.
-- `@slop-lab/qg-rules-files`: file layout, limits and Markdown policies.
+- `@slop-lab/qg-core`: runner, Git change parsing, reusable scan decisions, injectable input providers, and rule cache storage.
+- `@slop-lab/qg-rules-git`: Git hygiene checks for `.gitkeep`, local-only files, and ignored tracked files.
+- `@slop-lab/qg-rules-files`: file layout, limits, Markdown policies, and extensible source references.
 - `@slop-lab/qg-rules-js`: JS/TS source directives, test fixtures, package manifests and pnpm integrity.
 - `@slop-lab/qg-rules-cspell`: optional spelling checks with project dictionaries.
 - `@slop-lab/qg-rules-biome`, `@slop-lab/qg-rules-prettier`, `@slop-lab/qg-rules-eslint`: independent adapters for each tool.
@@ -45,6 +45,8 @@ and supported options; the architecture document also describes future work.
 - [Required files and nearby-file detection](docs/file-policies.md)
 - [File length and generated artifacts](docs/generated-artifacts.md)
 - [Directory file limits and self-only configuration](docs/directory-limits.md)
+- [Markdown table style](docs/markdown-tables.md)
+- [Source file references and extractor plugins](docs/source-references.md)
 
 ## Use in another project
 

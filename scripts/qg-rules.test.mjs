@@ -35,6 +35,22 @@ test("repository provider accepts independently versioned public packages", asyn
   );
 });
 
+test("repository provider accepts an older exact internal dependency version", async (t) => {
+  const fixture = await createFixture({
+    ...files({ dependencies: { "@slop-lab/qg-rules-files": "0.1.0" } }),
+    "packages/rules-files/package.json": JSON.stringify({
+      ...manifest,
+      name: "@slop-lab/qg-rules-files",
+      version: "0.1.1",
+    }),
+  });
+  t.after(() => fixture.cleanup());
+  assert.deepEqual(
+    (await runRule({ fixture, rule, severity: "error" })).diagnostics,
+    [],
+  );
+});
+
 test("repository provider reports manifest mismatches and unpublished dependency protocols", async (t) => {
   const fixture = await createFixture({
     ...files({
@@ -52,7 +68,7 @@ test("repository provider reports manifest mismatches and unpublished dependency
   const message = result.diagnostics[0]?.message ?? "";
   assert.match(message, /name must be @slop-lab\/qg-core/);
   assert.match(message, /npm-publishable version/);
-  assert.match(message, /must match packages\/rules-files\/package.json/);
+  assert.match(message, /must use an exact semantic version/);
 });
 
 test("a root metadata change rechecks unchanged workspace manifests", async (t) => {
@@ -73,9 +89,9 @@ test("a root metadata change rechecks unchanged workspace manifests", async (t) 
   assert.match(result.diagnostics[0]?.message ?? "", /UNLICENSED/);
 });
 
-test("a dependency release rechecks unchanged dependent manifests", async (t) => {
+test("a dependency manifest change rechecks unchanged dependent manifests", async (t) => {
   const fixture = await createFixture({
-    ...files({ dependencies: { "@slop-lab/qg-rules-files": "0.1.0" } }),
+    ...files({ dependencies: { "@slop-lab/qg-rules-files": "^0.1.0" } }),
     "packages/rules-files/package.json": JSON.stringify({
       ...manifest,
       name: "@slop-lab/qg-rules-files",
@@ -101,5 +117,5 @@ test("a dependency release rechecks unchanged dependent manifests", async (t) =>
     mode: "changed",
   });
   assert.equal(result.diagnostics[0]?.path, "packages/core/package.json");
-  assert.match(result.diagnostics[0]?.message ?? "", /0\.1\.1/);
+  assert.match(result.diagnostics[0]?.message ?? "", /exact semantic version/);
 });

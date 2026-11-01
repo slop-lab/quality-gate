@@ -82,9 +82,11 @@ credentials in the publishing machine's user configuration. See
 [scoped public packages](https://docs.npmjs.com/creating-and-publishing-scoped-public-packages/).
 
 Before publishing each changed package, check whether its target version already
-exists. For the file-reference fix release, check all three packages:
+exists. For this release, check all five packages:
 
 ```sh
+mise exec -- npm view @slop-lab/qg-core@0.1.1 version --registry=https://registry.npmjs.org/
+mise exec -- npm view @slop-lab/qg-rules-git@0.1.1 version --registry=https://registry.npmjs.org/
 mise exec -- npm view @slop-lab/qg-rules-files@0.1.1 version --registry=https://registry.npmjs.org/
 mise exec -- npm view @slop-lab/qg-rules-recommended@0.1.1 version --registry=https://registry.npmjs.org/
 mise exec -- npm view @slop-lab/qg@0.1.1 version --registry=https://registry.npmjs.org/
@@ -100,13 +102,17 @@ Run these commands individually from the repository root. Stop at the first
 failure and resolve it before continuing. Each command explicitly selects one
 public workspace and the public npm registry.
 
-| Order | Package | Purpose |
-| --- | --- | --- |
-| 1 | `@slop-lab/qg-rules-files@0.1.1` | Contains the file-reference fix |
-| 2 | `@slop-lab/qg-rules-recommended@0.1.1` | Pins `qg-rules-files@0.1.1` |
-| 3 | `@slop-lab/qg@0.1.1` | Pins `qg-rules-recommended@0.1.1` |
+| Package | Purpose |
+| --- | --- |
+| `@slop-lab/qg-core@0.1.1` | Exports versioned plugin fingerprints and extensible recheck triggers |
+| `@slop-lab/qg-rules-git@0.1.1` | Rejects ignored files that remain tracked |
+| `@slop-lab/qg-rules-files@0.1.1` | Contains file-reference plugins and Markdown table fixes |
+| `@slop-lab/qg-rules-recommended@0.1.1` | Enables the new Git, Markdown, and source-reference rules |
+| `@slop-lab/qg@0.1.1` | Pins `qg-rules-recommended@0.1.1` |
 
 ```sh
+mise exec -- npm publish --workspace @slop-lab/qg-core --access public --registry=https://registry.npmjs.org/
+mise exec -- npm publish --workspace @slop-lab/qg-rules-git --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rules-files --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rules-recommended --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg --access public --registry=https://registry.npmjs.org/
@@ -172,7 +178,7 @@ optional JS preset is active. Add its required directive and check again:
 ```sh
 printf '// @ts-check\nexport const value = 1;\n' > probe.js
 npx qg check --full
-npm install --save-dev @slop-lab/qg-core@0.1.0 @slop-lab/qg-rule-testing@0.1.0 --registry=https://registry.npmjs.org/
+npm install --save-dev @slop-lab/qg-core@0.1.1 @slop-lab/qg-rule-testing@0.1.0 --registry=https://registry.npmjs.org/
 node --input-type=module -e 'import {createFixture, runRule, assertDiagnostic} from "@slop-lab/qg-rule-testing"; console.log(typeof createFixture, typeof runRule, typeof assertDiagnostic)'
 ```
 

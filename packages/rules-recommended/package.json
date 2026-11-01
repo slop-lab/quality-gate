@@ -25,8 +25,8 @@
     "directory": "packages/rules-recommended"
   },
   "dependencies": {
-    "@slop-lab/qg-core": "0.1.0",
-    "@slop-lab/qg-rules-git": "0.1.0",
+    "@slop-lab/qg-core": "0.1.1",
+    "@slop-lab/qg-rules-git": "0.1.1",
     "@slop-lab/qg-rules-files": "0.1.1"
   },
   "devDependencies": {

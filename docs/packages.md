@@ -1,8 +1,8 @@
 # Package boundaries
 
-The repository publishes thirteen packages with the same release version.
-Package boundaries follow coherent development domains, integrations and public
-library roles. Individual rules and selections share their domain package.
+The repository publishes thirteen independently versioned packages. Package
+boundaries follow coherent development domains, integrations and public library
+roles. Individual rules and selections share their domain package.
 
 | Package | Responsibility | Runtime dependencies |
 | --- | --- | --- |
@@ -11,7 +11,7 @@ library roles. Individual rules and selections share their domain package.
 | `qg-rule-testing` | Fixtures and assertions for rule authors | core |
 | `qg-stdin-adapter` | Snapshot stdin rule factory and command caching | core |
 | `qg-rules-git` | Git hygiene policies | core |
-| `qg-rules-files` | File layout, content/directory limits and Markdown policies | core, Markdown parser |
+| `qg-rules-files` | File layout, content/directory limits, Markdown policies and reference extractors | core, Markdown parser |
 | `qg-rules-js` | JS/TS directives, fixture practices, package manifests and pnpm integrity | core, TypeScript parser |
 | `qg-rules-biome` | Biome stdin format adapter | core, stdin-adapter |
 | `qg-rules-prettier` | Prettier stdin check adapter | core, stdin-adapter |
@@ -42,10 +42,12 @@ integrity. The `js` preset loads its collection; focused `js-directives` and
 `js-test-fixtures` presets select subsets from that same installed package.
 Per-rule settings control enablement, severity and options.
 
-`qg-rules-files` groups layout, limits and Markdown policies. It exposes
-individual rules and `layoutRules`, `fileLimitRules`, `markdownRules` collections
-for library callers. The recommended set keeps its existing rule order and
-default behavior. Core's generic custom-path helper has no parser dependency.
+`qg-rules-files` groups layout, limits, Markdown policies and source references. It exposes
+individual rules and `layoutRules`, `fileLimitRules`, `markdownRules`, `sourceRules` collections
+for library callers. The recommended set enables the language-independent Git,
+file, and Markdown policies. Core's generic custom-path helper has no parser
+dependency. Its versioned reference extractor factory is also public for custom
+rule modules; see [source file references](source-references.md).
 
 Each external tool adapter owns its protocol and diagnostics. Shared snapshot
 stdin execution lives in `qg-stdin-adapter`, without a tool registry. Tool binaries
