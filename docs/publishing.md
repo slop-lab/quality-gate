@@ -89,8 +89,8 @@ credentials in the publishing machine's user configuration. See
 [npm login](https://docs.npmjs.com/cli/v11/commands/npm-login/) and
 [scoped public packages](https://docs.npmjs.com/creating-and-publishing-scoped-public-packages/).
 
-Before publishing each changed package, check whether its target version already
-exists. Check all eleven packages in this release.
+Before starting the release, check whether the target versions already exist.
+Check all eleven packages in this release.
 
 ```sh
 mise exec -- npm view @slop-lab/qg-core@0.1.1 version --registry=https://registry.npmjs.org/
@@ -112,9 +112,10 @@ already exists, follow the partial release guidance below before proceeding.
 
 ## Publish in dependency order
 
-Run these commands individually from the repository root. Stop at the first
-failure and resolve it before continuing. Each command explicitly selects one
-public workspace and the public npm registry.
+Run the release script from the repository root. It publishes one workspace at
+a time to the public npm registry and stops at the first failed publish. After
+each successful publish it proceeds to the next workspace, since registry
+reads may lag behind writes.
 
 | Package | Purpose |
 | --- | --- |
@@ -131,32 +132,17 @@ public workspace and the public npm registry.
 | `@slop-lab/qg@0.1.1` | Pins the new check runner and recommended rules |
 
 ```sh
-mise exec -- npm publish --workspace @slop-lab/qg-core --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-rules-git --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-rules-files --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-rules-recommended --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-check-runner --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-check-node-test --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-check-unittest --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-check-jest --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-check-vitest --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg-check-cargo --access public --registry=https://registry.npmjs.org/
-mise exec -- npm publish --workspace @slop-lab/qg --access public --registry=https://registry.npmjs.org/
+mise exec -- node scripts/publish-release.mjs
 ```
 
-The default dist-tag is `latest`. To preview the actual publish operation for a
-workspace first, append `--dry-run` to its command. Publish previews are distinct
-from registry writes. The workspace root must not be published.
-
-After each successful publish, confirm that version is visible before publishing
-packages that depend on it:
+The default dist-tag is `latest`. Preview the publish operations with:
 
 ```sh
-mise exec -- npm view @slop-lab/qg-rules-files@0.1.1 version --registry=https://registry.npmjs.org/
+mise exec -- node scripts/publish-release.mjs --dry-run
 ```
 
-Use the package just published in subsequent checks. After completing the list,
-verify the CLI's version, dist-tag, and runtime dependencies:
+After the full release propagates, verify the CLI's version, dist-tag, and
+runtime dependencies:
 
 ```sh
 mise exec -- npm view @slop-lab/qg@0.1.1 version dependencies engines license --json --registry=https://registry.npmjs.org/
@@ -217,7 +203,13 @@ examples, and the [CLI guide](cli.md) for hook commands and preset configuration
 
 Record which packages succeeded. Query their target-version metadata and compare
 with the intended release. Continue from the first unpublished package only if
-all already-published packages came from the same release content.
+all already-published packages came from the same release content. Run the
+remaining publishes individually in the order listed above. For example, if
+the check runner is the first unpublished package, start with:
+
+```sh
+mise exec -- npm publish --workspace @slop-lab/qg-check-runner --access public --registry=https://registry.npmjs.org/
+```
 
 A published name/version cannot be overwritten or reused, even after unpublish.
 If incorrect content was published, prepare a new release version and update
