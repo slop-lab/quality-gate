@@ -21,9 +21,11 @@ if (diagnostics.some((diagnostic) => diagnostic.severity === "error")) {
 
 Install the adapter for each test type used by the project. Available packages
 are `@slop-lab/qg-check-node-test`, `@slop-lab/qg-check-unittest`,
-`@slop-lab/qg-check-jest`, and `@slop-lab/qg-check-cargo`.
+`@slop-lab/qg-check-jest`, `@slop-lab/qg-check-vitest`, and `@slop-lab/qg-check-cargo`.
 
 `runChecks(root, checks, processProvider?)` runs declarations in order and
 returns diagnostics for failed checks. Commands receive arguments directly.
 Failures retain output or execution errors in metadata. All checks support
-`timeoutMs` (default 120000) and a recovery `message`.
+`cwd` relative to the root, `timeoutMs` (default 120000), and a recovery
+`message`. Pass `await collectCheckArtifacts(root, checks)` as
+`generatedArtifacts` when also running the core rule engine.

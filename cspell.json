@@ -15,6 +15,7 @@
     "subtests",
     "unconfigured",
     "venv",
+    "Vitest",
     "worktrees"
   ],
   "overrides": [

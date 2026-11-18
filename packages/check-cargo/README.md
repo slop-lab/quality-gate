@@ -12,6 +12,6 @@ checks:
     type: cargo
 ```
 
-With this check configured, QG treats `target/` build outputs as generated,
-including in nested crates. For a custom output directory, add its pattern to
-`artifacts.generated.include`.
+QG queries Cargo for its output directories and treats them as generated. This
+also covers paths set in Cargo config, `CARGO_TARGET_DIR`, or
+`args: [--target-dir, build/rust]`. Set `cwd` to run in a nested Rust package.

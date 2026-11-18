@@ -6,7 +6,7 @@ import { dirname, join } from "node:path";
 import { type TestContext, test } from "node:test";
 import type { ProcessExecOptions } from "@slop-lab/qg-core";
 import { NodeProcessProvider } from "@slop-lab/qg-core";
-import { runChecks } from "./index.js";
+import { collectCheckArtifacts, runChecks } from "./index.js";
 
 async function testProject(t: TestContext, ...types: string[]) {
   const root = await mkdtemp(join(tmpdir(), "qg-check-project-"));
@@ -197,7 +197,7 @@ test("Jest and Cargo load their adapters from the check project only when select
   await mkdir(jest, { recursive: true });
   await writeFile(
     join(jest, "package.json"),
-    JSON.stringify({ exports: { "./bin/jest": "./jest.js" } }),
+    JSON.stringify({ bin: "./jest.js" }),
   );
   const entry = join(jest, "jest.js");
   await writeFile(entry, "");
@@ -241,4 +241,112 @@ test("Jest and Cargo load their adapters from the check project only when select
   await rm(jest, { recursive: true });
   const missingJest = await runChecks(root, [{ name: "jest", type: "jest" }]);
   assert.match(missingJest[0]?.message ?? "", /Install jest in the project/);
+});
+
+test("Vitest resolves the adapter and executable from the check working directory", async (t) => {
+  const root = await testProject(t);
+  const cwd = join(root, "web app");
+  const scope = join(cwd, "node_modules", "@slop-lab");
+  const manifest = createRequire(import.meta.url).resolve(
+    "@slop-lab/qg-check-vitest/package.json",
+  );
+  await mkdir(scope, { recursive: true });
+  await symlink(dirname(manifest), join(scope, "qg-check-vitest"), "junction");
+  const packagePath = join(cwd, "node_modules", "vitest");
+  await mkdir(packagePath);
+  await writeFile(
+    join(packagePath, "package.json"),
+    JSON.stringify({ bin: { vitest: "./cli.mjs" } }),
+  );
+  const calls: ProcessExecOptions[] = [];
+  const diagnostics = await runChecks(
+    root,
+    [
+      {
+        name: "web",
+        type: "vitest",
+        cwd: "web app",
+        args: ["--project", "unit"],
+      },
+    ],
+    {
+      async exec(options) {
+        calls.push(options);
+        return { exitCode: 0, stdout: "hidden success", stderr: "" };
+      },
+    },
+  );
+  assert.deepEqual(diagnostics, []);
+  assert.deepEqual(calls, [
+    {
+      cwd,
+      command: process.execPath,
+      args: [join(packagePath, "cli.mjs"), "run", "--project", "unit"],
+      timeoutMs: 120_000,
+    },
+  ]);
+});
+
+test("Cargo artifact discovery uses the check directory, native configuration and explicit target override", async (t) => {
+  const root = await testProject(t, "cargo");
+  const cwd = join(root, "rust");
+  const calls: ProcessExecOptions[] = [];
+  const artifacts = await collectCheckArtifacts(
+    root,
+    [
+      {
+        name: "rust",
+        type: "cargo",
+        cwd: "rust",
+        args: [
+          "--manifest-path=app/Cargo.toml",
+          "--config",
+          "settings.toml",
+          "--target-dir",
+          "../build output",
+          "--",
+          "--target-dir",
+          "ignored",
+        ],
+      },
+    ],
+    {
+      async exec(options) {
+        calls.push(options);
+        return {
+          exitCode: 0,
+          stdout: JSON.stringify({
+            target_directory: join(cwd, "metadata-target"),
+            build_directory: join(cwd, "intermediate"),
+          }),
+          stderr: "",
+        };
+      },
+    },
+  );
+  assert.deepEqual(calls, [
+    {
+      command: "cargo",
+      cwd,
+      args: [
+        "metadata",
+        "--format-version",
+        "1",
+        "--no-deps",
+        "--offline",
+        "--manifest-path",
+        "app/Cargo.toml",
+        "--config",
+        "settings.toml",
+      ],
+      env: { CARGO_TARGET_DIR: join(root, "build output") },
+      timeoutMs: 10_000,
+    },
+  ]);
+  assert.deepEqual(artifacts, [
+    {
+      id: "qg/cargo-output",
+      files: ["build output/**", "rust/intermediate/**"],
+    },
+  ]);
 });

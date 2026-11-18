@@ -378,6 +378,9 @@ test("named checks support command lines and unittest settings in both check sec
     args: [--runInBand]
   rust:
     type: cargo
+  web:
+    type: vitest
+    cwd: packages/web app
 hooks:
   preCommit:
     checks:
@@ -400,6 +403,7 @@ hooks:
     },
     { name: "frontend", type: "jest", args: ["--runInBand"] },
     { name: "rust", type: "cargo" },
+    { name: "web", type: "vitest", cwd: "packages/web app" },
   ]);
   assert.deepEqual(config?.hooks?.preCommit?.checks, [
     {
@@ -420,6 +424,8 @@ hooks:
     { type: "jest", run: "jest" },
     { type: "cargo", command: "cargo" },
     { type: "cargo", args: "--workspace" },
+    { type: "vitest", cwd: "../outside" },
+    { type: "vitest", args: "--project unit" },
     { run: "just test", pattern: "*.py" },
   ]) {
     await write(

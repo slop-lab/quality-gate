@@ -26,6 +26,9 @@ importers:
       '@slop-lab/qg-check-unittest':
         specifier: 0.1.0
         version: link:packages/check-unittest
+      '@slop-lab/qg-check-vitest':
+        specifier: 0.1.0
+        version: link:packages/check-vitest
       '@slop-lab/qg-core':
         specifier: 0.1.1
         version: link:packages/core
@@ -82,6 +85,12 @@ importers:
         version: link:../core
 
   packages/check-unittest:
+    dependencies:
+      '@slop-lab/qg-core':
+        specifier: 0.1.1
+        version: link:../core
+
+  packages/check-vitest:
     dependencies:
       '@slop-lab/qg-core':
         specifier: 0.1.1

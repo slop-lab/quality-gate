@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 import { cwd, exit } from "node:process";
 import { fileURLToPath } from "node:url";
-import { runChecks } from "@slop-lab/qg-check-runner";
+import { collectCheckArtifacts, runChecks } from "@slop-lab/qg-check-runner";
 import {
   type Diagnostic,
+  type GeneratedArtifactDefinition,
   JsonFileRuleCacheStore,
   type Rule,
   type RuleCacheStore,
@@ -47,16 +48,30 @@ async function main(argv: string[]): Promise<number> {
     return 0;
   }
 
-  // The daemon runs rule scans; command/test checks run once in this client.
+  const config = await loadConfig(options.root, options.config);
+  const generatedArtifacts =
+    config?.artifacts?.generated?.defaults === false
+      ? []
+      : await collectCheckArtifacts(options.root, [
+          ...(config?.checks ?? []),
+          ...(config?.hooks?.preCommit?.checks ?? []),
+        ]);
+  // Check output paths and test execution use the client environment.
   const checkArgs =
     options.command === "run-hook"
       ? ["check", ...argv.slice(2), "--staged"]
       : argv;
-  const remote = await requestDaemon(options.root, "check", checkArgs);
+  const remote = await requestDaemon(
+    options.root,
+    "check",
+    checkArgs,
+    generatedArtifacts,
+  );
   if (remote?.error) throw new Error(remote.error);
-  const result = remote?.result ?? (await executeCheck(options));
+  const result =
+    remote?.result ??
+    (await executeCheck(options, undefined, generatedArtifacts));
   if (!options.rulesOnly) {
-    const config = await loadConfig(options.root, options.config);
     result.diagnostics.push(
       ...(await runChecks(options.root, [
         ...(config?.checks ?? []),
@@ -96,6 +111,7 @@ async function checkSetup(root: string, configPath?: string): Promise<void> {
 async function executeCheck(
   options: CliOptions,
   cacheStore?: RuleCacheStore,
+  generatedArtifacts?: GeneratedArtifactDefinition[],
 ): Promise<RunResult> {
   const config = await loadConfig(options.root, options.config);
   return runQualityGate({
@@ -108,6 +124,7 @@ async function executeCheck(
     rules: await loadRules(options.root, config),
     config,
     cacheStore,
+    generatedArtifacts,
   });
 }
 
@@ -163,9 +180,9 @@ async function runSpecialCommand(argv: string[]): Promise<number | undefined> {
     const action = argv[1] ?? "status";
     if (action === "start") {
       const store = new JsonFileRuleCacheStore(joinCache(root));
-      await startDaemon(root, async (args) => {
+      await startDaemon(root, async (args, generatedArtifacts) => {
         const options = parseArgs(args);
-        const result = await executeCheck(options, store);
+        const result = await executeCheck(options, store, generatedArtifacts);
         return { code: exitCodeFor(result), result };
       });
       return 0;

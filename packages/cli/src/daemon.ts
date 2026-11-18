@@ -3,7 +3,7 @@ import { watch } from "node:fs";
 import { mkdir, readdir, rm } from "node:fs/promises";
 import { createConnection, createServer } from "node:net";
 import { join, resolve } from "node:path";
-import type { RunResult } from "@slop-lab/qg-core";
+import type { GeneratedArtifactDefinition, RunResult } from "@slop-lab/qg-core";
 
 export interface DaemonResponse {
   code: number;
@@ -15,6 +15,7 @@ export interface DaemonResponse {
 interface Request {
   method: "check" | "ping" | "stop";
   args?: string[];
+  generatedArtifacts?: GeneratedArtifactDefinition[];
 }
 
 export function daemonDirectory(root: string): string {
@@ -33,7 +34,10 @@ export function daemonSocket(root: string): string {
 
 export async function startDaemon(
   root: string,
-  check: (args: string[]) => Promise<DaemonResponse>,
+  check: (
+    args: string[],
+    generatedArtifacts?: GeneratedArtifactDefinition[],
+  ) => Promise<DaemonResponse>,
 ): Promise<void> {
   const socket = daemonSocket(root);
   await mkdir(daemonDirectory(root), { recursive: true });
@@ -65,7 +69,7 @@ export async function startDaemon(
         } else {
           connection.end(
             JSON.stringify({
-              ...(await check(request.args ?? [])),
+              ...(await check(request.args ?? [], request.generatedArtifacts)),
               generation,
             }),
           );
@@ -127,13 +131,16 @@ export async function requestDaemon(
   root: string,
   method: Request["method"],
   args?: string[],
+  generatedArtifacts?: GeneratedArtifactDefinition[],
 ): Promise<DaemonResponse | undefined> {
   return new Promise((resolve) => {
     const connection = createConnection(daemonSocket(root));
     let output = "";
     connection.setEncoding("utf8");
     connection.on("connect", () =>
-      connection.write(`${JSON.stringify({ method, args })}\n`),
+      connection.write(
+        `${JSON.stringify({ method, args, generatedArtifacts })}\n`,
+      ),
     );
     connection.on("data", (chunk) => {
       output += chunk;

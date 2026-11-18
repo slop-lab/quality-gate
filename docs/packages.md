@@ -11,6 +11,7 @@ roles. Individual rules and selections share their domain package.
 | `qg-check-node-test` | Node test discovery and concise reporter | core |
 | `qg-check-unittest` | Python test discovery | core |
 | `qg-check-jest` | Project-local Jest invocation | core |
+| `qg-check-vitest` | Project-local Vitest invocation | core |
 | `qg-check-cargo` | Cargo test invocation | core |
 | `qg-rule-testing` | Fixtures and assertions for rule authors | core |
 | `qg-stdin-adapter` | Snapshot stdin rule factory and command caching | core |

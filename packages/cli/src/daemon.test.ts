@@ -8,10 +8,11 @@ import { requestDaemon, startDaemon } from "./daemon.js";
 
 test("project daemon handles check, ping, and stop over its local socket", async (t) => {
   const root = await mkdtemp(join(tmpdir(), "qg-daemon-"));
-  const running = startDaemon(root, async (args) => ({
+  const artifacts = [{ id: "example/build", files: ["build output/**"] }];
+  const running = startDaemon(root, async (args, generatedArtifacts) => ({
     code: 0,
     result: { mode: "changed", changes: [], diagnostics: [] },
-    error: args.join(","),
+    error: JSON.stringify({ args, generatedArtifacts }),
   }));
   t.after(async () => {
     await requestDaemon(root, "stop");
@@ -19,9 +20,13 @@ test("project daemon handles check, ping, and stop over its local socket", async
     await rm(root, { recursive: true, force: true });
   });
   await waitForDaemon(root);
-  const checked = await requestDaemon(root, "check", ["check", "--staged"]);
+  const args = ["check", "--staged"];
+  const checked = await requestDaemon(root, "check", args, artifacts);
   assert.equal(checked?.result?.mode, "changed");
-  assert.equal(checked?.error, "check,--staged");
+  assert.deepEqual(JSON.parse(checked?.error ?? "{}"), {
+    args,
+    generatedArtifacts: artifacts,
+  });
   assert.equal((await requestDaemon(root, "stop"))?.code, 0);
   await running;
   assert.equal(await requestDaemon(root, "ping"), undefined);

@@ -35,8 +35,18 @@ function normalizeCheck(
       object.timeoutMs <= 0)
   )
     throw new Error(`${label}.timeoutMs must be positive`);
+  const cwd =
+    object.cwd === undefined
+      ? undefined
+      : requireNonEmptyString(object.cwd, `${label}.cwd`);
+  if (
+    cwd &&
+    (cwd.startsWith("/") || /[\\:]/.test(cwd) || cwd.split("/").includes(".."))
+  )
+    throw new Error(`${label}.cwd must be a project-relative path using '/'`);
   const common = {
     name,
+    ...(cwd === undefined ? {} : { cwd }),
     ...(object.message === undefined ? {} : { message: object.message }),
     ...(object.timeoutMs === undefined ? {} : { timeoutMs: object.timeoutMs }),
   };
@@ -75,7 +85,7 @@ function normalizeCheck(
     return { ...common, type, files: patterns };
   }
   if (type === "unittest") return { ...common, type, ...unittestOptions };
-  if (type === "jest" || type === "cargo") {
+  if (type === "jest" || type === "cargo" || type === "vitest") {
     if (run !== undefined || command !== undefined)
       throw new Error(`${label}: ${type} does not accept run or command`);
     return {
@@ -88,7 +98,7 @@ function normalizeCheck(
   }
   if (type !== undefined && type !== "command")
     throw new Error(
-      `${label}.type must be command, node-test, unittest, jest, or cargo`,
+      `${label}.type must be command, node-test, unittest, jest, vitest, or cargo`,
     );
   const commandCheck = { ...common, ...(type && ({ type } as const)) };
   if (run !== undefined) {

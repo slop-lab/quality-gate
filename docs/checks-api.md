@@ -24,7 +24,8 @@ missing dependencies, nonzero exits, and timeouts. Diagnostics use
 execution for tests.
 
 Install test adapters in the project passed as `root`. The runner resolves
-`@slop-lab/qg-check-<type>` for each selected check. See the package names and
+`@slop-lab/qg-check-<type>` for each selected check from its `cwd`, which defaults
+to `root`. See the package names and
 configuration options in the [CLI guide](cli.md#run-hook-pre-commit-and-hooks-install).
 
 - `node-test` expands and deduplicates file globs, fails on unmatched patterns,
@@ -35,7 +36,9 @@ configuration options in the [CLI guide](cli.md#run-hook-pre-commit-and-hooks-in
   suite fails.
 - `jest` runs the locally installed Jest with `--ci`, using the project's Jest
   config and discovery. Use `args` for additional Jest flags. [Jest CLI options](https://jestjs.io/docs/cli)
-- `cargo` runs `cargo test` from the project root. Use `args` for options such as
+- `vitest` runs the locally installed Vitest once with `vitest run`.
+  [Vitest CLI options](https://vitest.dev/guide/cli)
+- `cargo` runs `cargo test`. Use `args` for options such as
   `--workspace` or `--manifest-path`. [Cargo test options](https://doc.rust-lang.org/cargo/commands/cargo-test.html)
 
 Import `createNodeTestCommand(root, check)` and `NodeTestCheckConfig` from
@@ -45,3 +48,6 @@ to run the reporter directly.
 
 The shared `CheckConfig` schema lives in core and is re-exported by the runner.
 Checks execute against the working tree. Staged rules use the index snapshot.
+The CLI calls `collectCheckArtifacts(root, checks)` and passes the result as
+`generatedArtifacts` to the rule runner. Library callers can use the same
+function to classify Cargo build outputs.

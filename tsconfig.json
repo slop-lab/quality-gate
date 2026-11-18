@@ -17,6 +17,9 @@
       "path": "packages/check-unittest"
     },
     {
+      "path": "packages/check-vitest"
+    },
+    {
       "path": "packages/cli"
     },
     {

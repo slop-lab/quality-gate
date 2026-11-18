@@ -90,7 +90,8 @@ checks:
     run: npm run typecheck
     message: "Fix type errors before committing."
   js-tests:
-    type: jest
+    type: vitest
+    cwd: apps/web
   rust-tests:
     type: cargo
     args: [--workspace]
@@ -112,15 +113,17 @@ require their corresponding package.
 | `node-test` | `@slop-lab/qg-check-node-test` | Required `files` paths or globs. |
 | `unittest` | `@slop-lab/qg-check-unittest` | Optional `python`, `startDirectory`, `pattern`, and `topLevelDirectory`. |
 | `jest` | `@slop-lab/qg-check-jest` | Uses the installed `jest` package in CI mode. Optional `args` are Jest flags. |
+| `vitest` | `@slop-lab/qg-check-vitest` | Runs the installed `vitest` package once. Optional `args` follow `run`. |
 | `cargo` | `@slop-lab/qg-check-cargo` | Runs `cargo test` with Cargo from `PATH`. Optional `args` follow `test`. |
 
 See the [checks API](checks-api.md) for defaults and the Node reporter, and the
 [Cargo adapter](../packages/check-cargo/README.md) for build artifacts.
 Successful checks produce one final `PASS`. Failures include tool output.
 
-All check types support `timeoutMs` (default 120000) and `message` (default a
-description of the failure). Checks run from the QG project root against the working tree;
-QG does not stash or modify partially staged files. Use rule adapters such as
+All checks support `timeoutMs` (default 120000) and `message` (default a failure
+description). Set `cwd` to a project-relative directory for checks in packages or
+crates. Tools resolve from this directory and run against the working tree.
+Use rule adapters such as
 `external/biome`, `external/prettier`, or `external/eslint` for formatter/linter
 checks of staged contents. Install and configure the selected tool locally.
 For Biome 2.5.15, use the adapter's `format` mode for staged formatting and a

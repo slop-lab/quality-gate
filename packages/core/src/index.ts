@@ -6,6 +6,7 @@ export * from "./discovery.js";
 export * from "./file-rule.js";
 export * from "./fs.js";
 export * from "./git.js";
+export * from "./node-package.js";
 export * from "./plugins.js";
 export * from "./process.js";
 export * from "./rule-provider.js";

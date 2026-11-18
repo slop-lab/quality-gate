@@ -25,7 +25,7 @@ The implementation is TypeScript. The runtime includes:
 - `@slop-lab/qg-rules-biome`, `@slop-lab/qg-rules-prettier`, `@slop-lab/qg-rules-eslint`: independent adapters for each tool.
 - `@slop-lab/qg-stdin-adapter`: factory for snapshot stdin command rules, without a tool registry.
 - `@slop-lab/qg-check-runner`: command execution and project-local test adapter loading.
-- `@slop-lab/qg-check-node-test`, `@slop-lab/qg-check-unittest`, `@slop-lab/qg-check-jest`, and `@slop-lab/qg-check-cargo`: independently installed test adapters.
+- `@slop-lab/qg-check-node-test`, `@slop-lab/qg-check-unittest`, `@slop-lab/qg-check-jest`, `@slop-lab/qg-check-vitest`, and `@slop-lab/qg-check-cargo`: independently installed test adapters.
 - `@slop-lab/qg-rule-testing`: fixtures, rule execution, and assertions for custom rule tests.
 - `@slop-lab/qg-rules-recommended`: the language-independent default Git and file rule set.
 - `@slop-lab/qg`: the `qg` CLI for `check`, `run-hook`, `hooks install`, `rules`, `daemon`, and `cache clear --rule`.
@@ -117,7 +117,7 @@ Run `pnpm exec qg run-hook pre-commit` to
 reproduce it manually. See [pre-commit setup](docs/cli.md#run-hook-pre-commit-and-hooks-install)
 to migrate formatter, typecheck, and test checks from existing hooks. Write
 commands as `test: just test` under `checks`, or install the desired test
-adapter and choose `type: node-test`, `unittest`, `jest`, or `cargo`.
+adapter and choose `type: node-test`, `unittest`, `jest`, `vitest`, or `cargo`.
 
 To run an unpublished checkout:
 

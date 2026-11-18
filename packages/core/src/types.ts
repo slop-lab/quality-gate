@@ -228,12 +228,15 @@ export type RuleConfig<TOptions = unknown> =
 
 export type CheckConfig = {
   name: string;
+  /** Working directory relative to the project root. */
+  cwd?: string;
   timeoutMs?: number;
   message?: string;
 } & (
   | { type?: "command"; command: string; args?: string[] }
   | { type: "node-test"; files: string[] }
   | { type: "jest"; args?: string[] }
+  | { type: "vitest"; args?: string[] }
   | { type: "cargo"; args?: string[] }
   | {
       type: "unittest";

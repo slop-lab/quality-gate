@@ -31,23 +31,14 @@ export async function runQualityGate(options: RunOptions): Promise<RunResult> {
   const diagnostics: Diagnostic[] = [];
   const suppressions = new Map<string, DocumentSuppressions>();
   const discovery = new NearbyFileDiscovery(fs);
-  const artifactConfig = options.config?.artifacts?.generated;
-  const usesCargo =
-    options.config?.checks?.some((check) => check.type === "cargo") ||
-    options.config?.hooks?.preCommit?.checks?.some(
-      (check) => check.type === "cargo",
-    );
   const artifacts = new GeneratedArtifactRegistry(
     [
-      ...(usesCargo && artifactConfig?.defaults !== false
-        ? [{ id: "qg/cargo-target", files: ["**/target/**"] }]
-        : []),
       ...options.rules.flatMap(
         (rule) => rule.metadata.generatedArtifacts ?? [],
       ),
       ...(options.generatedArtifacts ?? []),
     ],
-    artifactConfig,
+    options.config?.artifacts?.generated,
   );
 
   for (const rule of options.rules) {

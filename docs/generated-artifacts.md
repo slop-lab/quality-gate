@@ -43,8 +43,10 @@ participating content rules. Built-in definitions cover:
 - `*.min.js` and `*.min.css`;
 - `*.map` source maps.
 
-With a `type: cargo` check configured, the defaults also cover files under
-`target/` directories, including nested crates.
+With a `type: cargo` check configured, QG queries Cargo for its target and
+intermediate build directories. This follows the check's working directory,
+Cargo config, environment, and `--target-dir` argument. Only output directories
+inside the project need an artifact classification.
 
 Add project-specific patterns in the **root** `.qg.yaml`:
 
