@@ -11,9 +11,21 @@ importers:
       '@biomejs/biome':
         specifier: 2.5.15
         version: 2.5.15
+      '@slop-lab/qg-check-cargo':
+        specifier: 0.1.0
+        version: link:packages/check-cargo
+      '@slop-lab/qg-check-jest':
+        specifier: 0.1.0
+        version: link:packages/check-jest
+      '@slop-lab/qg-check-node-test':
+        specifier: 0.1.0
+        version: link:packages/check-node-test
       '@slop-lab/qg-check-runner':
         specifier: 0.1.0
         version: link:packages/check-runner
+      '@slop-lab/qg-check-unittest':
+        specifier: 0.1.0
+        version: link:packages/check-unittest
       '@slop-lab/qg-core':
         specifier: 0.1.1
         version: link:packages/core
@@ -45,11 +57,35 @@ importers:
         specifier: ^5.8.0
         version: 5.9.3
 
+  packages/check-cargo:
+    dependencies:
+      '@slop-lab/qg-core':
+        specifier: 0.1.1
+        version: link:../core
+
+  packages/check-jest:
+    dependencies:
+      '@slop-lab/qg-core':
+        specifier: 0.1.1
+        version: link:../core
+
+  packages/check-node-test:
+    dependencies:
+      '@slop-lab/qg-core':
+        specifier: 0.1.1
+        version: link:../core
+
   packages/check-runner:
     dependencies:
       '@slop-lab/qg-core':
-        specifier: 0.1.0
-        version: 0.1.0
+        specifier: 0.1.1
+        version: link:../core
+
+  packages/check-unittest:
+    dependencies:
+      '@slop-lab/qg-core':
+        specifier: 0.1.1
+        version: link:../core
 
   packages/cli:
     dependencies:

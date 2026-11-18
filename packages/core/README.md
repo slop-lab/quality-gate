@@ -20,5 +20,5 @@ provide the matching cache-invalidation foundation for plugin-owned data.
 Core also exports `createFilePathRule`, `FilePathOptions`, and
 `FilePathRuleDefinition` for custom file policies. These helpers use the runner's
 snapshot and path configuration without requiring any rule packages or Markdown
-parser dependencies. Command and Node test execution is provided separately by
+parser dependencies. Command and test execution is provided separately by
 `@slop-lab/qg-check-runner`, which depends on core; the CLI uses the same public runner.

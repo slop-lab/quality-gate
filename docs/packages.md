@@ -1,13 +1,17 @@
 # Package boundaries
 
-The repository publishes thirteen independently versioned packages. Package
+The repository publishes independently versioned packages. Package
 boundaries follow coherent development domains, integrations and public library
 roles. Individual rules and selections share their domain package.
 
 | Package | Responsibility | Runtime dependencies |
 | --- | --- | --- |
 | `qg-core` | Rule runner, snapshots, providers and configuration types | Node.js only |
-| `qg-check-runner` | Command/Node check execution and concise test reporter | core |
+| `qg-check-runner` | Command and optional test check execution | core |
+| `qg-check-node-test` | Node test discovery and concise reporter | core |
+| `qg-check-unittest` | Python test discovery | core |
+| `qg-check-jest` | Project-local Jest invocation | core |
+| `qg-check-cargo` | Cargo test invocation | core |
 | `qg-rule-testing` | Fixtures and assertions for rule authors | core |
 | `qg-stdin-adapter` | Snapshot stdin rule factory and command caching | core |
 | `qg-rules-git` | Git hygiene policies | core |
@@ -54,9 +58,8 @@ stdin execution lives in `qg-stdin-adapter`, without a tool registry. Tool binar
 are supplied by the consuming project. These integrations remain separate from
 the JS source/manifest/fixture policy collection.
 
-`qg-check-runner` contains command/test execution and the Node reporter. It exposes
-`runChecks`, `createNodeTestCommand` and the `node-test-reporter` subpath without
-a CLI dependency. See the [checks API](checks-api.md). `qg-rule-testing`
+`qg-check-runner` exposes `runChecks` without a CLI dependency. Test adapters
+are installed separately and resolved from the project. See the [checks API](checks-api.md). `qg-rule-testing`
 provides fixtures/assertions for rule authors, independently of check execution.
 
 Repository-only policies use the same public provider and helper interfaces

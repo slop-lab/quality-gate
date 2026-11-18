@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { GeneratedArtifactRegistry } from "./artifacts.js";
 import { runQualityGate } from "./runner.js";
-import type { Rule } from "./types.js";
+import type { CheckConfig, QualityGateConfig, Rule } from "./types.js";
 
 test("generated classifications cover root and nested artifacts and allow explicit source exceptions", () => {
   const registry = new GeneratedArtifactRegistry([], {
@@ -155,5 +155,47 @@ test("runner filters generated diagnostics from an extension that omitted its ea
     (await runQualityGate({ root: ".", mode: "full", rules: [rule] }))
       .diagnostics,
     [],
+  );
+});
+
+test("Cargo checks classify default target paths as generated and honor artifact overrides", async () => {
+  const cargo: CheckConfig = { name: "rust", type: "cargo" };
+  const paths = [
+    "target/debug/artifact",
+    "crates/app/target/debug/artifact",
+    "src/lib.rs",
+  ];
+  const rule = fixtureRule("plugin/content", () => {});
+  rule.check = async () =>
+    paths.map((path) => ({
+      ruleId: rule.metadata.id,
+      severity: "error",
+      message: "test diagnostic",
+      path,
+      scope: "file",
+    }));
+  const diagnosticsFor = async (config?: QualityGateConfig) =>
+    (
+      await runQualityGate({ root: ".", mode: "full", rules: [rule], config })
+    ).diagnostics.map(({ path }) => path);
+  assert.deepEqual(await diagnosticsFor(), paths);
+  assert.deepEqual(await diagnosticsFor({ checks: [cargo] }), ["src/lib.rs"]);
+  assert.deepEqual(
+    await diagnosticsFor({ hooks: { preCommit: { checks: [cargo] } } }),
+    ["src/lib.rs"],
+  );
+  assert.deepEqual(
+    await diagnosticsFor({
+      checks: [cargo],
+      artifacts: { generated: { exclude: ["crates/app/target/**"] } },
+    }),
+    paths.slice(1),
+  );
+  assert.deepEqual(
+    await diagnosticsFor({
+      checks: [cargo],
+      artifacts: { generated: { defaults: false } },
+    }),
+    paths,
   );
 });

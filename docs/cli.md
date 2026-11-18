@@ -8,7 +8,7 @@ installation, prefix it with `pnpm exec`.
 
 ### `check`
 
-Run rules followed by shared external command and Node.js test checks. Running
+Run rules followed by shared command and test checks. Running
 `qg` without a command is an alias for `qg check`. Successful text-mode checks print `PASS`; warnings and
 errors remain visible. Explicit JSON output keeps the structured result.
 
@@ -85,42 +85,40 @@ hooks:
     installation: auto
 
 checks:
-  - name: lint
-    type: command
-    command: npm
-    args: [run, lint]
-    message: "Fix lint errors before committing."
-  - name: typecheck
-    command: npm
-    args: [run, typecheck]
-    timeoutMs: 120000
+  lint: npm run lint
+  typecheck:
+    run: npm run typecheck
     message: "Fix type errors before committing."
-  - name: tests
-    type: node-test
-    files: ["test/**/*.test.mjs"]
-    timeoutMs: 120000
-    message: "Fix failing tests before committing."
+  js-tests:
+    type: jest
+  rust-tests:
+    type: cargo
+    args: [--workspace]
 ```
 
-Add an external tool or project script as a `type: command` check. QG uses its
-exit status, displays its output on failure, and runs each check once per
-invocation. Checks run in the CLI client even when a daemon handles the rule scan;
-external checks are never cached. Every check requires `name`. Command checks
-require `command`; `type: command` is optional and `args` defaults to `[]`. Arguments are passed directly without a
-shell; shell syntax and glob expansion require an explicit shell command.
+Use the check name as the YAML key. Write `test: just test` for a one-line command.
+Use `run: just test` with the expanded form to add a message or timeout. QG splits
+commands on whitespace, honors single and double quotes, and passes backslashes,
+variables, and globs literally. For shell syntax, invoke a shell explicitly with
+`run: sh -c 'lint && typecheck'`. Existing lists with `name`, `command`, and `args`
+remain supported, including in `hooks.preCommit.checks`.
 
-For Node.js tests, use `type: node-test` and a non-empty `files` array of paths or
-glob patterns relative to the project root. QG expands and deduplicates these
-paths and runs `node --test` with the same Node.js executable as QG. Each pattern
-must match at least one path; a missing test suite fails the check. `command` and
-`args` are not supported on this check type. Build compiled tests in a preceding
-command check when needed. No test script, Just installation, or extra test
-package is required in a consuming project. The reporter is provided by
-`@slop-lab/qg-check-runner`. Install that package explicitly to use it directly: `node --test --test-reporter=@slop-lab/qg-check-runner/node-test-reporter`.
-Passing test lists and counts are hidden; failures include names, locations,
-assertions, and captured output. QG prints one final `PASS` when the hook succeeds.
+Install only the test adapters used by the project. QG loads each adapter from
+the project by its `type`. Existing `node-test` and `unittest` declarations now
+require their corresponding package.
 
-Both check types support `timeoutMs` (default 120000) and `message` (default a
+| Type | Project dependency | Options |
+| --- | --- | --- |
+| `node-test` | `@slop-lab/qg-check-node-test` | Required `files` paths or globs. |
+| `unittest` | `@slop-lab/qg-check-unittest` | Optional `python`, `startDirectory`, `pattern`, and `topLevelDirectory`. |
+| `jest` | `@slop-lab/qg-check-jest` | Uses the installed `jest` package in CI mode. Optional `args` are Jest flags. |
+| `cargo` | `@slop-lab/qg-check-cargo` | Runs `cargo test` with Cargo from `PATH`. Optional `args` follow `test`. |
+
+See the [checks API](checks-api.md) for defaults and the Node reporter, and the
+[Cargo adapter](../packages/check-cargo/README.md) for build artifacts.
+Successful checks produce one final `PASS`. Failures include tool output.
+
+All check types support `timeoutMs` (default 120000) and `message` (default a
 description of the failure). Checks run from the QG project root against the working tree;
 QG does not stash or modify partially staged files. Use rule adapters such as
 `external/biome`, `external/prettier`, or `external/eslint` for formatter/linter

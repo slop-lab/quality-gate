@@ -1,9 +1,6 @@
 # @slop-lab/qg-check-runner
 
-Shared command and Node test checks for QG, independent of the CLI. This
-package owns sequential execution, failure diagnostics, Node file-pattern
-expansion and the concise test reporter. Its only runtime dependency is core.
-Requires Node.js 24 or later.
+Run QG command and test checks without the CLI. Requires Node.js 24 or later.
 
 ```sh
 npm install --save-dev @slop-lab/qg-check-runner
@@ -22,26 +19,11 @@ if (diagnostics.some((diagnostic) => diagnostic.severity === "error")) {
 }
 ```
 
-`runChecks(root, checks, processProvider?)` runs declarations in order, collects
-all failures, and returns diagnostics without printing status or exiting.
-Failed checks retain command output or execution errors in metadata. Commands
-receive arguments directly without a shell. Both check types support timeout
-(default 120000 ms) and recovery-message settings. Checks use the working tree;
-index-aware rules are executed separately through core's `runQualityGate`.
+Install the adapter for each test type used by the project. Available packages
+are `@slop-lab/qg-check-node-test`, `@slop-lab/qg-check-unittest`,
+`@slop-lab/qg-check-jest`, and `@slop-lab/qg-check-cargo`.
 
-For independent Node invocation preparation, this package also exports
-`createNodeTestCommand(root, check)` and `NodeTestCheckConfig`. The function
-returns command, arguments and environment fields for a process provider. It
-expands/deduplicates file patterns and throws for unmatched patterns, uses the
-current Node executable and packaged reporter, and clears `NODE_TEST_CONTEXT`
-to isolate nested test runners. Callers own execution, timeout and output.
-
-The reporter has a public subpath in the same package:
-
-```sh
-node --test --test-reporter=@slop-lab/qg-check-runner/node-test-reporter
-```
-
-It prints `PASS` for successful runs and details for failed tests, omitting
-passing test names/counts. Failure context survives linked temporary paths.
-The runner captures reporter output; CLI rendering remains in the CLI package.
+`runChecks(root, checks, processProvider?)` runs declarations in order and
+returns diagnostics for failed checks. Commands receive arguments directly.
+Failures retain output or execution errors in metadata. All checks support
+`timeoutMs` (default 120000) and a recovery `message`.

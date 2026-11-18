@@ -1,8 +1,8 @@
 # Checks as a library
 
-Use `@slop-lab/qg-core` for rules and `@slop-lab/qg-check-runner` for command and Node
-checks. The CLI composes these APIs and owns hook setup, configuration loading,
-text/JSON output and exit status. Both execution packages work without the CLI.
+Use `@slop-lab/qg-core` for rules and `@slop-lab/qg-check-runner` for command and
+test checks. The CLI composes these APIs and owns hook setup, configuration
+loading, output and exit status.
 
 ```ts
 import { runQualityGate } from "@slop-lab/qg-core";
@@ -17,23 +17,31 @@ result.diagnostics.push(...await runChecks(root, checks));
 ```
 
 `runChecks(root, checks, processProvider?)` returns diagnostics without printing
-or exiting. It preserves declaration order and captures every failed check,
-including missing executables, nonzero exits, and timeouts. Diagnostics use
-`checks/<name>` IDs with command output in metadata. A custom `ProcessProvider`
-can inject execution in tests or other environments. Both built-in check types
-support timeout and recovery-message settings.
+or exiting. It preserves check order and captures every failure, including
+missing dependencies, nonzero exits, and timeouts. Diagnostics use
+`checks/<name>` IDs with execution details in metadata. All checks support
+`timeoutMs` and a recovery `message`. A custom `ProcessProvider` can inject
+execution for tests.
 
-Node tests expand and deduplicate globs, use the current Node executable, and
-load this package's reporter. Unmatched patterns fail. Use
-`@slop-lab/qg-check-runner/node-test-reporter` for direct `node --test` reporter usage
-in a project where this package is installed.
+Install test adapters in the project passed as `root`. The runner resolves
+`@slop-lab/qg-check-<type>` for each selected check. See the package names and
+configuration options in the [CLI guide](cli.md#run-hook-pre-commit-and-hooks-install).
 
-The package also exports `createNodeTestCommand(root, check)` and
-`NodeTestCheckConfig` for callers that want to prepare a Node command and own
-its execution. The helper returns command, arguments and environment fields;
-it does not execute tests or set an exit status.
+- `node-test` expands and deduplicates file globs, fails on unmatched patterns,
+  and runs the current Node executable with a concise reporter.
+- `unittest` defaults to `tests/` and `test*.py`. Set `python` to select a
+  virtual environment, or `topLevelDirectory` to control the import root. The
+  default interpreter is `python3` on Unix and `python` on Windows. An empty
+  suite fails.
+- `jest` runs the locally installed Jest with `--ci`, using the project's Jest
+  config and discovery. Use `args` for additional Jest flags. [Jest CLI options](https://jestjs.io/docs/cli)
+- `cargo` runs `cargo test` from the project root. Use `args` for options such as
+  `--workspace` or `--manifest-path`. [Cargo test options](https://doc.rust-lang.org/cargo/commands/cargo-test.html)
 
-The shared `CheckConfig` schema remains in core and is re-exported from checks.
-Core has no dependency on the check runner, CLI, rule packages, parsers or
-spelling dictionaries. Check execution uses the working tree; staged rules
-independently use the index snapshot. The CLI owns final rendering and status.
+Import `createNodeTestCommand(root, check)` and `NodeTestCheckConfig` from
+`@slop-lab/qg-check-node-test` to prepare the Node command independently. Use
+`node --test --test-reporter=@slop-lab/qg-check-node-test/node-test-reporter`
+to run the reporter directly.
+
+The shared `CheckConfig` schema lives in core and is re-exported by the runner.
+Checks execute against the working tree. Staged rules use the index snapshot.

@@ -24,7 +24,8 @@ The implementation is TypeScript. The runtime includes:
 - `@slop-lab/qg-rules-cspell`: optional spelling checks with project dictionaries.
 - `@slop-lab/qg-rules-biome`, `@slop-lab/qg-rules-prettier`, `@slop-lab/qg-rules-eslint`: independent adapters for each tool.
 - `@slop-lab/qg-stdin-adapter`: factory for snapshot stdin command rules, without a tool registry.
-- `@slop-lab/qg-check-runner`: command/Node test execution and concise test reporter.
+- `@slop-lab/qg-check-runner`: command execution and project-local test adapter loading.
+- `@slop-lab/qg-check-node-test`, `@slop-lab/qg-check-unittest`, `@slop-lab/qg-check-jest`, and `@slop-lab/qg-check-cargo`: independently installed test adapters.
 - `@slop-lab/qg-rule-testing`: fixtures, rule execution, and assertions for custom rule tests.
 - `@slop-lab/qg-rules-recommended`: the language-independent default Git and file rule set.
 - `@slop-lab/qg`: the `qg` CLI for `check`, `run-hook`, `hooks install`, `rules`, `daemon`, and `cache clear --rule`.
@@ -109,14 +110,14 @@ execution through subprocesses or daemons; see [rule providers](docs/rule-provid
 Install only the packages your project needs. The default CLI installation does
 not include either package. `qg rules` lists the rules selected for the project.
 
-`qg` and `qg check` run rules followed by the shared command and Node.js test
+`qg` and `qg check` run rules followed by the shared command and test
 checks configured under top-level `checks` in `.qg.yaml`. Use `--rules-only` for
 just the rules. The installed hook runs staged rules and those same shared checks.
 Run `pnpm exec qg run-hook pre-commit` to
 reproduce it manually. See [pre-commit setup](docs/cli.md#run-hook-pre-commit-and-hooks-install)
-to migrate formatter, typecheck, and test checks from existing hooks. Use
-`type: node-test` with `files: ["test/**/*.test.mjs"]` to run Node tests directly
-with concise failure diagnostics.
+to migrate formatter, typecheck, and test checks from existing hooks. Write
+commands as `test: just test` under `checks`, or install the desired test
+adapter and choose `type: node-test`, `unittest`, `jest`, or `cargo`.
 
 To run an unpublished checkout:
 
@@ -195,6 +196,6 @@ post-publish installation checks, follow the [publishing runbook](docs/publishin
 mise exec -- just release-check
 ```
 
-This runs CI and `npm pack --dry-run` for all thirteen public packages, including
+This runs CI and `npm pack --dry-run` for all public packages, including
 their prepack builds. It does not publish. Public access is set in each package's
 `publishConfig`; only the workspace root is private.

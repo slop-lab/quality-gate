@@ -43,6 +43,9 @@ participating content rules. Built-in definitions cover:
 - `*.min.js` and `*.min.css`;
 - `*.map` source maps.
 
+With a `type: cargo` check configured, the defaults also cover files under
+`target/` directories, including nested crates.
+
 Add project-specific patterns in the **root** `.qg.yaml`:
 
 ```yaml

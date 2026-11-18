@@ -1,12 +1,13 @@
 import { readdir, readFile } from "node:fs/promises";
 import { dirname, isAbsolute, join, relative } from "node:path";
 import type {
-  CheckConfig,
   QualityGateConfig,
   QualityGateOverride,
   RuleConfig,
 } from "@slop-lab/qg-core";
 import { parse } from "yaml";
+import { normalizeChecks } from "./check-config.js";
+import { requireObject, requireStrings } from "./config-values.js";
 
 const localConfigNames = [".qg.yaml", ".qg.yml"];
 const alternateRootConfigNames = ["qg.config.yaml", "qg.config.yml"];
@@ -364,77 +365,4 @@ function isSeverity(
     value === "warning" ||
     value === "error"
   );
-}
-
-function requireObject(value: unknown, label: string): Record<string, unknown> {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
-    throw new Error(`${label} must be an object`);
-  }
-  return value as Record<string, unknown>;
-}
-
-function requireStrings(value: unknown, label: string): string[] {
-  if (!Array.isArray(value) || value.some((item) => typeof item !== "string")) {
-    throw new Error(`${label} must be an array of strings`);
-  }
-  return value as string[];
-}
-
-function normalizeChecks(value: unknown, label: string): CheckConfig[] {
-  if (!Array.isArray(value)) throw new Error(`${label} must be an array`);
-  return value.map((check, index) =>
-    normalizeCheck(check, `${label}[${index}]`),
-  );
-}
-
-function normalizeCheck(value: unknown, label: string): CheckConfig {
-  const object = requireObject(value, label);
-  if (typeof object.name !== "string" || !object.name.trim())
-    throw new Error(`${label}.name must be a non-empty string`);
-  if (object.message !== undefined && typeof object.message !== "string")
-    throw new Error(`${label}.message must be a string`);
-  if (
-    object.timeoutMs !== undefined &&
-    (typeof object.timeoutMs !== "number" ||
-      !Number.isFinite(object.timeoutMs) ||
-      object.timeoutMs <= 0)
-  )
-    throw new Error(`${label}.timeoutMs must be positive`);
-  let runner:
-    | { type: "node-test"; files: string[] }
-    | { type?: "command"; command: string; args?: string[] };
-  if (object.type === "node-test") {
-    if (object.command !== undefined || object.args !== undefined)
-      throw new Error(`${label}: node-test does not accept command or args`);
-    const files = requireStrings(object.files, `${label}.files`);
-    if (!files.length || files.some((file) => !file.trim()))
-      throw new Error(
-        `${label}.files must contain non-empty test paths or globs`,
-      );
-    runner = { type: "node-test", files };
-  } else {
-    if (object.type !== undefined && object.type !== "command")
-      throw new Error(`${label}.type must be command or node-test`);
-    if (typeof object.command !== "string" || !object.command.trim())
-      throw new Error(`${label}.command must be a non-empty string`);
-    if (object.files !== undefined)
-      throw new Error(`${label}.files is only supported for node-test`);
-    runner = {
-      ...(object.type === undefined ? {} : { type: "command" }),
-      command: object.command,
-      ...(object.args === undefined
-        ? {}
-        : { args: requireStrings(object.args, `${label}.args`) }),
-    };
-  }
-  return {
-    ...runner,
-    name: object.name as string,
-    ...(object.message === undefined
-      ? {}
-      : { message: object.message as string }),
-    ...(object.timeoutMs === undefined
-      ? {}
-      : { timeoutMs: object.timeoutMs as number }),
-  };
 }

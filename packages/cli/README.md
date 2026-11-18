@@ -45,11 +45,12 @@ pnpm exec qg run-hook pre-commit  # run the complete hook manually
 ```
 
 The CLI and hook share top-level `checks` from the root configuration. The hook
-selects staged rule inputs; external command and Node tests use the working tree:
+selects staged rule inputs. Commands and tests use the working tree. Install the adapter for each
+selected test type. This example uses `@slop-lab/qg-check-node-test`.
 
 ```yaml
 checks:
-  - name: tests
+  tests:
     type: node-test
     files: ["test/**/*.test.mjs"]
     message: "Fix tests before committing."

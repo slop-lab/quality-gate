@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "type": "module",
   "dependencies": {
-    "@slop-lab/qg-core": "0.1.0"
+    "@slop-lab/qg-core": "0.1.1"
   },
   "files": [
     "dist/*.mjs",
@@ -23,7 +23,7 @@
     "url": "git+https://github.com/slop-lab/quality-gate.git",
     "directory": "packages/check-runner"
   },
-  "description": "Shared command and Node test execution, diagnostics and concise reporter for QG",
+  "description": "Shared command and optional test check execution and diagnostics for QG",
   "engines": {
     "node": ">=24.0.0"
   },
@@ -33,7 +33,6 @@
   "license": "MIT",
   "exports": {
     ".": "./dist/index.mjs",
-    "./node-test-reporter": "./dist/node-test-reporter.mjs",
     "./package.json": "./package.json"
   }
 }

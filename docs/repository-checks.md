@@ -14,9 +14,9 @@ checks use the working tree; staged rules use the index snapshot.
 | Filename/path rules | Kebab-case source names and TypeScript source under package `src` directories, matching the build layout. |
 | Companion requirements | Every workspace package includes its README, license and TypeScript project. |
 | Local rule provider | Package names follow directory names; license and Node.js engines match the root; internal dependencies use exact publishable versions and resolve to workspace manifests. |
-| Shared checks API | `@slop-lab/qg-check-runner` runs command/Node checks; the same package owns Node command preparation and reporting. |
+| Shared checks API | `@slop-lab/qg-check-runner` runs checks and loads the selected adapter. |
 | Shared command checks | Complete Biome validation and package builds/type checks. |
-| Built-in Node test check | Compiled package tests and repository script tests, with concise failure output. |
+| Node test adapter | Compiled package tests and repository script tests, with concise failure output. |
 
 ## Project-specific policy through a public interface
 
@@ -63,5 +63,5 @@ just release-check
 ```
 
 `just qg` builds the CLI before running it. Full checks validate untouched
-files too. Package previews include all thirteen public packages. Successful checks
+files too. Package previews include all public packages. Successful checks
 print `PASS`, while failures retain their detailed diagnostics.

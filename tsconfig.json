@@ -2,7 +2,19 @@
   "files": [],
   "references": [
     {
+      "path": "packages/check-cargo"
+    },
+    {
+      "path": "packages/check-jest"
+    },
+    {
+      "path": "packages/check-node-test"
+    },
+    {
       "path": "packages/check-runner"
+    },
+    {
+      "path": "packages/check-unittest"
     },
     {
       "path": "packages/cli"

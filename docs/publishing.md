@@ -45,7 +45,7 @@ git status --short
 Bootstrap installs from `pnpm-lock.yaml`, builds the packages, and installs this
 clone's QG pre-commit hook. `release-check` runs `qg check --full` for the full
 rule scan and shared checks, including the configured full Biome check,
-TypeScript build, and tests. It then previews all thirteen public npm workspaces.
+TypeScript build, and tests. It then previews all public npm workspaces.
 
 Repository rules also verify package release metadata and required companion
 files. See [repository checks](repository-checks.md) for the policies exercised

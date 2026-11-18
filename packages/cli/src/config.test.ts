@@ -342,7 +342,7 @@ test("shared checks load at the root and reject malformed or nested configuratio
   assert.deepEqual((await loadConfig(root))?.checks, checks);
   for (const invalid of [
     null,
-    {},
+    { test: null },
     "tool",
     [{ name: "broken" }],
     [{ ...checks[1], files: [] }],
@@ -356,6 +356,79 @@ test("shared checks load at the root and reject malformed or nested configuratio
     loadConfig(root),
     /checks is only allowed in the root config/,
   );
+});
+
+test("named checks support command lines and unittest settings in both check sections", async (t) => {
+  const root = await mkdtemp(join(tmpdir(), "qg-config-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  await write(
+    root,
+    ".qg.yaml",
+    `checks:
+  build: just build
+  python-tests:
+    type: unittest
+    python: .venv/bin/python
+    startDirectory: tests
+    topLevelDirectory: .
+    pattern: '*_test.py'
+    timeoutMs: 2000
+  frontend:
+    type: jest
+    args: [--runInBand]
+  rust:
+    type: cargo
+hooks:
+  preCommit:
+    checks:
+      verify:
+        run: 'just test "path with spaces" "" $1 test*.py'
+        message: Fix tests
+`,
+  );
+  const config = await loadConfig(root);
+  assert.deepEqual(config?.checks, [
+    { name: "build", command: "just", args: ["build"] },
+    {
+      name: "python-tests",
+      type: "unittest",
+      python: ".venv/bin/python",
+      startDirectory: "tests",
+      topLevelDirectory: ".",
+      pattern: "*_test.py",
+      timeoutMs: 2000,
+    },
+    { name: "frontend", type: "jest", args: ["--runInBand"] },
+    { name: "rust", type: "cargo" },
+  ]);
+  assert.deepEqual(config?.hooks?.preCommit?.checks, [
+    {
+      name: "verify",
+      command: "just",
+      args: ["test", "path with spaces", "", "$1", "test*.py"],
+      message: "Fix tests",
+    },
+  ]);
+  for (const invalid of [
+    { run: 'just "test' },
+    { run: "just test", args: [] },
+    { run: "just test", command: "just" },
+    { type: "unittest", startDirectory: "" },
+    { type: "unittest", python: false },
+    { type: "unittest", command: "python3" },
+    { type: "unittest", files: ["tests"] },
+    { type: "jest", run: "jest" },
+    { type: "cargo", command: "cargo" },
+    { type: "cargo", args: "--workspace" },
+    { run: "just test", pattern: "*.py" },
+  ]) {
+    await write(
+      root,
+      ".qg.yaml",
+      JSON.stringify({ checks: { test: invalid } }),
+    );
+    await assert.rejects(loadConfig(root), /checks\.test/);
+  }
 });
 
 test("custom ruleModules are restricted to non-empty module specifiers in root config", async (t) => {

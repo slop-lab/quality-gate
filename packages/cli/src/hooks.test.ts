@@ -298,6 +298,7 @@ test("automatic setup installs and updates managed hooks, honors hooksPath, and 
 
 test("CLI node-test hook reports failures in text and JSON and stays out of ordinary rule scans", async (t) => {
   const { root } = await repository(t);
+  await linkNodeTestAdapter(root);
   await writeFile(
     join(root, ".qg.yaml"),
     JSON.stringify({
@@ -357,6 +358,7 @@ test("CLI node-test hook reports failures in text and JSON and stays out of ordi
 
 test("shared external and node-test checks run on qg, check and hooks, with a rules-only escape and no daemon duplication", async (t) => {
   const { root } = await repository(t);
+  await linkNodeTestAdapter(root);
   await writeFile(
     join(root, ".qg.yaml"),
     JSON.stringify({
@@ -470,3 +472,16 @@ test("shared external and node-test checks run on qg, check and hooks, with a ru
     },
   );
 });
+
+async function linkNodeTestAdapter(root: string): Promise<void> {
+  const manifest = createRequire(import.meta.url).resolve(
+    "@slop-lab/qg-check-node-test/package.json",
+  );
+  const scope = join(root, "node_modules", "@slop-lab");
+  await mkdir(scope, { recursive: true });
+  await symlink(
+    dirname(manifest),
+    join(scope, "qg-check-node-test"),
+    "junction",
+  );
+}

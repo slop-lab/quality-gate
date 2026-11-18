@@ -233,6 +233,15 @@ export type CheckConfig = {
 } & (
   | { type?: "command"; command: string; args?: string[] }
   | { type: "node-test"; files: string[] }
+  | { type: "jest"; args?: string[] }
+  | { type: "cargo"; args?: string[] }
+  | {
+      type: "unittest";
+      python?: string;
+      startDirectory?: string;
+      pattern?: string;
+      topLevelDirectory?: string;
+    }
 );
 
 /** @deprecated Use CheckConfig for shared checks. */
