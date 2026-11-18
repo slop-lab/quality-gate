@@ -29,3 +29,9 @@ Failures retain output or execution errors in metadata. All checks support
 `cwd` relative to the root, `timeoutMs` (default 120000), and a recovery
 `message`. Pass `await collectCheckArtifacts(root, checks)` as
 `generatedArtifacts` when also running the core rule engine.
+
+## Upgrade from 0.1.0
+
+Install `@slop-lab/qg-check-node-test` for `type: node-test`. Import
+`createNodeTestCommand` and `NodeTestCheckConfig` from that package. The reporter
+subpath is now `@slop-lab/qg-check-node-test/node-test-reporter`.

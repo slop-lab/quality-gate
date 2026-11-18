@@ -13,8 +13,9 @@ checks:
     files: ["test/**/*.test.mjs"]
 ```
 
-The package also exports `createNodeTestCommand(root, check)` and
-`NodeTestCheckConfig`. Use the reporter directly with Node's CLI.
+`createNodeTestCommand(root, check)`, `NodeTestCheckConfig`, and the
+`./node-test-reporter` subpath moved here from `@slop-lab/qg-check-runner`.
+Use the reporter directly with Node's CLI.
 
 ```sh
 node --test --test-reporter=@slop-lab/qg-check-node-test/node-test-reporter

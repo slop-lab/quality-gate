@@ -86,6 +86,46 @@ const customRuleSource = `({ metadata: {
   defaultEnabled: false, supports: ['changed', 'full'], scope: 'file', requires: [], fixable: 'none',
 }, async check() { return []; } })`;
 
+test("project packages support import-only, dual-mode, and require-only rule exports", async (t) => {
+  const root = await project(t);
+  const directory = join(root, "node_modules", "@example", "rules");
+  await mkdir(directory, { recursive: true });
+  await writeFile(
+    join(directory, "package.json"),
+    JSON.stringify({
+      name: "@example/rules",
+      exports: {
+        ".": { require: "./unused.cjs", import: "./rules.mjs" },
+        "./import-only": { import: "./rules.mjs" },
+        "./legacy": { require: "./legacy.cjs" },
+      },
+    }),
+  );
+  await writeFile(
+    join(directory, "rules.mjs"),
+    `export const rules = [${customRuleSource}];`,
+  );
+  await writeFile(
+    join(directory, "legacy.cjs"),
+    `module.exports = [${customRuleSource}];`,
+  );
+  await writeFile(
+    join(directory, "unused.cjs"),
+    'throw new Error("Unexpected require branch");',
+  );
+  for (const specifier of [
+    "@example/rules/import-only",
+    "@example/rules",
+    "@example/rules/legacy",
+  ]) {
+    const rules = await loadRules(root, { ruleModules: [specifier] });
+    assert.ok(
+      rules.some((rule) => rule.metadata.id === "project/custom"),
+      specifier,
+    );
+  }
+});
+
 test("custom rule modules load relative to the project root or from project packages", async (t) => {
   const root = await project(t);
   await writeFile(

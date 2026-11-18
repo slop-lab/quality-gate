@@ -1,4 +1,4 @@
-import { createRequire } from "node:module";
+import { createRequire, registerHooks } from "node:module";
 import { isAbsolute, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import {
@@ -27,20 +27,19 @@ export async function loadRules(
   config?: QualityGateConfig,
 ): Promise<Rule[]> {
   const rules = [...recommendedRules];
-  const require = createRequire(resolve(root, "package.json"));
   const presetRules = new Set<Rule>();
   for (const preset of new Set(config?.presets ?? [])) {
     const definition = optionalPresets[preset];
     let entry: string;
     try {
-      entry = require.resolve(definition.packageName);
+      entry = resolveProjectPackage(root, definition.packageName);
     } catch (error) {
       throw new Error(
         `Preset ${preset} requires ${definition.packageName} in the project. Install it with npm install --save-dev ${definition.packageName}.`,
         { cause: error },
       );
     }
-    const loaded = await import(pathToFileURL(entry).href);
+    const loaded = await import(entry);
     const extra = loaded[definition.exportName] as Rule[];
     if (
       !Array.isArray(extra) ||
@@ -65,9 +64,9 @@ export async function loadRules(
     try {
       const entry =
         specifier.startsWith(".") || isAbsolute(specifier)
-          ? resolve(root, specifier)
-          : require.resolve(specifier);
-      loaded = await import(pathToFileURL(entry).href);
+          ? pathToFileURL(resolve(root, specifier)).href
+          : resolveProjectPackage(root, specifier);
+      loaded = await import(entry);
     } catch (error) {
       throw new Error(
         `Cannot load rule module ${JSON.stringify(specifier)}: ${error instanceof Error ? error.message : String(error)}`,
@@ -116,6 +115,36 @@ export async function loadRules(
     }
   }
   return rules;
+}
+
+function resolveProjectPackage(root: string, specifier: string): string {
+  const parent = pathToFileURL(resolve(root, "package.json"));
+  // Use the project as the parent for this synchronous resolution only.
+  const hooks = registerHooks({
+    resolve(request, context, nextResolve) {
+      return nextResolve(
+        request,
+        request === specifier && context.parentURL === import.meta.url
+          ? { ...context, parentURL: parent.href }
+          : context,
+      );
+    },
+  });
+  try {
+    return import.meta.resolve(specifier);
+  } catch (error) {
+    if (
+      !(error instanceof Error && "code" in error) ||
+      (error.code !== "ERR_PACKAGE_PATH_NOT_EXPORTED" &&
+        error.code !== "ERR_MODULE_NOT_FOUND" &&
+        error.code !== "ERR_PACKAGE_IMPORT_NOT_DEFINED")
+    ) {
+      throw error;
+    }
+  } finally {
+    hooks.deregister();
+  }
+  return pathToFileURL(createRequire(parent).resolve(specifier)).href;
 }
 
 function isRule(value: unknown): value is Rule {

@@ -66,6 +66,13 @@ create a release or publish to a registry. Check that each preview contains
 points, and excludes test files and node_modules. A dry run does not establish
 account permissions or reserve a package version. See [npm publish](https://docs.npmjs.com/cli/v11/commands/npm-publish/).
 
+Before publishing, install the packed CLI and its unpublished runtime
+dependencies in a temporary npm project outside this checkout. Pack QG, core,
+the check runner, and the Git, file, and recommended rule packages. Verify
+`npm ls @slop-lab/qg-check-runner` reports `0.1.1` under QG and run
+`npx --no-install qg --help` there. Repeat the installation check below after
+the registry release.
+
 The source checkout should remain clean after validation. Fix and commit any
 new change before publishing, then repeat validation on the release commit.
 
@@ -83,13 +90,19 @@ credentials in the publishing machine's user configuration. See
 [scoped public packages](https://docs.npmjs.com/creating-and-publishing-scoped-public-packages/).
 
 Before publishing each changed package, check whether its target version already
-exists. For this release, check all five packages:
+exists. Check all eleven packages in this release.
 
 ```sh
 mise exec -- npm view @slop-lab/qg-core@0.1.1 version --registry=https://registry.npmjs.org/
 mise exec -- npm view @slop-lab/qg-rules-git@0.1.1 version --registry=https://registry.npmjs.org/
 mise exec -- npm view @slop-lab/qg-rules-files@0.1.1 version --registry=https://registry.npmjs.org/
 mise exec -- npm view @slop-lab/qg-rules-recommended@0.1.1 version --registry=https://registry.npmjs.org/
+mise exec -- npm view @slop-lab/qg-check-runner@0.1.1 version --registry=https://registry.npmjs.org/
+mise exec -- npm view @slop-lab/qg-check-node-test@0.1.0 version --registry=https://registry.npmjs.org/
+mise exec -- npm view @slop-lab/qg-check-unittest@0.1.0 version --registry=https://registry.npmjs.org/
+mise exec -- npm view @slop-lab/qg-check-jest@0.1.0 version --registry=https://registry.npmjs.org/
+mise exec -- npm view @slop-lab/qg-check-vitest@0.1.0 version --registry=https://registry.npmjs.org/
+mise exec -- npm view @slop-lab/qg-check-cargo@0.1.0 version --registry=https://registry.npmjs.org/
 mise exec -- npm view @slop-lab/qg@0.1.1 version --registry=https://registry.npmjs.org/
 ```
 
@@ -109,13 +122,25 @@ public workspace and the public npm registry.
 | `@slop-lab/qg-rules-git@0.1.1` | Rejects ignored files that remain tracked |
 | `@slop-lab/qg-rules-files@0.1.1` | Contains file-reference plugins and Markdown table fixes |
 | `@slop-lab/qg-rules-recommended@0.1.1` | Enables the new Git, Markdown, and source-reference rules |
-| `@slop-lab/qg@0.1.1` | Pins `qg-rules-recommended@0.1.1` |
+| `@slop-lab/qg-check-runner@0.1.1` | Exports `collectCheckArtifacts` for the CLI |
+| `@slop-lab/qg-check-node-test@0.1.0` | Node test adapter, command helper, and reporter |
+| `@slop-lab/qg-check-unittest@0.1.0` | Python test adapter |
+| `@slop-lab/qg-check-jest@0.1.0` | Jest test adapter |
+| `@slop-lab/qg-check-vitest@0.1.0` | Vitest test adapter |
+| `@slop-lab/qg-check-cargo@0.1.0` | Cargo test adapter and output discovery |
+| `@slop-lab/qg@0.1.1` | Pins the new check runner and recommended rules |
 
 ```sh
 mise exec -- npm publish --workspace @slop-lab/qg-core --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rules-git --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rules-files --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg-rules-recommended --access public --registry=https://registry.npmjs.org/
+mise exec -- npm publish --workspace @slop-lab/qg-check-runner --access public --registry=https://registry.npmjs.org/
+mise exec -- npm publish --workspace @slop-lab/qg-check-node-test --access public --registry=https://registry.npmjs.org/
+mise exec -- npm publish --workspace @slop-lab/qg-check-unittest --access public --registry=https://registry.npmjs.org/
+mise exec -- npm publish --workspace @slop-lab/qg-check-jest --access public --registry=https://registry.npmjs.org/
+mise exec -- npm publish --workspace @slop-lab/qg-check-vitest --access public --registry=https://registry.npmjs.org/
+mise exec -- npm publish --workspace @slop-lab/qg-check-cargo --access public --registry=https://registry.npmjs.org/
 mise exec -- npm publish --workspace @slop-lab/qg --access public --registry=https://registry.npmjs.org/
 ```
 
@@ -151,6 +176,7 @@ git init
 printf '# Smoke\n' > README.md
 printf '* text=auto eol=lf\n' > .gitattributes
 npm install --save-dev @slop-lab/qg@0.1.1 --registry=https://registry.npmjs.org/
+npm ls @slop-lab/qg-check-runner
 npx qg --help
 npx qg hooks install
 npx qg rules --format json

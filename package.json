@@ -21,7 +21,7 @@
     "@slop-lab/qg-check-cargo": "0.1.0",
     "@slop-lab/qg-check-jest": "0.1.0",
     "@slop-lab/qg-check-node-test": "0.1.0",
-    "@slop-lab/qg-check-runner": "0.1.0",
+    "@slop-lab/qg-check-runner": "0.1.1",
     "@slop-lab/qg-check-unittest": "0.1.0",
     "@slop-lab/qg-check-vitest": "0.1.0"
   },

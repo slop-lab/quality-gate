@@ -9,14 +9,40 @@ TypeScript test rules are separate optional packages.
 
 ```sh
 pnpm add -D @slop-lab/qg
-pnpm exec qg rules
-pnpm exec qg check
+```
+
+Run QG from a Git project's root. The default rules require a root `README.md`
+and this line in the root `.gitattributes`:
+
+```text
+* text=auto eol=lf
+```
+
+For a README with Korean text or emoji, allow the languages and the specific
+characters in `.qg.yaml`. This example permits Korean and the rocket emoji.
+
+```yaml
+rules:
+  markdown/allowed-characters:
+    options:
+      allowedLanguages: [ko]
+      allowedCharacters: ["\U0001F680"]
+```
+
+```sh
 pnpm exec qg check --full
 ```
 
 By default, checks inspect staged paths and index contents. `--full` scans the
 working tree. Configure rules with `.qg.yaml` or `.qg.yml` at the project root;
 nested config files apply to their directory and descendants.
+
+From a monorepo subdirectory, pass the project root explicitly. For example,
+from `packages/web/` in a repository with QG installed at its root:
+
+```sh
+pnpm exec qg check --root ../.. --full
+```
 
 ```yaml
 rules:

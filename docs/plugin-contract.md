@@ -15,6 +15,11 @@ See [custom file path policies](file-paths.md) for the `createFilePathRule` help
 Plugin lifecycle hooks, rich input discovery, and automatic fix application are
 not implemented.
 
+For installed packages, `ruleModules` resolves package names and exported paths from
+the configured project root with Node's `import` export conditions. QG also
+accepts packages exposing only a `require` entry. Relative file paths resolve
+from the project root.
+
 ## Principles
 
 Plugins must be:

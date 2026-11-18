@@ -31,7 +31,6 @@ Staged selection checks each changed file in full, rather than only added or mod
 Supported options:
 
 - `--rules-only`: skip shared command/test checks and run only rules.
-
 - `--changed`: select changed mode and disable the default staged selection.
 - `--full`: select full mode and disable the default staged selection.
 - `--base <ref>`: base ref for a non-staged ref comparison.
@@ -40,6 +39,7 @@ Supported options:
 - `--working-tree`: select unstaged tracked changes and working tree contents.
 - `--format <stylish|json>`: select output format (default: `stylish`).
 - `--root <path>`: workspace root (default: current directory).
+  From `packages/web/`, use `qg check --root ../.. --full` for the monorepo root.
 - `--config <path>`: root YAML config path, relative to the workspace root or absolute.
 - `-h`, `--help`: show help.
 

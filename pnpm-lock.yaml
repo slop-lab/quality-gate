@@ -21,7 +21,7 @@ importers:
         specifier: 0.1.0
         version: link:packages/check-node-test
       '@slop-lab/qg-check-runner':
-        specifier: 0.1.0
+        specifier: 0.1.1
         version: link:packages/check-runner
       '@slop-lab/qg-check-unittest':
         specifier: 0.1.0
@@ -150,7 +150,7 @@ importers:
   packages/cli:
     dependencies:
       '@slop-lab/qg-check-runner':
-        specifier: 0.1.0
+        specifier: 0.1.1
         version: link:../check-runner
       '@slop-lab/qg-core':
         specifier: 0.1.1
