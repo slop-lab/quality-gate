@@ -1,5 +1,12 @@
 import assert from "node:assert/strict";
-import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
+import {
+  mkdir,
+  mkdtemp,
+  realpath,
+  rm,
+  symlink,
+  writeFile,
+} from "node:fs/promises";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
@@ -9,7 +16,9 @@ import { NodeProcessProvider } from "@slop-lab/qg-core";
 import { collectCheckArtifacts, runChecks } from "./index.js";
 
 async function testProject(t: TestContext, ...types: string[]) {
-  const root = await mkdtemp(join(tmpdir(), "qg-check-project-"));
+  const root = await mkdtemp(
+    join(await realpath(tmpdir()), "qg-check-project-"),
+  );
   t.after(() => rm(root, { recursive: true, force: true }));
   const scope = join(root, "node_modules", "@slop-lab");
   await mkdir(scope, { recursive: true });
