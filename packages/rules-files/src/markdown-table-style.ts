@@ -1,4 +1,5 @@
 import type { Diagnostic, Rule } from "@slop-lab/qg-core";
+import stringWidth from "string-width";
 import {
   type DocumentFileOptions,
   documentPaths,
@@ -14,6 +15,7 @@ interface TableCell {
 
 interface MarkdownTable {
   header: TableCell[];
+  delimiters: string[];
   body: TableCell[][];
 }
 
@@ -22,7 +24,7 @@ export const noExtraTableCellWhitespaceRule: Rule<DocumentFileOptions> = {
     id: "markdown/no-extra-table-cell-whitespace",
     name: "No extra Markdown table cell whitespace",
     description:
-      "Reports repeated padding spaces next to Markdown table delimiters.",
+      "Reports repeated padding that does not align Markdown table columns.",
     defaultSeverity: "error",
     supports: ["changed", "full"],
     scope: "file",
@@ -36,20 +38,39 @@ export const noExtraTableCellWhitespaceRule: Rule<DocumentFileOptions> = {
       const diagnostics: Diagnostic[] = [];
       for (const table of tables) {
         for (const row of [table.header, ...table.body]) {
-          for (const cell of row) {
+          for (const [index, cell] of row.entries()) {
             const leading = cell.value.match(/^[ \t]+/)?.[0] ?? "";
-            const trailing = cell.value.match(/[ \t]+$/)?.[0] ?? "";
+            const empty = leading.length === cell.value.length;
+            const trailing = empty
+              ? ""
+              : (cell.value.match(/[ \t]+$/)?.[0] ?? "");
+            const compactLeading = empty ? 2 : 1;
+            if (leading.length <= compactLeading && trailing.length <= 1)
+              continue;
+            const [alignedLeading, alignedTrailing] = alignmentPadding(
+              cell.value.slice(
+                leading.length,
+                cell.value.length - trailing.length,
+              ),
+              table.delimiters[index],
+            );
+            const leadingLimit = paddingLimit(
+              leading,
+              alignedLeading,
+              compactLeading,
+            );
+            const trailingLimit = paddingLimit(trailing, alignedTrailing, 1);
             for (const violation of [
-              leading.length > 1
+              leading.length > leadingLimit
                 ? {
-                    column: cell.start + 2,
+                    column: cell.start + leadingLimit + 1,
                     endColumn: cell.start + leading.length + 1,
                   }
                 : undefined,
-              trailing.length > 1
+              trailing.length > trailingLimit
                 ? {
                     column: cell.end - trailing.length + 1,
-                    endColumn: cell.end,
+                    endColumn: cell.end - trailingLimit + 1,
                   }
                 : undefined,
             ]) {
@@ -58,14 +79,14 @@ export const noExtraTableCellWhitespaceRule: Rule<DocumentFileOptions> = {
                 ruleId: noExtraTableCellWhitespaceRule.metadata.id,
                 severity,
                 message:
-                  "Markdown table cells must not contain repeated delimiter padding.",
+                  "Repeated Markdown table cell padding does not align with the delimiter row.",
                 path,
                 line: cell.line,
                 ...violation,
                 scope: "file",
                 suggestedFix: {
                   message:
-                    "Keep at most one space next to each table delimiter.",
+                    "Remove the extra padding or align the cell with the delimiter row.",
                 },
               });
             }
@@ -76,6 +97,31 @@ export const noExtraTableCellWhitespaceRule: Rule<DocumentFileOptions> = {
     });
   },
 };
+
+function alignmentPadding(
+  content: string,
+  delimiter: string | undefined,
+): [leading: number, trailing: number] {
+  if (!delimiter) return [0, 0];
+  if (!content) return [delimiter.length + 2, 0];
+  const extra = delimiter.length - stringWidth(content);
+  if (extra < 0) return [0, 0];
+
+  let before = 0;
+  if (delimiter.endsWith(":"))
+    before = delimiter.startsWith(":") ? Math.floor(extra / 2) : extra;
+  return [before + 1, extra - before + 1];
+}
+
+function paddingLimit(
+  padding: string,
+  aligned: number,
+  compact: number,
+): number {
+  return padding.length >= aligned && !padding.includes("\t")
+    ? Math.max(aligned, compact)
+    : compact;
+}
 
 export const noRedundantTableRowNumbersRule: Rule<DocumentFileOptions> = {
   metadata: {
@@ -161,11 +207,13 @@ function markdownTables(content: string): MarkdownTable[] {
   for (let index = 1; index < lines.length; index += 1) {
     if (fenced.has(index - 1) || fenced.has(index)) continue;
     const header = tableCells(lines[index - 1] ?? "", index);
-    const delimiter = tableCells(lines[index] ?? "", index + 1);
+    const delimiters = tableCells(lines[index] ?? "", index + 1).map((cell) =>
+      cell.value.trim(),
+    );
     if (
       header.length < 2 ||
-      delimiter.length !== header.length ||
-      !delimiter.every((cell) => /^:?-{3,}:?$/.test(cell.value.trim()))
+      delimiters.length !== header.length ||
+      !delimiters.every((delimiter) => /^:?-+:?$/.test(delimiter))
     )
       continue;
     const body: TableCell[][] = [];
@@ -176,7 +224,7 @@ function markdownTables(content: string): MarkdownTable[] {
       body.push(cells);
       next += 1;
     }
-    tables.push({ header, body });
+    tables.push({ header, delimiters, body });
     index = next - 1;
   }
   return tables;

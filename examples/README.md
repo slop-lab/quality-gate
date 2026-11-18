@@ -1,5 +1,8 @@
 # QG test adapter examples
 
+The [Markdown formatter example](markdown-formatters/) compares Prettier and
+Biome with QG's table whitespace rule.
+
 Each directory is a small consumer project with its own QG configuration,
 development dependencies, and a passing test.
 

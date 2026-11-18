@@ -32,6 +32,59 @@ test("reports repeated Markdown table delimiter padding", async (t) => {
   );
 });
 
+test("allows formatter alignment with short delimiters and wide characters", async (t) => {
+  const fixture = await createFixture({
+    "README.md": `| 품목 |  상태  | Qty |
+| :--- | :----: | --: |
+| A    | 👩‍💻 New |   2 |
+| 界   |        |     |
+
+| A   |  B  |   C |
+| :-- | :-: | --: |
+| Z   |  X  |   1 |
+
+| Name | Meaning |
+| --- | --- |
+|  | valid |
+`,
+  });
+  t.after(() => fixture.cleanup());
+  const result = await runRule({
+    fixture,
+    rule: noExtraTableCellWhitespaceRule,
+  });
+  assert.deepEqual(result.diagnostics, []);
+});
+
+test("reports misplaced padding in a column with aligned cells", async (t) => {
+  const fixture = await createFixture({
+    "README.md": `| Name  | Count |
+| ----- | ----: |
+| first |     1 |
+|  next |     2 |
+|  new   |     3 |
+| new    |     4 |
+`,
+  });
+  t.after(() => fixture.cleanup());
+  const result = await runRule({
+    fixture,
+    rule: noExtraTableCellWhitespaceRule,
+  });
+  assert.deepEqual(
+    result.diagnostics.map(({ line, column, endColumn }) => ({
+      line,
+      column,
+      endColumn,
+    })),
+    [
+      { line: 4, column: 3, endColumn: 4 },
+      { line: 5, column: 3, endColumn: 4 },
+      { line: 6, column: 6, endColumn: 7 },
+    ],
+  );
+});
+
 test("reports redundant first-column Markdown row numbers", async (t) => {
   const fixture = await createFixture({
     "README.md": `| Order | Package |

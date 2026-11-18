@@ -1,0 +1,12 @@
+{
+  "name": "@this-project/example-markdown-formatters",
+  "private": true,
+  "scripts": {
+    "check": "qg check --full"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.8",
+    "@slop-lab/qg": "0.1.1",
+    "prettier": "3.10.1"
+  }
+}
