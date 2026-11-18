@@ -17,6 +17,7 @@ checks use the working tree; staged rules use the index snapshot.
 | Shared checks API | `@slop-lab/qg-check-runner` runs checks and loads the selected adapter. |
 | Shared command checks | Complete Biome validation and package builds/type checks. |
 | Node test adapter | Compiled package tests and repository script tests, with concise failure output. |
+| Adapter examples | Real CLI and pre-commit checks exercise each example in an isolated Git repository. |
 
 ## Project-specific policy through a public interface
 
@@ -59,6 +60,7 @@ just qg check --full
 just qg check --full --rules-only
 just qg run-hook pre-commit
 just test
+just test-examples
 just release-check
 ```
 

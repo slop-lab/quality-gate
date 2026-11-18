@@ -1,0 +1,7 @@
+hooks:
+  preCommit:
+    installation: off
+
+checks:
+  unittest:
+    type: unittest

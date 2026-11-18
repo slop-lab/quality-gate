@@ -40,6 +40,7 @@ and supported options; the architecture document also describes future work.
 - [Plugin Contract](docs/plugin-contract.md)
 - [Package boundaries](docs/packages.md)
 - [Checks API](docs/checks-api.md)
+- [Runnable test adapter examples](examples/README.md)
 - [CLI](docs/cli.md)
 - [Publishing](docs/publishing.md)
 - [External tools](docs/external-tools.md)

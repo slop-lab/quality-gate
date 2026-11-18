@@ -1,0 +1,12 @@
+{
+  "name": "@this-project/example-vitest",
+  "private": true,
+  "scripts": {
+    "check": "qg check --full"
+  },
+  "devDependencies": {
+    "@slop-lab/qg": "0.1.1",
+    "@slop-lab/qg-check-vitest": "0.1.0",
+    "vitest": "5.0.4"
+  }
+}

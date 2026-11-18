@@ -1,0 +1,11 @@
+{
+  "name": "@this-project/example-node-test",
+  "private": true,
+  "scripts": {
+    "check": "qg check --full"
+  },
+  "devDependencies": {
+    "@slop-lab/qg": "0.1.1",
+    "@slop-lab/qg-check-node-test": "0.1.0"
+  }
+}

@@ -1,0 +1,8 @@
+hooks:
+  preCommit:
+    installation: off
+
+checks:
+  cargo:
+    type: cargo
+    args: [--offline, --locked, --target-dir, build/cargo]

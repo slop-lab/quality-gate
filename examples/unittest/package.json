@@ -1,0 +1,11 @@
+{
+  "name": "@this-project/example-unittest",
+  "private": true,
+  "scripts": {
+    "check": "qg check --full"
+  },
+  "devDependencies": {
+    "@slop-lab/qg": "0.1.1",
+    "@slop-lab/qg-check-unittest": "0.1.0"
+  }
+}

@@ -9,7 +9,7 @@ scan:
 
 artifacts:
   generated:
-    include: ["**/*.tgz"]
+    include: ["**/*.tgz", "examples/cargo/build/**"]
 
 rules:
   external/biome:

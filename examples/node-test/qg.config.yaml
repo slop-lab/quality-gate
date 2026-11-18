@@ -1,0 +1,8 @@
+hooks:
+  preCommit:
+    installation: off
+
+checks:
+  node-test:
+    type: node-test
+    files: ["test/*.test.mjs"]

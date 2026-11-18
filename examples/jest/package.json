@@ -1,0 +1,12 @@
+{
+  "name": "@this-project/example-jest",
+  "private": true,
+  "scripts": {
+    "check": "qg check --full"
+  },
+  "devDependencies": {
+    "@slop-lab/qg": "0.1.1",
+    "@slop-lab/qg-check-jest": "0.1.0",
+    "jest": "30.5.2"
+  }
+}

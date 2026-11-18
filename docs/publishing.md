@@ -41,7 +41,8 @@ mise exec -- just release-check
 git status --short
 ```
 
-`mise.toml` pins Node.js 24.21.0, pnpm 11.10.0, Just 1.47.0, and Biome 2.5.15.
+`mise.toml` pins Node.js, pnpm, Just, and Biome. It also pins Python and Rust
+for the consumer example tests.
 Bootstrap installs from `pnpm-lock.yaml`, builds the packages, and installs this
 clone's QG pre-commit hook. `release-check` runs `qg check --full` for the full
 rule scan and shared checks, including the configured full Biome check,
